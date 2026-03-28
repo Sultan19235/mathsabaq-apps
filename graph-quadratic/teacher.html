@@ -61,6 +61,26 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
 .err.on{display:block}
 
+/* ── SETUP ── */
+.setup-wrap{width:100%;max-width:720px;height:100%;display:flex;flex-direction:column}
+.setup-hero{text-align:center;margin-bottom:16px;flex-shrink:0}
+.setup-scroll{flex:1;overflow-y:auto;min-height:0;margin-bottom:12px}
+.sec-group{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:10px;box-shadow:var(--shadow-sm)}
+.sec-group-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1.5px solid var(--border)}
+.sec-group-title{font-weight:800;font-size:.94rem}
+.sec-group-all{font-size:.72rem;background:var(--bg3);border:none;padding:6px 14px;border-radius:8px;cursor:pointer;color:var(--primary);font-weight:700;touch-action:manipulation;transition:all .15s}
+.sec-group-all:hover{background:var(--primary-light)}
+.sec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:640px){.sec-grid{grid-template-columns:repeat(2,1fr)}}
+.sec-btn{padding:18px 14px;border-radius:14px;border:2.5px solid var(--border);background:var(--bg2);cursor:pointer;transition:all .2s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;touch-action:manipulation;min-height:88px;justify-content:center}
+.sec-btn:hover{border-color:rgba(67,56,202,.4);background:var(--primary-light)}
+.sec-btn:active{transform:scale(.96)}
+.sec-btn.sel{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(67,56,202,.3)}
+.sec-btn .sec-formula{font-size:1.1rem;line-height:1.3;pointer-events:none}
+.sec-btn.sel .katex{color:#fff!important}
+.sec-btn .sec-ex{font-size:.66rem;opacity:.55;font-weight:600;font-family:'JetBrains Mono',monospace}
+.sec-btn.sel .sec-ex{opacity:.75;color:#e0e7ff}
+
 /* ── LOBBY ── */
 .lobby-wrap{width:100%;max-width:860px;height:100%;display:flex;flex-direction:column}
 .lobby-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;flex-shrink:0}
@@ -95,6 +115,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 /* ── Student card ── */
 .s-card{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:14px;position:relative;overflow:hidden;animation:pop .35s ease;transition:border-color .4s,background .4s,box-shadow .4s}
 .s-card.flash-ok{border-color:var(--green)!important;background:var(--green-light)!important;box-shadow:0 0 16px rgba(5,150,105,.15)}
+.s-card.flash-err{border-color:var(--red)!important;background:var(--red-light)!important;box-shadow:0 0 16px rgba(220,38,38,.15)}
 .s-card[data-rank="1"]{border-color:#fbbf24;background:linear-gradient(135deg,#fffdf0,#fef9e7);box-shadow:0 2px 12px rgba(251,191,36,.12)}
 .s-card[data-rank="2"]{border-color:#d1d5de;background:linear-gradient(135deg,#fafbfc,#f4f5f7)}
 .s-card[data-rank="3"]{border-color:#fdba74;background:linear-gradient(135deg,#fffaf5,#fef3e2)}
@@ -114,10 +135,10 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .s-focus{display:flex;align-items:center;gap:4px;font-size:.64rem;font-weight:600}
 .s-focus-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .s-focus-dot.on{background:var(--green);animation:breathe 2s infinite}
-.s-focus-dot.off{background:var(--muted)}
+.s-focus-dot.off{background:var(--red);animation:pulse 1s infinite}
 .s-focus-text{color:var(--muted)}
-.finished-badge{font-size:.58rem;color:var(--green);font-weight:700;background:var(--green-light);border:1px solid var(--green-border);border-radius:6px;padding:2px 7px;display:none;align-items:center;gap:3px}
-.s-card.finished .finished-badge{display:flex}
+.s-focus-text.away{color:var(--red)}
+.tab-warn{font-size:.58rem;color:var(--red);font-weight:700;background:var(--red-light);border:1px solid var(--red-border);border-radius:6px;padding:2px 7px;display:flex;align-items:center;gap:3px}
 
 /* ── RESULTS ── */
 .results-wrap{width:100%;max-width:800px;height:100%;display:flex;flex-direction:column;overflow:hidden}
@@ -162,21 +183,25 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
   </div>
 </div>
 
-<!-- ════ START ════ -->
-<div class="screen active" id="s-start">
+<!-- ════ SETUP ════ -->
+<div class="screen active" id="s-setup">
   <div class="si center">
-    <div style="width:100%;max-width:480px">
-      <div style="text-align:center;margin-bottom:20px">
+    <div class="setup-wrap">
+      <div class="setup-hero">
         <div class="logo">📈 Квадраттық <b>функция</b></div>
-        <div class="logo-sub">Графикті табу · Тікелей тест</div>
+        <div class="logo-sub">Графикті табу · Бөлімдерді таңдаңыз</div>
       </div>
-      <div class="card" style="padding:28px;text-align:center">
-        <div style="font-size:2.8rem;margin-bottom:12px">🧮</div>
-        <div style="font-size:1.1rem;font-weight:800;margin-bottom:6px">Квадраттық функция графигі</div>
-        <div style="color:var(--muted);font-size:.84rem;margin-bottom:20px">Сабақты бастау үшін сессия ашыңыз</div>
-        <div class="err" id="start-err"></div>
-        <button class="btn btn-green btn-block" style="padding:14px;font-size:.94rem" onclick="createSession()">🚀 Сабақты бастау</button>
+      <div class="setup-scroll">
+        <div class="sec-group">
+          <div class="sec-group-hdr">
+            <span class="sec-group-title">📊 Бөлімдер</span>
+            <button class="sec-group-all" onclick="toggleAll()">Бәрін таңдау</button>
+          </div>
+          <div class="sec-grid" id="sec-grid"></div>
+        </div>
       </div>
+      <div class="err" id="setup-err"></div>
+      <button class="btn btn-green btn-block" id="create-btn" style="padding:14px;font-size:.94rem" onclick="createRoom()">🚀 Бөлме құру</button>
     </div>
   </div>
 </div>
@@ -188,10 +213,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <div class="lobby-top">
         <div>
           <div class="logo">📈 Квадраттық <b>функция</b></div>
-          <div class="logo-sub">Графикті табу · Тікелей</div>
+          <div class="logo-sub" id="lobby-secs">—</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center">
           <span class="chip chip-p">∞ есеп</span>
+          <button class="btn btn-ghost btn-sm" onclick="backToSetup()">← Өзгерту</button>
         </div>
       </div>
       <div class="code-panel">
@@ -220,19 +246,19 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
             1. Экранды тақтаға көрсетіңіз<br>
             2. Оқушылар QR кодты сканерлейді<br>
             3. Атын жазып кіреді<br>
-            4. Нәтижелер автоматты түрде көрсетіледі<br>
+            4. <b style="color:var(--green)">Бастау</b> батырмасын басыңыз<br>
             <em>⚡ Есептер шексіз генерацияланады</em>
           </div>
         </div>
       </div>
       <div style="flex-shrink:0;margin-top:8px">
-        <button class="btn btn-red btn-block" style="padding:14px;font-size:.94rem" onclick="endSession()">⏹ Сабақты аяқтау</button>
+        <button class="btn btn-green btn-block" id="start-btn" onclick="goLive()" style="padding:14px;font-size:.94rem" disabled>▶ Бастау (оқушылар күтілуде…)</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ════ LIVE (same as lobby but with cards) ════ -->
+<!-- ════ LIVE ════ -->
 <div class="screen" id="s-live">
   <div class="si top">
     <div class="live-wrap">
@@ -244,9 +270,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
         <div class="live-controls">
           <div class="stat-pill">👥 <span id="live-count">0</span></div>
           <div class="stat-pill">🎯 <span id="avg-pct">0</span>%</div>
-          <div class="stat-pill" id="finished-pill" style="display:none;border-color:var(--green-border);color:var(--green)">✓ <span id="finished-count">0</span> бітірді</div>
+          <div class="stat-pill" id="away-pill" style="display:none;border-color:var(--red-border);color:var(--red)">👀 <span id="away-count">0</span> сыртта</div>
           <div class="code-pill" id="live-code" onclick="openQR()">------</div>
-          <button class="btn btn-red btn-sm" onclick="endSession()">⏹ Аяқтау</button>
+          <button class="btn btn-red btn-sm" onclick="endQuiz()">⏹ Аяқтау</button>
         </div>
       </div>
       <div class="cards-wrap">
@@ -287,9 +313,32 @@ const STUDENT_URL = 'https://sultan19235.github.io/mathsabaq-apps/graph-quadrati
 
 // ═══════════════════════════════════════════════════════════════
 
+const SECTIONS = [
+  { id:'sec1', formula:'y = ax^2',           example:'y=2x²,  y=−x²' },
+  { id:'sec2', formula:'y = ax^2 + c',       example:'y=x²+3' },
+  { id:'sec3', formula:'y = a(x-m)^2',       example:'y=(x−2)²' },
+  { id:'sec4', formula:'y = a(x-m)^2 + n',   example:'y=(x−1)²+2' },
+  { id:'sec5', formula:'y = ax^2 + bx + c',  example:'y=x²−4x+3' },
+  { id:'sec6', formula:'y = ax^2 + bx',      example:'y=x²−4x' }
+];
+const SEC_NAMES = {};
+SECTIONS.forEach(s => SEC_NAMES[s.id] = s.formula);
+
 let sessionCode = null;
 let sseSource = null;
+let selectedSecs = new Set();
 const students = new Map();
+
+function tex(s) { return katex.renderToString(s, { throwOnError: false }); }
+
+// ── Build section buttons with KaTeX ────────────────────
+(function renderSections() {
+  document.getElementById('sec-grid').innerHTML = SECTIONS.map(s => `
+    <button class="sec-btn" data-sec="${s.id}" onclick="toggleSec(this)">
+      <span class="sec-formula">${tex(s.formula)}</span>
+      <span class="sec-ex">${s.example}</span>
+    </button>`).join('');
+})();
 
 // ── Helpers ──────────────────────────────────────────────
 function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
@@ -301,7 +350,7 @@ function copyCode() {
   function fb() { const t = document.createElement('textarea'); t.value = sessionCode; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); toast('✅ Көшірілді!', 'ok'); }
 }
 function openQR() {
-  const url = STUDENT_URL + '?code=' + sessionCode;
+  const url = buildStudentUrl();
   document.getElementById('qr-code-big').textContent = sessionCode;
   document.getElementById('qr-hint').textContent = 'QR кодты сканерлеп кіріңіз';
   const b = document.getElementById('qr-big'); b.innerHTML = '';
@@ -311,36 +360,71 @@ function openQR() {
 function closeQR(e) { if (e.target === document.getElementById('qr-overlay')) document.getElementById('qr-overlay').classList.remove('on'); }
 function spawnConfetti() { const w = document.getElementById('confetti'); w.innerHTML = ''; const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626','#0891b2','#7c3aed']; for (let i = 0; i < 72; i++) { const e = document.createElement('div'); e.className = 'cfp'; const s = 5 + Math.random() * 9; e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`; w.appendChild(e); } setTimeout(() => w.innerHTML = '', 6000); }
 
-// ── Create session via HTTP POST ────────────────────────
-async function createSession() {
+// Build student URL with selected sections
+function buildStudentUrl() {
+  const secStr = Array.from(selectedSecs).join(',');
+  return `${STUDENT_URL}?code=${sessionCode}&sec=${secStr}`;
+}
+
+// ── Section toggle ──────────────────────────────────────
+function toggleSec(el) { const s = el.dataset.sec; if (selectedSecs.has(s)) { selectedSecs.delete(s); el.classList.remove('sel'); } else { selectedSecs.add(s); el.classList.add('sel'); } }
+function toggleAll() { const btns = document.querySelectorAll('.sec-btn'); const allSel = Array.from(btns).every(b => b.classList.contains('sel')); btns.forEach(b => { const s = b.dataset.sec; if (allSel) { selectedSecs.delete(s); b.classList.remove('sel'); } else if (!b.classList.contains('sel')) { selectedSecs.add(s); b.classList.add('sel'); } }); }
+
+// ── Create room (POST /session → get code → show lobby) ──
+async function createRoom() {
+  if (!selectedSecs.size) { document.getElementById('setup-err').textContent = 'Кем дегенде 1 бөлімді таңдаңыз!'; document.getElementById('setup-err').classList.add('on'); return; }
+  document.getElementById('setup-err').classList.remove('on');
+
+  const btn = document.getElementById('create-btn');
+  btn.disabled = true; btn.textContent = '⏳ Бөлме құрылуда...';
+
   try {
     const res = await fetch(`${BACKEND}/session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: 'Квадраттық функция графигі' })
+      body: JSON.stringify({ title: 'Квадраттық функция · ' + Array.from(selectedSecs).map(s => SEC_NAMES[s]).join(', ') })
     });
     const data = await res.json();
     sessionCode = data.code;
+    btn.disabled = false; btn.textContent = '🚀 Бөлме құру';
     startLobby();
   } catch (e) {
-    document.getElementById('start-err').textContent = '❌ Серверге қосылу мүмкін болмады';
-    document.getElementById('start-err').classList.add('on');
+    btn.disabled = false; btn.textContent = '🚀 Бөлме құру';
+    document.getElementById('setup-err').textContent = '❌ Серверге қосылу мүмкін болмады';
+    document.getElementById('setup-err').classList.add('on');
   }
 }
 
-// ── Start lobby ─────────────────────────────────────────
+function backToSetup() {
+  if (sseSource) sseSource.close();
+  students.clear();
+  sessionCode = null;
+  show('s-setup');
+}
+
+// ── Lobby ───────────────────────────────────────────────
 function startLobby() {
   document.getElementById('room-code').textContent = sessionCode;
   document.getElementById('live-code').textContent = sessionCode;
+  document.getElementById('lobby-secs').textContent = Array.from(selectedSecs).map(s => SEC_NAMES[s]).join(', ');
+  document.getElementById('live-meta').textContent = 'Тікелей · ' + Array.from(selectedSecs).map(s => SEC_NAMES[s]).join(', ');
 
-  const studentUrl = STUDENT_URL + '?code=' + sessionCode;
+  const studentUrl = buildStudentUrl();
 
   // Generate QR
   const qb = document.getElementById('qr-box'); qb.innerHTML = '';
   try { new QRCode(qb, { text: studentUrl, width: 90, height: 90, colorDark: '#141826', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
 
+  updateLobby();
   show('s-lobby');
+
+  // Start SSE — students will start appearing
   connectSSE();
+}
+
+// ── Go live (teacher clicks "Бастау") ───────────────────
+function goLive() {
+  show('s-live');
 }
 
 // ── SSE connection ──────────────────────────────────────
@@ -351,73 +435,59 @@ function connectSSE() {
   sseSource.onmessage = (e) => {
     const data = JSON.parse(e.data);
     if (data.type === 'snapshot') {
-      data.students.forEach(s => {
-        students.set(s.studentId, s);
-      });
+      data.students.forEach(s => students.set(s.studentId, s));
     } else if (data.type === 'update') {
       const prev = students.get(data.studentId);
       students.set(data.studentId, data);
-      // Flash card on update
       flashCard(data.studentId, prev);
     }
-    renderAll();
+    updateLobby();
+    renderCards();
+    updateLiveStats();
   };
 
   sseSource.onerror = () => {
-    setTimeout(connectSSE, 3000); // Auto-reconnect
+    setTimeout(connectSSE, 3000);
   };
 }
 
 function flashCard(studentId, prev) {
   setTimeout(() => {
     const card = document.getElementById('card-' + studentId);
-    if (card) {
-      card.classList.add('flash-ok');
-      setTimeout(() => card.classList.remove('flash-ok'), 800);
-    }
+    if (!card) return;
+    // Determine if answer was correct by comparing prev and current score
+    const curr = students.get(studentId);
+    const wasCorrect = prev && curr && curr.score > (prev.score || 0);
+    const wasWrong = prev && curr && curr.total > (prev.total || 0) && curr.score === (prev.score || 0);
+    if (wasCorrect) { card.classList.add('flash-ok'); setTimeout(() => card.classList.remove('flash-ok'), 800); }
+    else if (wasWrong) { card.classList.add('flash-err'); setTimeout(() => card.classList.remove('flash-err'), 800); }
+    else { card.classList.add('flash-ok'); setTimeout(() => card.classList.remove('flash-ok'), 800); }
   }, 50);
 }
 
-// ── Render everything ───────────────────────────────────
-function renderAll() {
-  const count = students.size;
-  document.getElementById('lobby-count').textContent = count;
-
-  // Switch to live view once students start arriving
-  if (count > 0 && document.getElementById('s-lobby').classList.contains('active')) {
-    show('s-live');
-  }
-
-  // Lobby student list
+// ── Lobby student list ──────────────────────────────────
+function updateLobby() {
   const arr = Array.from(students.values());
+  document.getElementById('lobby-count').textContent = arr.length;
+
+  const btn = document.getElementById('start-btn');
+  btn.disabled = arr.length === 0;
+  btn.textContent = arr.length ? `▶ Бастау (${arr.length} оқушы)` : '▶ Бастау (оқушылар күтілуде…)';
+
   document.getElementById('lobby-list').innerHTML = arr.map(s =>
     `<div class="s-join"><div class="s-join-av" style="background:#4338ca18;color:#4338ca">${esc(s.name)[0].toUpperCase()}</div><div><div class="s-join-name">${esc(s.name)}</div><div class="s-join-sub">✅ Қосылды</div></div></div>`
   ).join('') || '<div class="dots" style="padding:8px 0"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="color:var(--muted);font-size:.78rem;margin-left:6px">Күтілуде…</span></div>';
-
-  // Live stats
-  document.getElementById('live-count').textContent = count;
-  const withScore = arr.filter(s => s.total > 0);
-  const avg = withScore.length > 0
-    ? Math.round(withScore.reduce((sum, s) => sum + (s.score / s.total * 100), 0) / withScore.length)
-    : 0;
-  document.getElementById('avg-pct').textContent = avg;
-
-  const finished = arr.filter(s => s.finished).length;
-  const pill = document.getElementById('finished-pill');
-  if (finished > 0) { pill.style.display = ''; document.getElementById('finished-count').textContent = finished; }
-  else pill.style.display = 'none';
-
-  // Render student cards
-  renderCards(arr);
 }
 
+// ── Render live student cards ───────────────────────────
 const AV_COLORS = ['#4338ca','#059669','#d97706','#dc2626','#0891b2','#7c3aed','#ec4899','#f97316'];
-function renderCards(arr) {
+function renderCards() {
+  const arr = Array.from(students.values());
   const sorted = arr.sort((a, b) => {
     const pctA = a.total > 0 ? a.score / a.total : 0;
     const pctB = b.total > 0 ? b.score / b.total : 0;
     if (pctB !== pctA) return pctB - pctA;
-    return b.score - a.score;
+    return (b.score || 0) - (a.score || 0);
   });
   const medals = ['🥇','🥈','🥉'];
   document.getElementById('cards-grid').innerHTML = sorted.map((s, i) => {
@@ -428,7 +498,15 @@ function renderCards(arr) {
     const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
     const barBg = pct >= 70 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
     const ac = AV_COLORS[i % AV_COLORS.length];
-    const isActive = !s.finished && (Date.now() - (s.updatedAt || 0)) < 15000;
+
+    // Focus tracking
+    const isFocused = s.focused !== false; // default true if not sent
+    const tabSw = s.tabSwitches || 0;
+    const awaySec = s.awaySeconds || 0;
+    const warn = tabSw > 0
+      ? `<span class="tab-warn">👀 ${tabSw}× · ${awaySec}с</span>`
+      : '';
+
     return `<div class="s-card${s.finished ? ' finished' : ''}" id="card-${s.studentId}" data-rank="${i+1}">
       <div class="s-card-header">
         <span class="s-card-rank">${medals[i] || (i+1)}</span>
@@ -443,16 +521,31 @@ function renderCards(arr) {
       </div>
       <div class="s-bar"><div class="s-bar-fill" style="width:${pct}%;background:${barBg}"></div></div>
       <div class="s-card-footer">
-        <div class="s-focus"><span class="s-focus-dot ${isActive ? 'on' : 'off'}"></span><span class="s-focus-text">${isActive ? 'Белсенді' : s.finished ? 'Бітірді' : 'Күтілуде'}</span></div>
-        <div class="finished-badge">✓ Бітірді</div>
+        <div class="s-focus"><span class="s-focus-dot ${isFocused ? 'on' : 'off'}"></span><span class="s-focus-text${isFocused ? '' : ' away'}">${isFocused ? 'Экранда' : 'Сыртта'}</span></div>
+        ${warn}
       </div>
     </div>`;
   }).join('');
 }
 
-// ── End session ─────────────────────────────────────────
-function endSession() {
-  if (!confirm('Сабақты аяқтағыңыз келе ме?')) return;
+function updateLiveStats() {
+  const arr = Array.from(students.values());
+  document.getElementById('live-count').textContent = arr.length;
+  const withScore = arr.filter(s => s.total > 0);
+  const avg = withScore.length > 0
+    ? Math.round(withScore.reduce((sum, s) => sum + (s.score / s.total * 100), 0) / withScore.length)
+    : 0;
+  document.getElementById('avg-pct').textContent = avg;
+
+  const awayArr = arr.filter(s => s.focused === false);
+  const pill = document.getElementById('away-pill');
+  if (awayArr.length > 0) { pill.style.display = ''; document.getElementById('away-count').textContent = awayArr.length; }
+  else pill.style.display = 'none';
+}
+
+// ── End quiz ────────────────────────────────────────────
+function endQuiz() {
+  if (!confirm('Сабақты аяқтайсыз ба?')) return;
   if (sseSource) sseSource.close();
   showResults();
 }
@@ -471,10 +564,13 @@ function showResults() {
     const wrong = total - score;
     const pct = total > 0 ? Math.round(score / total * 100) : 0;
     const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
+    const tabSw = s.tabSwitches || 0;
+    const awaySec = s.awaySeconds || 0;
+    const warnStr = tabSw > 0 ? `  👀 ${tabSw}× · ${awaySec}с` : '';
     return `<div class="lb-row">
       <div class="lb-rank">${medals[i] || (i+1)}</div>
       <div class="lb-av" style="background:#4338ca18;color:#4338ca">${esc(s.name)[0].toUpperCase()}</div>
-      <div class="lb-info"><div class="lb-name">${esc(s.name)}</div><div class="lb-detail">✅ ${score}  ❌ ${wrong}  📝 ${total}  📊 ${pct}%</div></div>
+      <div class="lb-info"><div class="lb-name">${esc(s.name)}</div><div class="lb-detail">✅ ${score}  ❌ ${wrong}  📝 ${total}  📊 ${pct}%${warnStr}</div></div>
       <div class="lb-pct" style="color:${col}">${pct}%</div>
     </div>`;
   }).join('');
@@ -485,7 +581,9 @@ function showResults() {
 function newSession() {
   sessionCode = null;
   students.clear();
-  show('s-start');
+  selectedSecs.clear();
+  document.querySelectorAll('.sec-btn').forEach(b => b.classList.remove('sel'));
+  show('s-setup');
 }
 </script>
 </body>

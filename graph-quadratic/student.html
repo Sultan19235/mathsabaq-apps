@@ -58,7 +58,6 @@ body{overflow-x:hidden}
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.6rem .4rem;text-align:center;box-shadow:var(--shadow-sm)}
 .stat-card.hl{background:var(--primary-light);border-color:rgba(67,56,202,.25)}
-.stat-card.g{}.stat-card.r{}.stat-card.a{}
 .stat-icon{font-size:1rem;margin-bottom:.15rem}
 .stat-value{font-size:1.25rem;font-weight:800;color:var(--primary)}
 .stat-card.g .stat-value{color:var(--green)}
@@ -170,11 +169,6 @@ body{overflow-x:hidden}
 // ═══════════════════════════════════════════════════════════════
 const BACKEND = 'https://mathsabaq.online';
 
-// ═══════════════════════════════════════════════════════════════
-// All 6 sections enabled by default (teacher no longer picks)
-// ═══════════════════════════════════════════════════════════════
-const sections = ['sec1','sec2','sec3','sec4','sec5','sec6'];
-
 const tex = s => katex.renderToString(s, { throwOnError: false });
 
 // ── State ────────────────────────────────────────────────
@@ -187,7 +181,33 @@ let quiz = { selected: null, answered: false };
 const graphInstances = {};
 let submitInterval = null;
 
-// ── URL params — auto-fill code ──────────────────────────
+// Sections — teacher passes via URL param, default all
+const secParam = urlParams.get('sec');
+let sections = secParam ? secParam.split(',') : ['sec1','sec2','sec3','sec4','sec5','sec6'];
+
+// ── Focus tracking ──────────────────────────────────────
+let focused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let _awayStart = 0;
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (focused) { focused = false; tabSwitches++; _awayStart = Date.now(); }
+  } else {
+    if (_awayStart) { awaySeconds += Math.round((Date.now() - _awayStart) / 1000); _awayStart = 0; }
+    focused = true;
+  }
+});
+window.addEventListener('blur', () => {
+  if (focused && sessionCode) { focused = false; tabSwitches++; _awayStart = Date.now(); }
+});
+window.addEventListener('focus', () => {
+  if (_awayStart) { awaySeconds += Math.round((Date.now() - _awayStart) / 1000); _awayStart = 0; }
+  focused = true;
+});
+
+// ── Auto-fill code from URL ─────────────────────────────
 if (sessionCode) {
   document.getElementById('scode').value = sessionCode;
   document.getElementById('code-wrap').style.display = 'none';
@@ -216,16 +236,13 @@ function joinQuiz() {
 
   sessionCode = code;
   studentName = name;
-
-  // Start quiz immediately
   stats = { correct: 0, wrong: 0, streak: 0 };
   updateStats();
   show('s-quiz');
   loadQuestion();
 
-  // Start sending score every 5 seconds
+  sendScore();
   submitInterval = setInterval(sendScore, 5000);
-  sendScore(); // Send initial join
 }
 
 document.addEventListener('keydown', e => {
@@ -235,6 +252,8 @@ document.addEventListener('keydown', e => {
 // ── Send score to backend ───────────────────────────────
 async function sendScore(finished) {
   if (!sessionCode || !studentName) return;
+  let currentAway = awaySeconds;
+  if (_awayStart) currentAway += Math.round((Date.now() - _awayStart) / 1000);
   try {
     await fetch(`${BACKEND}/submit`, {
       method: 'POST',
@@ -245,12 +264,13 @@ async function sendScore(finished) {
         name: studentName,
         score: stats.correct,
         total: stats.correct + stats.wrong,
-        finished: finished === true
+        finished: finished === true,
+        focused,
+        tabSwitches,
+        awaySeconds: currentAway
       })
     });
-  } catch (_) {
-    // Silent fail — will retry in 5 seconds
-  }
+  } catch (_) {}
 }
 
 function updateStats() {
@@ -261,7 +281,7 @@ function updateStats() {
 }
 
 // ══════════════════════════════════════════════
-//  GRAPH VIEW CLASS (unchanged)
+//  GRAPH VIEW CLASS
 // ══════════════════════════════════════════════
 class GraphView {
   constructor(canvas, container, params) {
@@ -311,16 +331,13 @@ class GraphView {
     const b = { minX: this.cx - hw, maxX: this.cx + hw, minY: this.cy - hh, maxY: this.cy + hh };
     const ww = b.maxX - b.minX;
     let gs = 1; if (ww > 20) gs = 5; if (ww > 50) gs = 10; if (ww < 5) gs = 0.5;
-    // grid
     ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 1;
     for (let x = Math.floor(b.minX / gs) * gs; x <= b.maxX; x += gs) { const p = this.w2s(x, 0); ctx.beginPath(); ctx.moveTo(p.x, 0); ctx.lineTo(p.x, h); ctx.stroke(); }
     for (let y = Math.floor(b.minY / gs) * gs; y <= b.maxY; y += gs) { const p = this.w2s(0, y); ctx.beginPath(); ctx.moveTo(0, p.y); ctx.lineTo(w, p.y); ctx.stroke(); }
-    // axes
     ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
     const o = this.w2s(0, 0);
     if (o.y >= 0 && o.y <= h) { ctx.beginPath(); ctx.moveTo(0, o.y); ctx.lineTo(w, o.y); ctx.stroke(); }
     if (o.x >= 0 && o.x <= w) { ctx.beginPath(); ctx.moveTo(o.x, 0); ctx.lineTo(o.x, h); ctx.stroke(); }
-    // labels
     ctx.fillStyle = '#64748b'; ctx.font = '500 9px DM Sans,sans-serif';
     ctx.textAlign = 'center';
     for (let x = Math.floor(b.minX / gs) * gs; x <= b.maxX; x += gs) { if (Math.abs(x) < .001) continue; const p = this.w2s(x, 0); if (p.x > 12 && p.x < w - 12) ctx.fillText(Number.isInteger(x) ? x : x.toFixed(1), p.x, Math.min(Math.max(o.y + 13, 13), h - 3)); }
@@ -329,19 +346,17 @@ class GraphView {
     ctx.font = '700 10px DM Sans,sans-serif';
     ctx.fillText('x', w - 10, Math.min(Math.max(o.y - 4, 12), h - 3));
     ctx.fillText('y', Math.min(Math.max(o.x + 4, 4), w - 10), 10);
-    // parabola
     ctx.beginPath(); ctx.strokeStyle = '#4338ca'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     let started = false;
     for (let px = -10; px <= w + 10; px += 2) { const wld = this.s2w(px, 0); const wy = this.f(wld.x); const p = this.w2s(wld.x, wy); if (p.y >= -50 && p.y <= h + 50) { if (!started) { ctx.moveTo(p.x, p.y); started = true; } else ctx.lineTo(p.x, p.y); } }
     ctx.stroke();
-    // vertex dot
     const v = this.vertex(), vs = this.w2s(v.x, v.y);
     if (vs.x >= -10 && vs.x <= w + 10 && vs.y >= -10 && vs.y <= h + 10) { ctx.beginPath(); ctx.arc(vs.x, vs.y, 3.5, 0, Math.PI * 2); ctx.fillStyle = '#4338ca'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke(); }
   }
 }
 
 // ══════════════════════════════════════════════
-//  QUESTION GENERATION (unchanged)
+//  QUESTION GENERATION
 // ══════════════════════════════════════════════
 function formatFunc(p) {
   if (p.mode === 'standard') {
@@ -381,7 +396,6 @@ function genWrong(correct, sec) {
   return wrongs;
 }
 
-// ── Load question ────────────────────────────────────────
 function loadQuestion() {
   Object.keys(graphInstances).forEach(k => delete graphInstances[k]);
   quiz = { selected: null, answered: false };
@@ -447,7 +461,7 @@ function checkAnswer() {
     fb.classList.add('wrong'); fb.textContent = '✗ Қате! Дұрыс жауап жасыл түспен белгіленді.';
   }
   updateStats();
-  sendScore(); // Send score immediately after answer
+  sendScore();
   document.getElementById('check-btn').classList.add('hidden');
   document.getElementById('next-btn').classList.remove('hidden');
 }
