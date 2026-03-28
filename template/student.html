@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>MathSabaq — Тест</title>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; padding: 24px 16px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* ── JOIN SCREEN ── */
+  .join-card {
+    background: #1e293b;
+    border-radius: 20px;
+    padding: 36px 28px;
+    width: 100%;
+    max-width: 380px;
+    border: 1px solid #334155;
+    text-align: center;
+  }
+  .join-card .icon { font-size: 52px; margin-bottom: 12px; }
+  .join-card h2 { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+  .join-card p { font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
+  .code-box {
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    color: #38bdf8;
+  }
+  input[type=text] {
+    width: 100%;
+    padding: 14px 16px;
+    background: #0f172a;
+    border: 1px solid #475569;
+    border-radius: 10px;
+    color: #f1f5f9;
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+  input[type=text]:focus { outline: none; border-color: #3b82f6; }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-primary { background: #3b82f6; color: white; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-primary:disabled { background: #334155; color: #64748b; cursor: default; }
+
+  /* ── QUIZ SCREEN ── */
+  #screenQuiz {
+    padding: 0;
+    justify-content: flex-start;
+  }
+  .quiz-header {
+    width: 100%;
+    background: #1e293b;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #334155;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .quiz-header .student-info { font-size: 14px; color: #94a3b8; }
+  .quiz-header .score-pill {
+    background: #0f172a;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    color: #34d399;
+    font-size: 14px;
+  }
+  .progress-track {
+    width: 100%;
+    height: 4px;
+    background: #334155;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    transition: width 0.4s ease;
+  }
+
+  .question-wrap {
+    width: 100%;
+    max-width: 600px;
+    padding: 28px 20px;
+    margin: 0 auto;
+    flex: 1;
+  }
+  .q-number {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .q-text {
+    font-size: 20px;
+    color: #f1f5f9;
+    margin-bottom: 28px;
+    line-height: 1.5;
+    min-height: 60px;
+  }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .option {
+    padding: 16px 20px;
+    background: #1e293b;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    user-select: none;
+  }
+  .option:hover { border-color: #3b82f6; background: #1e3a5f; }
+  .option.correct { border-color: #34d399; background: #064e3b; color: #a7f3d0; }
+  .option.wrong { border-color: #ef4444; background: #450a0a; color: #fca5a5; }
+  .option .letter {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #334155;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .option.correct .letter { background: #065f46; }
+  .option.wrong .letter { background: #7f1d1d; }
+
+  /* ── DONE SCREEN ── */
+  .done-card {
+    background: #1e293b;
+    border-radius: 20px;
+    padding: 40px 28px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    border: 1px solid #334155;
+  }
+  .done-card .big-score {
+    font-size: 72px;
+    font-weight: 800;
+    color: #34d399;
+    line-height: 1;
+    margin: 16px 0;
+  }
+  .done-card .score-label { font-size: 16px; color: #94a3b8; }
+  .done-card h2 { font-size: 22px; margin-top: 16px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ JOIN SCREEN ═══ -->
+<div class="screen active" id="screenJoin">
+  <div class="join-card">
+    <div class="icon">🧮</div>
+    <h2 id="joinTitle">MathSabaq</h2>
+    <p>Тестке қатысу үшін атыңызды енгізіңіз</p>
+    <div class="code-box" id="joinCodeDisplay">———</div>
+    <input type="text" id="inputName" placeholder="Атыңыз..." maxlength="30" autocomplete="off">
+    <input type="text" id="inputCode" placeholder="Код (QR жоқ болса)" maxlength="6"
+           style="text-transform:uppercase;letter-spacing:4px;display:none">
+    <button class="btn btn-primary" id="joinBtn" onclick="joinQuiz()">Бастау →</button>
+  </div>
+</div>
+
+<!-- ═══ QUIZ SCREEN ═══ -->
+<div class="screen" id="screenQuiz">
+  <div class="quiz-header">
+    <span class="student-info" id="headerName"></span>
+    <span class="score-pill" id="headerScore">0 / 0</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="question-wrap">
+    <div class="q-number" id="qNumber"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="options" id="optionsContainer"></div>
+  </div>
+</div>
+
+<!-- ═══ DONE SCREEN ═══ -->
+<div class="screen" id="screenDone">
+  <div class="done-card">
+    <div style="font-size:56px">🏆</div>
+    <h2>Тест аяқталды!</h2>
+    <div class="big-score" id="finalPct">0%</div>
+    <div class="score-label" id="finalScore"></div>
+    <p style="color:#94a3b8;margin-top:16px;font-size:14px">Нәтижелер мұғалімге жіберілді ✓</p>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CUSTOMIZE: Your Hetzner backend URL
+// ═══════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTOMIZE: Quiz title
+// ═══════════════════════════════════════════════════════════════
+const QUIZ_TITLE = 'Математика тесті';
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTOMIZE: Replace these questions with your topic questions
+// Format: { q: 'Question text with $LaTeX$', opts: ['$A$','$B$','$C$','$D$'], ans: 'A' }
+// ═══════════════════════════════════════════════════════════════
+const QUESTIONS = [
+  {
+    q: '$2 + 3 = \\;?$',
+    opts: ['$4$', '$5$', '$6$', '$7$'],
+    ans: 'B'
+  },
+  {
+    q: '$10 - 4 = \\;?$',
+    opts: ['$5$', '$7$', '$6$', '$8$'],
+    ans: 'C'
+  },
+  {
+    q: '$3 \\times 4 = \\;?$',
+    opts: ['$10$', '$11$', '$12$', '$13$'],
+    ans: 'C'
+  },
+  {
+    q: '$15 \\div 3 = \\;?$',
+    opts: ['$3$', '$4$', '$5$', '$6$'],
+    ans: 'C'
+  },
+  {
+    q: '$2^3 = \\;?$',
+    opts: ['$6$', '$8$', '$9$', '$16$'],
+    ans: 'B'
+  }
+];
+// ═══════════════════════════════════════════════════════════════
+
+// ── State ──
+const urlParams = new URLSearchParams(location.search);
+let sessionCode = urlParams.get('code') || '';
+let studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
+let studentName = '';
+let currentQ = 0;
+let score = 0;
+let answered = false;
+let submitInterval = null;
+
+// ── Init ──
+document.getElementById('joinTitle').textContent = QUIZ_TITLE;
+
+if (sessionCode) {
+  document.getElementById('joinCodeDisplay').textContent = sessionCode;
+} else {
+  document.getElementById('joinCodeDisplay').style.display = 'none';
+  document.getElementById('inputCode').style.display = 'block';
+}
+
+document.getElementById('inputName').focus();
+document.getElementById('inputName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') joinQuiz();
+});
+
+function joinQuiz() {
+  const name = document.getElementById('inputName').value.trim();
+  const codeInput = document.getElementById('inputCode').value.trim().toUpperCase();
+
+  if (!name) {
+    document.getElementById('inputName').focus();
+    return;
+  }
+
+  if (!sessionCode && !codeInput) {
+    document.getElementById('inputCode').style.display = 'block';
+    document.getElementById('inputCode').focus();
+    return;
+  }
+
+  if (codeInput) sessionCode = codeInput;
+  studentName = name;
+
+  document.getElementById('screenJoin').classList.remove('active');
+  document.getElementById('screenQuiz').classList.add('active');
+  document.getElementById('headerName').textContent = name;
+
+  // Start sending score every 5 seconds
+  submitInterval = setInterval(sendScore, 5000);
+
+  loadQuestion();
+}
+
+function loadQuestion() {
+  if (currentQ >= QUESTIONS.length) {
+    finishQuiz();
+    return;
+  }
+
+  const q = QUESTIONS[currentQ];
+  answered = false;
+
+  // Progress
+  const pct = (currentQ / QUESTIONS.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('qNumber').textContent = `Сұрақ ${currentQ + 1} / ${QUESTIONS.length}`;
+  document.getElementById('headerScore').textContent = `${score} / ${currentQ}`;
+
+  // Question text
+  document.getElementById('qText').innerHTML = q.q;
+
+  // Options
+  const letters = ['A', 'B', 'C', 'D'];
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `<span class="letter">${letters[i]}</span><span>${opt}</span>`;
+    div.onclick = () => selectOption(i, letters[i] === q.ans, div);
+    container.appendChild(div);
+  });
+
+  // Re-render MathJax
+  if (window.MathJax) {
+    MathJax.typesetPromise([
+      document.getElementById('qText'),
+      container
+    ]).catch(() => {});
+  }
+}
+
+function selectOption(idx, isCorrect, el) {
+  if (answered) return;
+  answered = true;
+
+  if (isCorrect) {
+    score++;
+    el.classList.add('correct');
+  } else {
+    el.classList.add('wrong');
+    // Show correct answer
+    const letters = ['A', 'B', 'C', 'D'];
+    const correctIdx = letters.indexOf(QUESTIONS[currentQ].ans);
+    document.querySelectorAll('.option')[correctIdx].classList.add('correct');
+  }
+
+  currentQ++;
+  document.getElementById('headerScore').textContent = `${score} / ${currentQ}`;
+
+  setTimeout(loadQuestion, 900);
+}
+
+function finishQuiz() {
+  clearInterval(submitInterval);
+  sendScore(true); // Final send with finished=true
+
+  document.getElementById('screenQuiz').classList.remove('active');
+  document.getElementById('screenDone').classList.add('active');
+
+  const total = QUESTIONS.length;
+  const pct = Math.round(score / total * 100);
+  document.getElementById('finalPct').textContent = pct + '%';
+  document.getElementById('finalScore').textContent = `${score} дұрыс / ${total} сұрақ`;
+}
+
+async function sendScore(finished = false) {
+  if (!sessionCode || !studentName) return;
+  try {
+    await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: sessionCode,
+        studentId,
+        name: studentName,
+        score,
+        total: currentQ,
+        finished: finished === true
+      })
+    });
+  } catch (_) {
+    // Silent fail — will retry in 5 seconds
+  }
+}
+</script>
+</body>
+</html>
