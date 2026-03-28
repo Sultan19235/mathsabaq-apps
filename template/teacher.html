@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathSabaq — Мұғалім панелі</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: #1e293b;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #334155;
+  }
+  .topbar h1 { font-size: 18px; color: #38bdf8; font-weight: 700; }
+  .topbar .quiz-title { font-size: 14px; color: #94a3b8; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; padding: 32px 24px; max-width: 1100px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* ── START SCREEN ── */
+  .start-card {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 480px;
+    margin: 60px auto;
+    text-align: center;
+    border: 1px solid #334155;
+  }
+  .start-card h2 { font-size: 24px; margin-bottom: 8px; color: #f1f5f9; }
+  .start-card p { color: #94a3b8; margin-bottom: 28px; font-size: 15px; }
+  .input-group { margin-bottom: 20px; text-align: left; }
+  .input-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; }
+  .input-group input {
+    width: 100%; padding: 12px 16px; background: #0f172a;
+    border: 1px solid #475569; border-radius: 8px; color: #f1f5f9; font-size: 15px;
+  }
+  .btn {
+    padding: 12px 28px; border: none; border-radius: 8px;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary { background: #3b82f6; color: white; width: 100%; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-danger { background: #ef4444; color: white; font-size: 13px; padding: 8px 16px; }
+  .btn-danger:hover { background: #dc2626; }
+
+  /* ── LOBBY SCREEN ── */
+  .lobby-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .qr-card {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 28px;
+    border: 1px solid #334155;
+    text-align: center;
+    position: sticky;
+    top: 20px;
+  }
+  .qr-card h3 { font-size: 15px; color: #94a3b8; margin-bottom: 16px; }
+  .code-display {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    color: #38bdf8;
+    margin-bottom: 16px;
+  }
+  #qrcode { display: flex; justify-content: center; margin-bottom: 16px; }
+  #qrcode canvas { border-radius: 8px; }
+  .join-url {
+    font-size: 12px;
+    color: #64748b;
+    word-break: break-all;
+    margin-bottom: 20px;
+  }
+  .student-count {
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  .student-count span { font-size: 28px; font-weight: 700; color: #34d399; }
+  .student-count p { font-size: 13px; color: #94a3b8; }
+
+  /* ── DASHBOARD ── */
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .dashboard-header h2 { font-size: 18px; color: #f1f5f9; }
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-box {
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #334155;
+    text-align: center;
+  }
+  .stat-box .val { font-size: 26px; font-weight: 700; color: #38bdf8; }
+  .stat-box .lbl { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+  /* ── STUDENT LIST ── */
+  .student-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  .student-card {
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #334155;
+    transition: border-color 0.3s;
+  }
+  .student-card.updated { border-color: #3b82f6; }
+  .student-card.finished { border-color: #34d399; }
+  .student-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: #334155;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+  .student-card.finished .progress-fill { background: #34d399; }
+  .score-text {
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    justify-content: space-between;
+  }
+  .score-text .pct { font-weight: 700; color: #38bdf8; }
+  .student-card.finished .score-text .pct { color: #34d399; }
+  .finished-badge {
+    display: none;
+    font-size: 10px;
+    background: #064e3b;
+    color: #34d399;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 4px;
+    text-align: center;
+  }
+  .student-card.finished .finished-badge { display: block; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #475569;
+    grid-column: 1 / -1;
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: #1e293b; border: 1px solid #334155;
+    color: #e2e8f0; padding: 12px 20px; border-radius: 10px;
+    font-size: 14px; opacity: 0; transition: opacity 0.3s;
+    pointer-events: none; z-index: 1000;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 700px) {
+    .lobby-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📊 MathSabaq</h1>
+  <span class="quiz-title" id="topTitle">Мұғалім панелі</span>
+</div>
+
+<!-- ═══ START SCREEN ═══ -->
+<div class="screen active" id="screenStart">
+  <div class="start-card">
+    <div style="font-size:48px;margin-bottom:16px">🧮</div>
+    <h2 id="startTitle">QUIZ_TITLE</h2>
+    <p>Сабақты бастау үшін сессия ашыңыз</p>
+    <div class="input-group">
+      <label>Мұғалімнің аты (міндетті емес)</label>
+      <input type="text" id="teacherName" placeholder="Мысалы: Айгүл апай">
+    </div>
+    <button class="btn btn-primary" onclick="createSession()">▶ Сабақты бастау</button>
+  </div>
+</div>
+
+<!-- ═══ LOBBY SCREEN ═══ -->
+<div class="screen" id="screenLobby">
+  <div class="lobby-grid">
+
+    <!-- Left: QR + Code -->
+    <div class="qr-card">
+      <h3>Оқушылар осы кодты енгізеді:</h3>
+      <div class="code-display" id="codeDisplay">------</div>
+      <div id="qrcode"></div>
+      <div class="join-url" id="joinUrl"></div>
+      <div class="student-count">
+        <span id="studentCount">0</span>
+        <p>оқушы қосылды</p>
+      </div>
+      <button class="btn btn-danger" onclick="endSession()">⏹ Сабақты аяқтау</button>
+    </div>
+
+    <!-- Right: Live Dashboard -->
+    <div>
+      <div class="dashboard-header">
+        <h2>Тікелей нәтижелер</h2>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="val" id="statAvg">—</div>
+          <div class="lbl">Орташа балл %</div>
+        </div>
+        <div class="stat-box">
+          <div class="val" id="statFinished">0</div>
+          <div class="lbl">Бітірді</div>
+        </div>
+        <div class="stat-box">
+          <div class="val" id="statTop">—</div>
+          <div class="lbl">Үздік балл %</div>
+        </div>
+      </div>
+      <div class="student-grid" id="studentGrid">
+        <div class="empty-state">
+          <div class="icon">⏳</div>
+          <p>Оқушыларды күтуде…</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CUSTOMIZE: Change this to your Hetzner server URL
+// ═══════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+
+// CUSTOMIZE: Change this to the URL of the student file on GitHub Pages
+const STUDENT_URL = 'https://sultan19235.github.io/mathsabaq-apps/template/student.html';
+
+// CUSTOMIZE: Quiz title (shown on start screen)
+const QUIZ_TITLE = 'Математика тесті';
+
+// ═══════════════════════════════════════════════════════════════
+
+document.getElementById('startTitle').textContent = QUIZ_TITLE;
+document.getElementById('topTitle').textContent = QUIZ_TITLE;
+
+let sessionCode = null;
+let sseSource = null;
+const students = new Map();
+
+async function createSession() {
+  const teacherName = document.getElementById('teacherName').value.trim();
+  try {
+    const res = await fetch(`${BACKEND}/session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: QUIZ_TITLE, teacher: teacherName })
+    });
+    const data = await res.json();
+    sessionCode = data.code;
+    startLobby();
+  } catch (e) {
+    showToast('❌ Серверге қосылу мүмкін болмады');
+  }
+}
+
+function startLobby() {
+  document.getElementById('screenStart').classList.remove('active');
+  document.getElementById('screenLobby').classList.add('active');
+
+  document.getElementById('codeDisplay').textContent = sessionCode;
+
+  const studentUrl = `${STUDENT_URL}?code=${sessionCode}`;
+  document.getElementById('joinUrl').textContent = studentUrl;
+
+  // Generate QR
+  document.getElementById('qrcode').innerHTML = '';
+  new QRCode(document.getElementById('qrcode'), {
+    text: studentUrl,
+    width: 200,
+    height: 200,
+    colorDark: '#1e293b',
+    colorLight: '#ffffff'
+  });
+
+  // Start SSE
+  connectSSE();
+}
+
+function connectSSE() {
+  if (sseSource) sseSource.close();
+  sseSource = new EventSource(`${BACKEND}/live?code=${sessionCode}`);
+
+  sseSource.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (data.type === 'snapshot') {
+      data.students.forEach(s => students.set(s.studentId, s));
+    } else if (data.type === 'update') {
+      students.set(data.studentId, data);
+      flashCard(data.studentId);
+    }
+    renderDashboard();
+  };
+
+  sseSource.onerror = () => {
+    setTimeout(connectSSE, 3000); // Auto-reconnect
+  };
+}
+
+function flashCard(studentId) {
+  const card = document.getElementById(`card-${studentId}`);
+  if (card) {
+    card.classList.add('updated');
+    setTimeout(() => card.classList.remove('updated'), 1500);
+  }
+}
+
+function renderDashboard() {
+  const count = students.size;
+  document.getElementById('studentCount').textContent = count;
+
+  if (count === 0) return;
+
+  const arr = Array.from(students.values());
+  const finished = arr.filter(s => s.finished).length;
+  const withScore = arr.filter(s => s.total > 0);
+  const avg = withScore.length > 0
+    ? Math.round(withScore.reduce((sum, s) => sum + (s.score / s.total * 100), 0) / withScore.length)
+    : 0;
+  const top = withScore.length > 0
+    ? Math.round(Math.max(...withScore.map(s => s.score / s.total * 100)))
+    : 0;
+
+  document.getElementById('statAvg').textContent = withScore.length > 0 ? avg + '%' : '—';
+  document.getElementById('statFinished').textContent = finished;
+  document.getElementById('statTop').textContent = withScore.length > 0 ? top + '%' : '—';
+
+  const grid = document.getElementById('studentGrid');
+  arr.sort((a, b) => (b.score / (b.total || 1)) - (a.score / (a.total || 1)));
+
+  // Update or create cards
+  arr.forEach(s => {
+    const pct = s.total > 0 ? Math.round(s.score / s.total * 100) : 0;
+    let card = document.getElementById(`card-${s.studentId}`);
+    if (!card) {
+      card = document.createElement('div');
+      card.className = 'student-card';
+      card.id = `card-${s.studentId}`;
+      card.innerHTML = `
+        <div class="student-name">${s.name}</div>
+        <div class="progress-bar"><div class="progress-fill" id="pf-${s.studentId}" style="width:0%"></div></div>
+        <div class="score-text">
+          <span>${s.score}/${s.total}</span>
+          <span class="pct" id="pp-${s.studentId}">0%</span>
+        </div>
+        <div class="finished-badge">✓ Бітірді</div>
+      `;
+      // Remove empty state if present
+      const empty = grid.querySelector('.empty-state');
+      if (empty) empty.remove();
+      grid.appendChild(card);
+    }
+
+    document.getElementById(`pf-${s.studentId}`).style.width = pct + '%';
+    document.getElementById(`pp-${s.studentId}`).textContent = pct + '%';
+    card.querySelector('.score-text span').textContent = `${s.score}/${s.total}`;
+    card.classList.toggle('finished', !!s.finished);
+  });
+}
+
+function endSession() {
+  if (!confirm('Сабақты аяқтағыңыз келе ме?')) return;
+  if (sseSource) sseSource.close();
+  sessionCode = null;
+  students.clear();
+  document.getElementById('studentGrid').innerHTML = `
+    <div class="empty-state"><div class="icon">⏳</div><p>Оқушыларды күтуде…</p></div>`;
+  document.getElementById('screenLobby').classList.remove('active');
+  document.getElementById('screenStart').classList.add('active');
+  showToast('✅ Сабақ аяқталды');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
