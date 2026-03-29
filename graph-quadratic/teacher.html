@@ -49,7 +49,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
 .btn-green{background:var(--green);color:#fff}
 .btn-red{background:var(--red);color:#fff}
-.btn-amber{background:var(--amber);color:#fff}
 .btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
 .btn-sm{padding:7px 14px;font-size:.76rem;min-height:36px}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
@@ -106,6 +105,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .live-meta{font-size:.7rem;color:var(--muted)}
 .live-controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .stat-pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.72rem;font-weight:700;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.stat-pill.timer{font-family:'JetBrains Mono',monospace;border-color:var(--amber-border);color:var(--amber)}
+.stat-pill.timer.warn{border-color:var(--red-border);color:var(--red);animation:pulse 1.5s infinite}
 .code-pill{font-family:'JetBrains Mono',monospace;background:var(--primary-light);border:1px solid rgba(67,56,202,.2);color:var(--primary);border-radius:8px;padding:5px 14px;font-size:.8rem;font-weight:700;letter-spacing:3px;cursor:pointer;touch-action:manipulation}
 .cards-wrap{flex:1;overflow-y:auto;min-height:0;padding:2px}
 .cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -216,7 +217,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
           <div class="logo-sub" id="lobby-secs">—</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center">
-          <span class="chip chip-p">∞ есеп</span>
+          <span class="chip chip-p">∞ есеп · 45 мин</span>
           <button class="btn btn-ghost btn-sm" onclick="backToSetup()">← Өзгерту</button>
         </div>
       </div>
@@ -247,12 +248,12 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
             2. Оқушылар QR кодты сканерлейді<br>
             3. Атын жазып кіреді<br>
             4. <b style="color:var(--green)">Бастау</b> батырмасын басыңыз<br>
-            <em>⚡ Есептер шексіз генерацияланады</em>
+            <em>⏱ Сабақ 45 минутқа шектелген</em>
           </div>
         </div>
       </div>
       <div style="flex-shrink:0;margin-top:8px">
-        <button class="btn btn-green btn-block" id="start-btn" onclick="goLive()" style="padding:14px;font-size:.94rem" disabled>▶ Бастау (оқушылар күтілуде…)</button>
+        <button class="btn btn-green btn-block" id="start-btn" onclick="startQuiz()" style="padding:14px;font-size:.94rem" disabled>▶ Бастау (оқушылар күтілуде…)</button>
       </div>
     </div>
   </div>
@@ -268,6 +269,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
           <div class="live-meta" id="live-meta">Тікелей</div>
         </div>
         <div class="live-controls">
+          <div class="stat-pill timer" id="timer-pill">⏱ 45:00</div>
           <div class="stat-pill">👥 <span id="live-count">0</span></div>
           <div class="stat-pill">🎯 <span id="avg-pct">0</span>%</div>
           <div class="stat-pill" id="away-pill" style="display:none;border-color:var(--red-border);color:var(--red)">👀 <span id="away-count">0</span> сыртта</div>
@@ -304,13 +306,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// CUSTOMIZE: Change this to your Hetzner server URL
-// ═══════════════════════════════════════════════════════════════
 const BACKEND = 'https://mathsabaq.online';
-
-// CUSTOMIZE: Change this to the URL of the student file on GitHub Pages
 const STUDENT_URL = 'https://sultan19235.github.io/mathsabaq-apps/graph-quadratic/student.html';
-
 // ═══════════════════════════════════════════════════════════════
 
 const SECTIONS = [
@@ -328,11 +325,14 @@ let sessionCode = null;
 let sseSource = null;
 let selectedSecs = new Set();
 const students = new Map();
+let timerInterval = null;
+let timeLeftSec = 45 * 60; // 45 minutes
+let quizEnded = false;
 
 function tex(s) { return katex.renderToString(s, { throwOnError: false }); }
 
-// ── Build section buttons with KaTeX ────────────────────
-(function renderSections() {
+// ── Build section buttons ───────────────────────────────
+(function() {
   document.getElementById('sec-grid').innerHTML = SECTIONS.map(s => `
     <button class="sec-btn" data-sec="${s.id}" onclick="toggleSec(this)">
       <span class="sec-formula">${tex(s.formula)}</span>
@@ -344,103 +344,143 @@ function tex(s) { return katex.renderToString(s, { throwOnError: false }); }
 function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 function toast(msg, type) { const el = document.getElementById('toast'); el.textContent = msg; el.className = 'on ' + (type || ''); setTimeout(() => el.classList.remove('on'), 3000); }
+function fmtTime(sec) { const m = Math.floor(sec / 60); const s = sec % 60; return `${m}:${s < 10 ? '0' : ''}${s}`; }
 
 function copyCode() {
   navigator.clipboard?.writeText(sessionCode).then(() => toast('✅ Көшірілді!', 'ok')).catch(fb) || fb();
   function fb() { const t = document.createElement('textarea'); t.value = sessionCode; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); toast('✅ Көшірілді!', 'ok'); }
 }
+function buildStudentUrl() { return `${STUDENT_URL}?code=${sessionCode}&sec=${Array.from(selectedSecs).join(',')}`; }
 function openQR() {
-  const url = buildStudentUrl();
   document.getElementById('qr-code-big').textContent = sessionCode;
   document.getElementById('qr-hint').textContent = 'QR кодты сканерлеп кіріңіз';
   const b = document.getElementById('qr-big'); b.innerHTML = '';
-  try { new QRCode(b, { text: url, width: 280, height: 280, colorDark: '#141826', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
+  try { new QRCode(b, { text: buildStudentUrl(), width: 280, height: 280, colorDark: '#141826', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
   document.getElementById('qr-overlay').classList.add('on');
 }
 function closeQR(e) { if (e.target === document.getElementById('qr-overlay')) document.getElementById('qr-overlay').classList.remove('on'); }
 function spawnConfetti() { const w = document.getElementById('confetti'); w.innerHTML = ''; const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626','#0891b2','#7c3aed']; for (let i = 0; i < 72; i++) { const e = document.createElement('div'); e.className = 'cfp'; const s = 5 + Math.random() * 9; e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`; w.appendChild(e); } setTimeout(() => w.innerHTML = '', 6000); }
 
-// Build student URL with selected sections
-function buildStudentUrl() {
-  const secStr = Array.from(selectedSecs).join(',');
-  return `${STUDENT_URL}?code=${sessionCode}&sec=${secStr}`;
-}
-
 // ── Section toggle ──────────────────────────────────────
 function toggleSec(el) { const s = el.dataset.sec; if (selectedSecs.has(s)) { selectedSecs.delete(s); el.classList.remove('sel'); } else { selectedSecs.add(s); el.classList.add('sel'); } }
 function toggleAll() { const btns = document.querySelectorAll('.sec-btn'); const allSel = Array.from(btns).every(b => b.classList.contains('sel')); btns.forEach(b => { const s = b.dataset.sec; if (allSel) { selectedSecs.delete(s); b.classList.remove('sel'); } else if (!b.classList.contains('sel')) { selectedSecs.add(s); b.classList.add('sel'); } }); }
 
-// ── Create room (POST /session → get code → show lobby) ──
+// ══════════════════════════════════════════════════════════
+//  CREATE ROOM → POST /session → lobby
+// ══════════════════════════════════════════════════════════
 async function createRoom() {
   if (!selectedSecs.size) { document.getElementById('setup-err').textContent = 'Кем дегенде 1 бөлімді таңдаңыз!'; document.getElementById('setup-err').classList.add('on'); return; }
   document.getElementById('setup-err').classList.remove('on');
-
-  const btn = document.getElementById('create-btn');
-  btn.disabled = true; btn.textContent = '⏳ Бөлме құрылуда...';
-
+  const btn = document.getElementById('create-btn'); btn.disabled = true; btn.textContent = '⏳ Бөлме құрылуда...';
   try {
-    const res = await fetch(`${BACKEND}/session`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: 'Квадраттық функция · ' + Array.from(selectedSecs).map(s => SEC_NAMES[s]).join(', ') })
-    });
+    const res = await fetch(`${BACKEND}/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'Квадраттық функция' }) });
     const data = await res.json();
     sessionCode = data.code;
     btn.disabled = false; btn.textContent = '🚀 Бөлме құру';
-    startLobby();
+    showLobby();
   } catch (e) {
     btn.disabled = false; btn.textContent = '🚀 Бөлме құру';
-    document.getElementById('setup-err').textContent = '❌ Серверге қосылу мүмкін болмады';
-    document.getElementById('setup-err').classList.add('on');
+    document.getElementById('setup-err').textContent = '❌ Серверге қосылу мүмкін болмады'; document.getElementById('setup-err').classList.add('on');
   }
 }
 
 function backToSetup() {
   if (sseSource) sseSource.close();
-  students.clear();
-  sessionCode = null;
+  students.clear(); sessionCode = null;
   show('s-setup');
 }
 
-// ── Lobby ───────────────────────────────────────────────
-function startLobby() {
+// ══════════════════════════════════════════════════════════
+//  LOBBY — show code, QR, wait for students, start SSE
+// ══════════════════════════════════════════════════════════
+function showLobby() {
+  quizEnded = false;
   document.getElementById('room-code').textContent = sessionCode;
   document.getElementById('live-code').textContent = sessionCode;
   document.getElementById('lobby-secs').textContent = Array.from(selectedSecs).map(s => SEC_NAMES[s]).join(', ');
   document.getElementById('live-meta').textContent = 'Тікелей · ' + Array.from(selectedSecs).map(s => SEC_NAMES[s]).join(', ');
-
-  const studentUrl = buildStudentUrl();
-
-  // Generate QR
   const qb = document.getElementById('qr-box'); qb.innerHTML = '';
-  try { new QRCode(qb, { text: studentUrl, width: 90, height: 90, colorDark: '#141826', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
-
+  try { new QRCode(qb, { text: buildStudentUrl(), width: 90, height: 90, colorDark: '#141826', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
   updateLobby();
   show('s-lobby');
-
-  // Start SSE — students will start appearing
   connectSSE();
 }
 
-// ── Go live (teacher clicks "Бастау") ───────────────────
-function goLive() {
-  show('s-live');
+// ══════════════════════════════════════════════════════════
+//  START QUIZ → POST /start → go live
+// ══════════════════════════════════════════════════════════
+async function startQuiz() {
+  if (!students.size) { toast('Оқушылар жоқ!', 'er'); return; }
+  try {
+    await fetch(`${BACKEND}/start`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: sessionCode }) });
+    timeLeftSec = 45 * 60;
+    startTimer();
+    show('s-live');
+  } catch (e) {
+    toast('❌ Серверге қосылу қатесі', 'er');
+  }
 }
 
-// ── SSE connection ──────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+//  END QUIZ → POST /end → results
+// ══════════════════════════════════════════════════════════
+async function endQuiz() {
+  if (!confirm('Сабақты аяқтайсыз ба?')) return;
+  try {
+    await fetch(`${BACKEND}/end`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: sessionCode }) });
+  } catch (_) {}
+  showResults();
+}
+
+// ══════════════════════════════════════════════════════════
+//  TIMER — 45 minute countdown
+// ══════════════════════════════════════════════════════════
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeftSec--;
+    updateTimerDisplay();
+    if (timeLeftSec <= 0) {
+      clearInterval(timerInterval); timerInterval = null;
+      // Server will auto-end, but handle it locally too
+      showResults();
+    }
+  }, 1000);
+}
+function updateTimerDisplay() {
+  const pill = document.getElementById('timer-pill');
+  pill.textContent = '⏱ ' + fmtTime(Math.max(0, timeLeftSec));
+  if (timeLeftSec <= 300) pill.classList.add('warn'); // Last 5 min
+  else pill.classList.remove('warn');
+}
+
+// ══════════════════════════════════════════════════════════
+//  SSE — live updates from server
+// ══════════════════════════════════════════════════════════
 function connectSSE() {
   if (sseSource) sseSource.close();
   sseSource = new EventSource(`${BACKEND}/live?code=${sessionCode}`);
 
   sseSource.onmessage = (e) => {
     const data = JSON.parse(e.data);
+
     if (data.type === 'snapshot') {
       data.students.forEach(s => students.set(s.studentId, s));
+      // If server says quiz already started, sync timer
+      if (data.status === 'active' && data.timeLeft != null) {
+        timeLeftSec = data.timeLeft;
+      }
     } else if (data.type === 'update') {
       const prev = students.get(data.studentId);
       students.set(data.studentId, data);
       flashCard(data.studentId, prev);
+    } else if (data.type === 'ended') {
+      // Server ended the quiz (timeout or teacher from another tab)
+      if (!quizEnded) showResults();
+      return;
     }
+
     updateLobby();
     renderCards();
     updateLiveStats();
@@ -455,59 +495,51 @@ function flashCard(studentId, prev) {
   setTimeout(() => {
     const card = document.getElementById('card-' + studentId);
     if (!card) return;
-    // Determine if answer was correct by comparing prev and current score
     const curr = students.get(studentId);
     const wasCorrect = prev && curr && curr.score > (prev.score || 0);
     const wasWrong = prev && curr && curr.total > (prev.total || 0) && curr.score === (prev.score || 0);
-    if (wasCorrect) { card.classList.add('flash-ok'); setTimeout(() => card.classList.remove('flash-ok'), 800); }
-    else if (wasWrong) { card.classList.add('flash-err'); setTimeout(() => card.classList.remove('flash-err'), 800); }
-    else { card.classList.add('flash-ok'); setTimeout(() => card.classList.remove('flash-ok'), 800); }
+    const cls = wasWrong ? 'flash-err' : 'flash-ok';
+    card.classList.add(cls);
+    setTimeout(() => card.classList.remove(cls), 800);
   }, 50);
 }
 
-// ── Lobby student list ──────────────────────────────────
+// ── Lobby list ──────────────────────────────────────────
 function updateLobby() {
   const arr = Array.from(students.values());
   document.getElementById('lobby-count').textContent = arr.length;
-
   const btn = document.getElementById('start-btn');
   btn.disabled = arr.length === 0;
   btn.textContent = arr.length ? `▶ Бастау (${arr.length} оқушы)` : '▶ Бастау (оқушылар күтілуде…)';
-
   document.getElementById('lobby-list').innerHTML = arr.map(s =>
     `<div class="s-join"><div class="s-join-av" style="background:#4338ca18;color:#4338ca">${esc(s.name)[0].toUpperCase()}</div><div><div class="s-join-name">${esc(s.name)}</div><div class="s-join-sub">✅ Қосылды</div></div></div>`
   ).join('') || '<div class="dots" style="padding:8px 0"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="color:var(--muted);font-size:.78rem;margin-left:6px">Күтілуде…</span></div>';
 }
 
-// ── Render live student cards ───────────────────────────
+// ── Live student cards with focus tracking ──────────────
 const AV_COLORS = ['#4338ca','#059669','#d97706','#dc2626','#0891b2','#7c3aed','#ec4899','#f97316'];
 function renderCards() {
   const arr = Array.from(students.values());
   const sorted = arr.sort((a, b) => {
-    const pctA = a.total > 0 ? a.score / a.total : 0;
-    const pctB = b.total > 0 ? b.score / b.total : 0;
-    if (pctB !== pctA) return pctB - pctA;
-    return (b.score || 0) - (a.score || 0);
+    const pA = a.total > 0 ? a.score / a.total : 0;
+    const pB = b.total > 0 ? b.score / b.total : 0;
+    return pB !== pA ? pB - pA : (b.score || 0) - (a.score || 0);
   });
   const medals = ['🥇','🥈','🥉'];
   document.getElementById('cards-grid').innerHTML = sorted.map((s, i) => {
-    const total = s.total || 0;
-    const score = s.score || 0;
-    const wrong = total - score;
+    const total = s.total || 0, score = s.score || 0, wrong = total - score;
     const pct = total > 0 ? Math.round(score / total * 100) : 0;
     const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
     const barBg = pct >= 70 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
     const ac = AV_COLORS[i % AV_COLORS.length];
 
     // Focus tracking
-    const isFocused = s.focused !== false; // default true if not sent
+    const isFocused = s.focused !== false;
     const tabSw = s.tabSwitches || 0;
     const awaySec = s.awaySeconds || 0;
-    const warn = tabSw > 0
-      ? `<span class="tab-warn">👀 ${tabSw}× · ${awaySec}с</span>`
-      : '';
+    const warn = tabSw > 0 ? `<span class="tab-warn">👀 ${tabSw}× · ${awaySec}с</span>` : '';
 
-    return `<div class="s-card${s.finished ? ' finished' : ''}" id="card-${s.studentId}" data-rank="${i+1}">
+    return `<div class="s-card" id="card-${s.studentId}" data-rank="${i+1}">
       <div class="s-card-header">
         <span class="s-card-rank">${medals[i] || (i+1)}</span>
         <div class="s-card-av" style="background:${ac}18;color:${ac};border-color:${ac}30">${esc(s.name)[0].toUpperCase()}</div>
@@ -532,40 +564,35 @@ function updateLiveStats() {
   const arr = Array.from(students.values());
   document.getElementById('live-count').textContent = arr.length;
   const withScore = arr.filter(s => s.total > 0);
-  const avg = withScore.length > 0
-    ? Math.round(withScore.reduce((sum, s) => sum + (s.score / s.total * 100), 0) / withScore.length)
-    : 0;
+  const avg = withScore.length ? Math.round(withScore.reduce((sum, s) => sum + (s.score / s.total * 100), 0) / withScore.length) : 0;
   document.getElementById('avg-pct').textContent = avg;
-
   const awayArr = arr.filter(s => s.focused === false);
   const pill = document.getElementById('away-pill');
-  if (awayArr.length > 0) { pill.style.display = ''; document.getElementById('away-count').textContent = awayArr.length; }
+  if (awayArr.length) { pill.style.display = ''; document.getElementById('away-count').textContent = awayArr.length; }
   else pill.style.display = 'none';
 }
 
-// ── End quiz ────────────────────────────────────────────
-function endQuiz() {
-  if (!confirm('Сабақты аяқтайсыз ба?')) return;
-  if (sseSource) sseSource.close();
-  showResults();
-}
-
+// ══════════════════════════════════════════════════════════
+//  RESULTS
+// ══════════════════════════════════════════════════════════
 function showResults() {
+  if (quizEnded) return;
+  quizEnded = true;
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (sseSource) sseSource.close();
+
   const arr = Array.from(students.values()).sort((a, b) => {
-    const pctA = a.total > 0 ? a.score / a.total : 0;
-    const pctB = b.total > 0 ? b.score / b.total : 0;
-    return pctB - pctA;
+    const pA = a.total > 0 ? a.score / a.total : 0;
+    const pB = b.total > 0 ? b.score / b.total : 0;
+    return pB - pA;
   });
   const medals = ['🥇','🥈','🥉'];
   document.getElementById('res-sub').textContent = arr.length + ' оқушы';
   document.getElementById('leaderboard').innerHTML = arr.map((s, i) => {
-    const total = s.total || 0;
-    const score = s.score || 0;
-    const wrong = total - score;
+    const total = s.total || 0, score = s.score || 0, wrong = total - score;
     const pct = total > 0 ? Math.round(score / total * 100) : 0;
     const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
-    const tabSw = s.tabSwitches || 0;
-    const awaySec = s.awaySeconds || 0;
+    const tabSw = s.tabSwitches || 0, awaySec = s.awaySeconds || 0;
     const warnStr = tabSw > 0 ? `  👀 ${tabSw}× · ${awaySec}с` : '';
     return `<div class="lb-row">
       <div class="lb-rank">${medals[i] || (i+1)}</div>
@@ -579,9 +606,8 @@ function showResults() {
 }
 
 function newSession() {
-  sessionCode = null;
-  students.clear();
-  selectedSecs.clear();
+  sessionCode = null; quizEnded = false;
+  students.clear(); selectedSecs.clear();
   document.querySelectorAll('.sec-btn').forEach(b => b.classList.remove('sel'));
   show('s-setup');
 }
