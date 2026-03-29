@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>MathSabaq — Fruits 🍎</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; overflow-x: hidden; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; padding: 24px 16px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* ── JOIN SCREEN ── */
+  .join-card {
+    background: #1e293b;
+    border-radius: 20px;
+    padding: 36px 28px;
+    width: 100%;
+    max-width: 380px;
+    border: 1px solid #334155;
+    text-align: center;
+  }
+  .join-card .icon { font-size: 52px; margin-bottom: 12px; }
+  .join-card h2 { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+  .join-card p { font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
+  .code-box {
+    background: #0f172a; border-radius: 10px; padding: 12px 16px;
+    margin-bottom: 16px; font-size: 24px; font-weight: 800;
+    letter-spacing: 4px; color: #38bdf8;
+  }
+  input[type=text] {
+    width: 100%; padding: 14px 16px; background: #0f172a;
+    border: 1px solid #475569; border-radius: 10px;
+    color: #f1f5f9; font-size: 16px; margin-bottom: 14px;
+  }
+  input[type=text]:focus { outline: none; border-color: #3b82f6; }
+  .btn {
+    width: 100%; padding: 14px; border: none; border-radius: 10px;
+    font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+  }
+  .btn-primary { background: #3b82f6; color: white; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-primary:disabled { background: #334155; color: #64748b; cursor: default; }
+
+  /* ── SHARED HEADER ── */
+  .app-header {
+    width: 100%; background: #1e293b; padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #334155; position: sticky; top: 0; z-index: 10;
+  }
+  .app-header .student-info { font-size: 14px; color: #94a3b8; }
+  .app-header .score-pill {
+    background: #0f172a; padding: 6px 14px; border-radius: 20px;
+    font-weight: 700; color: #34d399; font-size: 14px;
+  }
+  .progress-track { width: 100%; height: 4px; background: #334155; }
+  .progress-fill { height: 100%; background: #3b82f6; transition: width 0.4s ease; }
+
+  /* ═══ PHASE SELECTOR ═══ */
+  #screenPhase { padding: 0; justify-content: flex-start; }
+  .phase-content {
+    width: 100%; max-width: 440px; padding: 40px 20px; margin: 0 auto; text-align: center;
+  }
+  .phase-title { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+  .phase-sub { font-size: 14px; color: #94a3b8; margin-bottom: 32px; }
+  .phase-btn {
+    width: 100%; padding: 20px; margin-bottom: 14px;
+    background: #1e293b; border: 2px solid #334155; border-radius: 16px;
+    cursor: pointer; transition: all 0.2s; text-align: left;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .phase-btn:hover { border-color: #3b82f6; background: #1e3a5f; }
+  .phase-btn .phase-icon { font-size: 36px; flex-shrink: 0; }
+  .phase-btn .phase-label { font-size: 17px; font-weight: 600; color: #e2e8f0; }
+  .phase-btn .phase-desc { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+
+  /* ═══ FLASHCARD SCREEN ═══ */
+  #screenFlash { padding: 0; justify-content: flex-start; }
+  .flash-wrap {
+    width: 100%; max-width: 420px; padding: 28px 20px; margin: 0 auto;
+    display: flex; flex-direction: column; align-items: center; flex: 1;
+  }
+  .flash-counter {
+    font-size: 13px; color: #64748b; font-weight: 600;
+    letter-spacing: 1px; margin-bottom: 16px; text-transform: uppercase;
+  }
+  .flashcard {
+    width: 100%; aspect-ratio: 4/3; background: #1e293b;
+    border: 2px solid #334155; border-radius: 20px;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; cursor: pointer;
+    transition: transform 0.5s, box-shadow 0.3s;
+    transform-style: preserve-3d; position: relative;
+    perspective: 800px; user-select: none;
+  }
+  .flashcard:hover { box-shadow: 0 8px 32px rgba(56,189,248,0.12); }
+  .flashcard.flipped .flash-front { opacity: 0; transform: rotateY(180deg); }
+  .flashcard.flipped .flash-back { opacity: 1; transform: rotateY(0deg); }
+  .flash-front, .flash-back {
+    position: absolute; width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; transition: opacity 0.4s, transform 0.5s;
+    backface-visibility: hidden;
+  }
+  .flash-back { opacity: 0; transform: rotateY(-180deg); }
+  .flash-emoji { font-size: 72px; margin-bottom: 12px; }
+  .flash-word-en {
+    font-size: 28px; font-weight: 800; color: #38bdf8;
+    text-transform: uppercase; letter-spacing: 2px;
+  }
+  .flash-word-kz {
+    font-size: 22px; font-weight: 600; color: #fbbf24; margin-top: 4px;
+  }
+  .flash-hint { font-size: 13px; color: #475569; margin-top: 20px; }
+  .flash-nav {
+    display: flex; gap: 12px; margin-top: 24px; width: 100%;
+  }
+  .flash-nav button {
+    flex: 1; padding: 14px; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+  }
+  .flash-nav .nav-prev { background: #334155; color: #e2e8f0; }
+  .flash-nav .nav-prev:hover { background: #475569; }
+  .flash-nav .nav-next { background: #3b82f6; color: white; }
+  .flash-nav .nav-next:hover { background: #2563eb; }
+  .flash-nav .nav-done { background: #16a34a; color: white; }
+  .flash-nav .nav-done:hover { background: #15803d; }
+
+  /* ═══ DICTATION SCREEN ═══ */
+  #screenDictation { padding: 0; justify-content: flex-start; }
+  .dict-wrap {
+    width: 100%; max-width: 480px; padding: 24px 16px; margin: 0 auto; flex: 1;
+  }
+  .dict-counter {
+    font-size: 12px; color: #64748b; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+    text-align: center;
+  }
+  .dict-prompt {
+    text-align: center; margin-bottom: 20px;
+  }
+  .dict-emoji { font-size: 56px; margin-bottom: 8px; }
+  .dict-instruction {
+    font-size: 14px; color: #94a3b8; margin-bottom: 12px;
+  }
+  .play-btn {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: #3b82f6; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px; transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+  }
+  .play-btn:hover { background: #2563eb; transform: scale(1.05); }
+  .play-btn:active { transform: scale(0.95); }
+  .play-btn svg { width: 28px; height: 28px; fill: white; }
+  .play-count { font-size: 11px; color: #475569; text-align: center; margin-bottom: 16px; }
+
+  /* Word blocks */
+  .word-blocks {
+    display: flex; gap: 6px; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 20px; min-height: 52px;
+  }
+  .word-block {
+    width: 40px; height: 48px;
+    background: #1e293b; border: 2px solid #475569;
+    border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 22px; font-weight: 800;
+    color: #f1f5f9; text-transform: uppercase;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .word-block.filled { border-color: #38bdf8; background: #0c2d48; }
+  .word-block.correct { border-color: #34d399; background: #052e16; color: #a7f3d0; }
+  .word-block.wrong { border-color: #ef4444; background: #450a0a; color: #fca5a5; }
+  .word-block.active { border-color: #fbbf24; box-shadow: 0 0 12px rgba(251,191,36,0.3); }
+
+  /* Letter choices */
+  .letter-pool {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin-bottom: 20px;
+  }
+  .letter-tile {
+    width: 42px; height: 46px;
+    background: #334155; border: 2px solid #475569;
+    border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 20px; font-weight: 700;
+    color: #e2e8f0; text-transform: uppercase;
+    cursor: pointer; transition: all 0.15s; user-select: none;
+  }
+  .letter-tile:hover { background: #3b82f6; border-color: #3b82f6; }
+  .letter-tile.used { opacity: 0.25; pointer-events: none; }
+
+  /* Dict actions */
+  .dict-actions {
+    display: flex; gap: 10px; justify-content: center; margin-top: 16px;
+  }
+  .dict-actions button {
+    padding: 12px 24px; border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-clear { background: #475569; color: #e2e8f0; }
+  .btn-clear:hover { background: #64748b; }
+  .btn-check { background: #16a34a; color: white; }
+  .btn-check:hover { background: #15803d; }
+  .btn-skip { background: #334155; color: #94a3b8; }
+  .btn-skip:hover { background: #475569; color: #e2e8f0; }
+
+  .dict-feedback {
+    text-align: center; margin-top: 12px; font-size: 15px;
+    font-weight: 700; min-height: 24px;
+  }
+  .dict-feedback.correct { color: #34d399; }
+  .dict-feedback.wrong { color: #f87171; }
+
+  /* Kazakh translation hint after answer */
+  .dict-translation {
+    text-align: center; font-size: 14px; color: #fbbf24;
+    margin-top: 6px; min-height: 20px;
+  }
+
+  /* ═══ DONE SCREEN ═══ */
+  .done-card {
+    background: #1e293b; border-radius: 20px; padding: 40px 28px;
+    width: 100%; max-width: 380px; text-align: center;
+    border: 1px solid #334155;
+  }
+  .done-card .big-score {
+    font-size: 72px; font-weight: 800; color: #34d399;
+    line-height: 1; margin: 16px 0;
+  }
+  .done-card .score-label { font-size: 16px; color: #94a3b8; }
+  .done-card h2 { font-size: 22px; margin-top: 16px; margin-bottom: 8px; }
+
+  /* Responsive */
+  @media (max-width: 380px) {
+    .word-block { width: 34px; height: 42px; font-size: 18px; }
+    .letter-tile { width: 36px; height: 40px; font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ JOIN SCREEN ═══ -->
+<div class="screen active" id="screenJoin">
+  <div class="join-card">
+    <div class="icon">🍎</div>
+    <h2>Fruits — Жемістер</h2>
+    <p>Ағылшын тілі тесті. Атыңызды жазыңыз.</p>
+    <div class="code-box" id="joinCodeDisplay">———</div>
+    <input type="text" id="inputName" placeholder="Атыңыз..." maxlength="30" autocomplete="off">
+    <input type="text" id="inputCode" placeholder="Код (QR жоқ болса)" maxlength="6"
+           style="text-transform:uppercase;letter-spacing:4px;display:none">
+    <button class="btn btn-primary" id="joinBtn" onclick="joinQuiz()">Бастау →</button>
+  </div>
+</div>
+
+<!-- ═══ PHASE SELECTOR ═══ -->
+<div class="screen" id="screenPhase">
+  <div class="app-header">
+    <span class="student-info" id="phaseHeaderName"></span>
+    <span class="score-pill" id="phaseHeaderScore">0 / 0</span>
+  </div>
+  <div class="phase-content">
+    <div style="font-size:48px;margin-bottom:12px">🍎🍊🍋</div>
+    <div class="phase-title">Fruits — Жемістер</div>
+    <div class="phase-sub">Алдымен сөздерді үйреніңіз, содан кейін диктант жазыңыз</div>
+
+    <div class="phase-btn" onclick="startFlashcards()">
+      <div class="phase-icon">📖</div>
+      <div>
+        <div class="phase-label">1. Сөздерді үйрену</div>
+        <div class="phase-desc">Flashcards — суреттермен сөз жаттау</div>
+      </div>
+    </div>
+
+    <div class="phase-btn" id="dictBtn" onclick="startDictation()">
+      <div class="phase-icon">✍️</div>
+      <div>
+        <div class="phase-label">2. Диктант</div>
+        <div class="phase-desc">Аудионы тыңдап, сөзді жинаңыз</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FLASHCARD SCREEN ═══ -->
+<div class="screen" id="screenFlash">
+  <div class="app-header">
+    <span class="student-info" id="flashHeaderName"></span>
+    <span class="score-pill" style="background:#0f172a;color:#fbbf24" id="flashProgress">1 / 12</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="flashProgressBar" style="width:0%"></div>
+  </div>
+  <div class="flash-wrap">
+    <div class="flash-counter" id="flashCounter">Сөз 1 / 12</div>
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="flash-front">
+        <div class="flash-emoji" id="flashEmoji">🍎</div>
+        <div class="flash-word-en" id="flashWordEn">APPLE</div>
+        <div class="flash-hint">Аудару үшін басыңыз 👆</div>
+      </div>
+      <div class="flash-back">
+        <div class="flash-emoji" id="flashEmojiBack">🍎</div>
+        <div class="flash-word-en" id="flashWordEnBack" style="font-size:22px">APPLE</div>
+        <div class="flash-word-kz" id="flashWordKz">Алма</div>
+      </div>
+    </div>
+    <div class="flash-nav">
+      <button class="nav-prev" id="flashPrev" onclick="flashPrev()">← Алдыңғы</button>
+      <button class="nav-next" id="flashNext" onclick="flashNext()">Келесі →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DICTATION SCREEN ═══ -->
+<div class="screen" id="screenDictation">
+  <div class="app-header">
+    <span class="student-info" id="dictHeaderName"></span>
+    <span class="score-pill" id="dictHeaderScore">0 / 0</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="dictProgressBar" style="width:0%"></div>
+  </div>
+  <div class="dict-wrap">
+    <div class="dict-counter" id="dictCounter">Сөз 1 / 12</div>
+    <div class="dict-prompt">
+      <div class="dict-emoji" id="dictEmoji">🍎</div>
+      <div class="dict-instruction">Тыңдаңыз және сөзді жинаңыз:</div>
+      <button class="play-btn" id="playBtn" onclick="playAudio()">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="play-count" id="playCount"></div>
+    </div>
+
+    <div class="word-blocks" id="wordBlocks"></div>
+
+    <div class="letter-pool" id="letterPool"></div>
+
+    <div class="dict-actions">
+      <button class="btn-clear" onclick="clearWord()">⌫ Өшіру</button>
+      <button class="btn-check" id="checkBtn" onclick="checkWord()">✓ Тексеру</button>
+      <button class="btn-skip" onclick="skipWord()">Келесі →</button>
+    </div>
+
+    <div class="dict-feedback" id="dictFeedback"></div>
+    <div class="dict-translation" id="dictTranslation"></div>
+  </div>
+</div>
+
+<!-- ═══ DONE SCREEN ═══ -->
+<div class="screen" id="screenDone">
+  <div class="done-card">
+    <div style="font-size:56px">🏆</div>
+    <h2>Диктант аяқталды!</h2>
+    <div class="big-score" id="finalPct">0%</div>
+    <div class="score-label" id="finalScore"></div>
+    <p style="color:#94a3b8;margin-top:16px;font-size:14px">Нәтижелер мұғалімге жіберілді ✓</p>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CUSTOMIZE
+// ═══════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const QUIZ_TITLE = 'Fruits — Жемістер (4-сынып)';
+
+// Word bank: English word, Kazakh translation, emoji
+const WORDS = [
+  { en: 'apple',       kz: 'Алма',       emoji: '🍎' },
+  { en: 'banana',      kz: 'Банан',      emoji: '🍌' },
+  { en: 'orange',      kz: 'Апельсин',   emoji: '🍊' },
+  { en: 'grape',       kz: 'Жүзім',      emoji: '🍇' },
+  { en: 'lemon',       kz: 'Лимон',      emoji: '🍋' },
+  { en: 'watermelon',  kz: 'Қарбыз',     emoji: '🍉' },
+  { en: 'strawberry',  kz: 'Құлпынай',   emoji: '🍓' },
+  { en: 'pear',        kz: 'Алмұрт',     emoji: '🍐' },
+  { en: 'cherry',      kz: 'Шие',        emoji: '🍒' },
+  { en: 'peach',       kz: 'Шабдалы',    emoji: '🍑' },
+  { en: 'pineapple',   kz: 'Ананас',     emoji: '🍍' },
+  { en: 'mango',       kz: 'Манго',      emoji: '🥭' },
+];
+// ═══════════════════════════════════════════════════════════════
+
+// ── State ──
+const urlParams = new URLSearchParams(location.search);
+let sessionCode = urlParams.get('code') || '';
+let studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
+let studentName = '';
+let submitInterval = null;
+
+// Dictation scoring
+let dictScore = 0;
+let dictTotal = 0;
+let dictCurrent = 0;
+let dictAnswered = false;
+let dictOrder = []; // shuffled indices
+
+// Flashcard state
+let flashIndex = 0;
+
+// Current word blocks
+let currentBlocks = [];  // array of letters placed so far
+let currentAnswer = '';  // the correct answer word
+
+// ── Focus tracking state ──
+let isFocused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let awayStart = null;
+
+function markAway() {
+  if (!isFocused) return;
+  isFocused = false;
+  tabSwitches++;
+  awayStart = Date.now();
+}
+function markBack() {
+  if (isFocused) return;
+  isFocused = true;
+  if (awayStart) {
+    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
+    awayStart = null;
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) markAway(); else markBack();
+});
+window.addEventListener('blur', markAway);
+window.addEventListener('focus', markBack);
+
+// ── TTS ──
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.8;
+  // Try to pick a good English voice
+  const voices = window.speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Female'))
+               || voices.find(v => v.lang.startsWith('en'));
+  if (enVoice) u.voice = enVoice;
+  window.speechSynthesis.speak(u);
+}
+
+// Preload voices
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+
+// ── Init ──
+if (sessionCode) {
+  document.getElementById('joinCodeDisplay').textContent = sessionCode;
+} else {
+  document.getElementById('joinCodeDisplay').style.display = 'none';
+  document.getElementById('inputCode').style.display = 'block';
+}
+document.getElementById('inputName').focus();
+document.getElementById('inputName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') joinQuiz();
+});
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function joinQuiz() {
+  const name = document.getElementById('inputName').value.trim();
+  const codeInput = document.getElementById('inputCode').value.trim().toUpperCase();
+  if (!name) { document.getElementById('inputName').focus(); return; }
+  if (!sessionCode && !codeInput) {
+    document.getElementById('inputCode').style.display = 'block';
+    document.getElementById('inputCode').focus();
+    return;
+  }
+  if (codeInput) sessionCode = codeInput;
+  studentName = name;
+
+  // Set headers
+  document.getElementById('phaseHeaderName').textContent = name;
+  document.getElementById('flashHeaderName').textContent = name;
+  document.getElementById('dictHeaderName').textContent = name;
+
+  submitInterval = setInterval(sendScore, 5000);
+  showScreen('screenPhase');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FLASHCARDS
+// ═══════════════════════════════════════════════════════════════
+function startFlashcards() {
+  flashIndex = 0;
+  showScreen('screenFlash');
+  renderFlashcard();
+}
+
+function renderFlashcard() {
+  const w = WORDS[flashIndex];
+  const card = document.getElementById('flashcard');
+  card.classList.remove('flipped');
+
+  document.getElementById('flashEmoji').textContent = w.emoji;
+  document.getElementById('flashEmojiBack').textContent = w.emoji;
+  document.getElementById('flashWordEn').textContent = w.en.toUpperCase();
+  document.getElementById('flashWordEnBack').textContent = w.en.toUpperCase();
+  document.getElementById('flashWordKz').textContent = w.kz;
+
+  document.getElementById('flashCounter').textContent = `Сөз ${flashIndex + 1} / ${WORDS.length}`;
+  document.getElementById('flashProgress').textContent = `${flashIndex + 1} / ${WORDS.length}`;
+  document.getElementById('flashProgressBar').style.width =
+    ((flashIndex + 1) / WORDS.length * 100) + '%';
+
+  // Nav buttons
+  document.getElementById('flashPrev').style.visibility = flashIndex === 0 ? 'hidden' : 'visible';
+  const nextBtn = document.getElementById('flashNext');
+  if (flashIndex === WORDS.length - 1) {
+    nextBtn.textContent = '✓ Диктантқа өту';
+    nextBtn.className = 'nav-done';
+  } else {
+    nextBtn.textContent = 'Келесі →';
+    nextBtn.className = 'nav-next';
+  }
+
+  // Speak the word
+  setTimeout(() => speak(w.en), 300);
+}
+
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+function flashPrev() {
+  if (flashIndex > 0) { flashIndex--; renderFlashcard(); }
+}
+
+function flashNext() {
+  if (flashIndex < WORDS.length - 1) {
+    flashIndex++;
+    renderFlashcard();
+  } else {
+    // Go to phase screen or straight to dictation
+    showScreen('screenPhase');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DICTATION
+// ═══════════════════════════════════════════════════════════════
+function startDictation() {
+  dictScore = 0;
+  dictTotal = 0;
+  dictCurrent = 0;
+  dictAnswered = false;
+
+  // Shuffle word order
+  dictOrder = WORDS.map((_, i) => i);
+  for (let i = dictOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [dictOrder[i], dictOrder[j]] = [dictOrder[j], dictOrder[i]];
+  }
+
+  showScreen('screenDictation');
+  loadDictWord();
+}
+
+function loadDictWord() {
+  if (dictCurrent >= WORDS.length) {
+    finishQuiz();
+    return;
+  }
+
+  dictAnswered = false;
+  const idx = dictOrder[dictCurrent];
+  const w = WORDS[idx];
+  currentAnswer = w.en.toLowerCase();
+  currentBlocks = [];
+
+  // Update UI
+  document.getElementById('dictCounter').textContent = `Сөз ${dictCurrent + 1} / ${WORDS.length}`;
+  document.getElementById('dictEmoji').textContent = w.emoji;
+  document.getElementById('dictProgressBar').style.width =
+    (dictCurrent / WORDS.length * 100) + '%';
+  document.getElementById('dictHeaderScore').textContent = `${dictScore} / ${dictTotal}`;
+  document.getElementById('dictFeedback').textContent = '';
+  document.getElementById('dictFeedback').className = 'dict-feedback';
+  document.getElementById('dictTranslation').textContent = '';
+  document.getElementById('playCount').textContent = '';
+
+  // Create blank blocks
+  const blocksEl = document.getElementById('wordBlocks');
+  blocksEl.innerHTML = '';
+  for (let i = 0; i < currentAnswer.length; i++) {
+    const block = document.createElement('div');
+    block.className = 'word-block';
+    block.dataset.index = i;
+    block.onclick = () => removeLetterAt(i);
+    blocksEl.appendChild(block);
+  }
+  // Highlight first block
+  updateActiveBlock();
+
+  // Create letter pool (correct letters + some random extras)
+  const letters = currentAnswer.split('');
+  // Add 4-6 random distractor letters
+  const distractorCount = Math.min(6, Math.max(4, 10 - letters.length));
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+  for (let i = 0; i < distractorCount; i++) {
+    letters.push(alphabet[Math.floor(Math.random() * 26)]);
+  }
+  // Shuffle
+  for (let i = letters.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [letters[i], letters[j]] = [letters[j], letters[i]];
+  }
+
+  const poolEl = document.getElementById('letterPool');
+  poolEl.innerHTML = '';
+  letters.forEach((ch, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'letter-tile';
+    tile.textContent = ch;
+    tile.dataset.poolIndex = i;
+    tile.onclick = () => pickLetter(i, ch, tile);
+    poolEl.appendChild(tile);
+  });
+
+  // Auto-play audio
+  setTimeout(() => speak(w.en), 400);
+}
+
+function pickLetter(poolIdx, ch, tile) {
+  if (dictAnswered) return;
+  if (currentBlocks.length >= currentAnswer.length) return;
+  if (tile.classList.contains('used')) return;
+
+  tile.classList.add('used');
+  currentBlocks.push({ ch, poolIdx });
+
+  // Fill the next block
+  const pos = currentBlocks.length - 1;
+  const blocks = document.getElementById('wordBlocks').children;
+  blocks[pos].textContent = ch;
+  blocks[pos].classList.add('filled');
+
+  updateActiveBlock();
+}
+
+function removeLetterAt(index) {
+  if (dictAnswered) return;
+  if (index >= currentBlocks.length) return;
+
+  // Remove this letter and all after it
+  const removed = currentBlocks.splice(index);
+  const blocks = document.getElementById('wordBlocks').children;
+  const poolTiles = document.getElementById('letterPool').children;
+
+  removed.forEach((item, i) => {
+    const blockIdx = index + i;
+    blocks[blockIdx].textContent = '';
+    blocks[blockIdx].classList.remove('filled');
+    poolTiles[item.poolIdx].classList.remove('used');
+  });
+
+  updateActiveBlock();
+}
+
+function updateActiveBlock() {
+  const blocks = document.getElementById('wordBlocks').children;
+  for (let i = 0; i < blocks.length; i++) {
+    blocks[i].classList.remove('active');
+  }
+  if (currentBlocks.length < currentAnswer.length) {
+    blocks[currentBlocks.length].classList.add('active');
+  }
+}
+
+function clearWord() {
+  if (dictAnswered) return;
+  const blocks = document.getElementById('wordBlocks').children;
+  const poolTiles = document.getElementById('letterPool').children;
+
+  currentBlocks.forEach(item => {
+    poolTiles[item.poolIdx].classList.remove('used');
+  });
+  currentBlocks = [];
+
+  for (let i = 0; i < blocks.length; i++) {
+    blocks[i].textContent = '';
+    blocks[i].classList.remove('filled', 'correct', 'wrong');
+  }
+  updateActiveBlock();
+}
+
+function checkWord() {
+  if (dictAnswered) return;
+  if (currentBlocks.length < currentAnswer.length) return; // not all filled
+
+  dictAnswered = true;
+  dictTotal++;
+
+  const attempt = currentBlocks.map(b => b.ch).join('').toLowerCase();
+  const isCorrect = attempt === currentAnswer;
+
+  const blocks = document.getElementById('wordBlocks').children;
+  const feedback = document.getElementById('dictFeedback');
+  const idx = dictOrder[dictCurrent];
+  const w = WORDS[idx];
+
+  // Color each block
+  for (let i = 0; i < currentAnswer.length; i++) {
+    if (currentBlocks[i] && currentBlocks[i].ch.toLowerCase() === currentAnswer[i]) {
+      blocks[i].classList.add('correct');
+    } else {
+      blocks[i].classList.add('wrong');
+    }
+  }
+
+  if (isCorrect) {
+    dictScore++;
+    feedback.textContent = '✓ Дұрыс!';
+    feedback.className = 'dict-feedback correct';
+  } else {
+    feedback.textContent = `✗ Дұрыс жауап: ${currentAnswer.toUpperCase()}`;
+    feedback.className = 'dict-feedback wrong';
+  }
+
+  document.getElementById('dictTranslation').textContent = `${w.kz}`;
+  document.getElementById('dictHeaderScore').textContent = `${dictScore} / ${dictTotal}`;
+
+  // Auto advance
+  setTimeout(() => {
+    dictCurrent++;
+    loadDictWord();
+  }, 1800);
+}
+
+function skipWord() {
+  if (dictAnswered) return;
+  dictAnswered = true;
+  dictTotal++;
+
+  const idx = dictOrder[dictCurrent];
+  const w = WORDS[idx];
+  const feedback = document.getElementById('dictFeedback');
+  feedback.textContent = `Жауап: ${currentAnswer.toUpperCase()}`;
+  feedback.className = 'dict-feedback wrong';
+  document.getElementById('dictTranslation').textContent = `${w.kz}`;
+  document.getElementById('dictHeaderScore').textContent = `${dictScore} / ${dictTotal}`;
+
+  // Show correct letters
+  const blocks = document.getElementById('wordBlocks').children;
+  for (let i = 0; i < currentAnswer.length; i++) {
+    blocks[i].textContent = currentAnswer[i];
+    blocks[i].classList.add('wrong');
+  }
+
+  setTimeout(() => {
+    dictCurrent++;
+    loadDictWord();
+  }, 1800);
+}
+
+function playAudio() {
+  const idx = dictOrder[dictCurrent];
+  const w = WORDS[idx];
+  speak(w.en);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FINISH
+// ═══════════════════════════════════════════════════════════════
+function finishQuiz() {
+  clearInterval(submitInterval);
+  sendScore(true);
+
+  showScreen('screenDone');
+  const total = WORDS.length;
+  const pct = Math.round(dictScore / total * 100);
+  document.getElementById('finalPct').textContent = pct + '%';
+  document.getElementById('finalScore').textContent = `${dictScore} дұрыс / ${total} сөз`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCORE SUBMISSION (same as template)
+// ═══════════════════════════════════════════════════════════════
+async function sendScore(finished = false) {
+  if (!sessionCode || !studentName) return;
+
+  let currentAwaySeconds = awaySeconds;
+  if (!isFocused && awayStart) {
+    currentAwaySeconds += Math.round((Date.now() - awayStart) / 1000);
+  }
+
+  try {
+    await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code:        sessionCode,
+        studentId,
+        name:        studentName,
+        score:       dictScore,
+        total:       dictTotal,
+        finished:    finished === true,
+        focused:     isFocused,
+        tabSwitches: tabSwitches,
+        awaySeconds: currentAwaySeconds
+      })
+    });
+  } catch (_) {}
+}
+</script>
+</body>
+</html>
