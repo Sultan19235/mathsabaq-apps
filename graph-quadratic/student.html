@@ -219,6 +219,7 @@ function markAway() {
   isFocused = false;
   tabSwitches++;
   awayStart = Date.now();
+  sendScore(); // Immediately notify teacher
 }
 function markBack() {
   if (isFocused) return;
@@ -227,6 +228,7 @@ function markBack() {
     awaySeconds += Math.round((Date.now() - awayStart) / 1000);
     awayStart = null;
   }
+  sendScore(); // Immediately notify teacher
 }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) markAway(); else markBack();
@@ -281,6 +283,7 @@ function spawnConfetti() {
 
 // ── Auto-fill code from URL ─────────────────────────────
 if (urlCode) {
+  sessionCode = urlCode; // Pre-set so joinQuiz doesn't need it
   document.getElementById('scode').value = urlCode;
   document.getElementById('code-wrap').style.display = 'none';
 }

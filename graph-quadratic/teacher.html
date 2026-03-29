@@ -492,13 +492,15 @@ function connectSSE() {
 }
 
 function flashCard(studentId, prev) {
+  const curr = students.get(studentId);
+  if (!prev || !curr) return;
+  // Only flash when a NEW answer was submitted (total changed)
+  if (curr.total === (prev.total || 0)) return;
   setTimeout(() => {
     const card = document.getElementById('card-' + studentId);
     if (!card) return;
-    const curr = students.get(studentId);
-    const wasCorrect = prev && curr && curr.score > (prev.score || 0);
-    const wasWrong = prev && curr && curr.total > (prev.total || 0) && curr.score === (prev.score || 0);
-    const cls = wasWrong ? 'flash-err' : 'flash-ok';
+    const wasCorrect = curr.score > (prev.score || 0);
+    const cls = wasCorrect ? 'flash-ok' : 'flash-err';
     card.classList.add(cls);
     setTimeout(() => card.classList.remove(cls), 800);
   }, 50);
