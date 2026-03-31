@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Арифметикалық орта — Оқушы</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;--amber-light:#fffbeb;--amber-border:#fcd34d;
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
+  --shadow-lg:0 8px 30px rgba(20,24,38,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+.screen{display:none;min-height:100vh;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes pop{0%{transform:scale(.95);opacity:0}100%{transform:scale(1);opacity:1}}
+.container{max-width:520px;margin:0 auto;padding:1rem;padding-bottom:2rem}
+
+/* JOIN */
+.join-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.join-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.join-logo{text-align:center;margin-bottom:20px}
+.join-icon{font-size:2.4rem;margin-bottom:6px}
+.join-title{font-size:1.3rem;font-weight:800;margin-bottom:2px}
+.join-sub{color:var(--muted);font-size:.82rem}
+.field{margin-bottom:12px}
+.field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px}
+.field input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;outline:none;transition:border-color .15s;background:var(--bg)}
+.field input:focus{border-color:var(--primary)}
+.field input.code-input{font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:6px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
+.err.on{display:block}
+
+/* WAIT */
+.wait-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.wait-icon{font-size:3.5rem;margin-bottom:12px}
+.wait-title{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+.wait-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.wait-name{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.82rem;font-weight:700;margin-top:8px}
+.dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-top:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+
+/* QUIZ */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.6rem .4rem;text-align:center;box-shadow:var(--shadow-sm)}
+.stat-icon{font-size:1rem;margin-bottom:.15rem}
+.stat-value{font-size:1.25rem;font-weight:800}
+.stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow)}
+
+/* Level indicator */
+.level-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.level-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.level-badge.l1{background:var(--green-light);color:var(--green);border:1.5px solid var(--green-border)}
+.level-badge.l2{background:var(--amber-light);color:var(--amber);border:1.5px solid var(--amber-border)}
+.level-badge.l3{background:var(--red-light);color:var(--red);border:1.5px solid var(--red-border)}
+.q-progress{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);font-weight:700}
+.q-prog-bar{width:80px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.q-prog-fill{height:100%;background:var(--primary);border-radius:3px;transition:width .3s ease}
+
+/* Question text */
+.q-text{font-size:1rem;font-weight:600;color:var(--text);text-align:center;padding:.9rem 1rem;background:var(--primary-light);border:1.5px solid rgba(67,56,202,.18);border-radius:14px;margin-bottom:1rem;line-height:1.7}
+
+/* MCQ Options */
+.mcq-opt{width:100%;padding:12px 14px;border:2.5px solid var(--border);border-radius:12px;background:var(--bg2);cursor:pointer;transition:all .18s;text-align:left;display:flex;align-items:center;gap:12px;margin-bottom:8px;touch-action:manipulation;font-family:inherit;font-size:.9rem;font-weight:500}
+.mcq-opt:last-child{margin-bottom:0}
+.mcq-opt:active{transform:scale(.99)}
+.mcq-opt.selected{border-color:var(--primary);background:var(--primary-light)}
+.mcq-opt.correct{border-color:var(--green);background:var(--green-light)}
+.mcq-opt.wrong{border-color:var(--red);background:var(--red-light)}
+.mcq-opt:disabled{pointer-events:none}
+.mcq-label{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.76rem;background:var(--bg3);color:var(--text2);flex-shrink:0;transition:all .18s}
+.mcq-opt.selected .mcq-label{background:var(--primary);color:#fff}
+.mcq-opt.correct .mcq-label{background:var(--green);color:#fff}
+.mcq-opt.wrong .mcq-label{background:var(--red);color:#fff}
+.mcq-text{flex:1;line-height:1.4}
+
+.feedback{text-align:center;padding:.75rem;border-radius:12px;margin-top:.75rem;margin-bottom:.75rem;font-weight:700;font-size:.88rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.feedback.correct{background:var(--green-light);color:var(--green);border:1px solid var(--green-border)}
+.feedback.wrong{background:var(--red-light);color:var(--red);border:1px solid var(--red-border)}
+.btn-group{display:flex;gap:.6rem;justify-content:center;align-items:center}
+.hidden{display:none!important}
+
+/* LEVEL END */
+.le-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.le-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;text-align:center;box-shadow:var(--shadow-lg);animation:pop .35s ease}
+.le-score-box{background:var(--bg);border-radius:14px;padding:16px;margin:16px 0}
+.le-score-val{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:800}
+.le-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-top:8px}
+.le-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+
+/* RESULTS */
+.res-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.res-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg)}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.res-stat{background:var(--bg);border-radius:12px;padding:12px 8px}
+.res-val{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.res-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+
+.cfw{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.cfp{position:absolute;animation:cfFall linear forwards}
+</style>
+</head>
+<body>
+<div class="cfw" id="confetti"></div>
+
+<!-- ════ JOIN ════ -->
+<div class="screen active" id="s-join">
+  <div class="join-wrap">
+    <div class="join-card">
+      <div class="join-logo">
+        <div class="join-icon">📊</div>
+        <div class="join-title">Арифметикалық орта</div>
+        <div class="join-sub">3 деңгейлі тест · 10 сұрақ / деңгей</div>
+      </div>
+      <div class="err" id="join-err"></div>
+      <div class="field">
+        <label>Аты-жөні</label>
+        <input type="text" id="sname" placeholder="Атыңызды жазыңыз" maxlength="20" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="field" id="code-wrap">
+        <label>Бөлме коды</label>
+        <input type="text" id="scode" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
+      </div>
+      <button class="btn btn-primary btn-block" id="join-btn" style="margin-top:4px" onclick="joinQuiz()">🚀 Кіру</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WAIT ════ -->
+<div class="screen" id="s-wait">
+  <div class="wait-wrap">
+    <div class="wait-icon">✅</div>
+    <div class="wait-title">Қосылдыңыз!</div>
+    <div class="wait-sub">Мұғалім сабақты бастағанша күтіңіз</div>
+    <div class="wait-name" id="wait-name"></div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div class="screen" id="s-quiz">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value" id="st-level" style="color:var(--green)">1</div><div class="stat-label">Деңгей</div></div>
+      <div class="stat-card"><div class="stat-icon">✓</div><div class="stat-value" id="st-correct" style="color:var(--green)">0</div><div class="stat-label">Дұрыс</div></div>
+      <div class="stat-card"><div class="stat-icon">✗</div><div class="stat-value" id="st-wrong" style="color:var(--red)">0</div><div class="stat-label">Қате</div></div>
+      <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-value" id="st-q" style="color:var(--amber)">1/10</div><div class="stat-label">Сұрақ</div></div>
+    </div>
+    <div class="quiz-card">
+      <div class="level-row">
+        <span class="level-badge l1" id="level-badge">⬤ Деңгей 1</span>
+        <div class="q-progress">
+          <span id="q-prog-text">1/10</span>
+          <div class="q-prog-bar"><div class="q-prog-fill" id="q-prog-fill" style="width:10%"></div></div>
+        </div>
+      </div>
+      <div class="q-text" id="q-text"></div>
+      <div id="opts-container"></div>
+      <div class="feedback hidden" id="feedback"></div>
+      <div class="btn-group" style="margin-top:.75rem">
+        <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()" disabled>✓ Тексеру</button>
+        <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Келесі →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ LEVEL END ════ -->
+<div class="screen" id="s-level-end">
+  <div class="le-wrap">
+    <div class="le-card">
+      <div style="font-size:3rem;margin-bottom:10px" id="le-emoji">🎉</div>
+      <div style="font-size:1.2rem;font-weight:800;margin-bottom:4px" id="le-title">Деңгей аяқталды!</div>
+      <div style="color:var(--muted);font-size:.84rem" id="le-sub">Нәтижеңіз:</div>
+      <div class="le-score-box">
+        <div class="le-score-val" id="le-score">0/10</div>
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px">Ұпай</div>
+        <div class="le-bar"><div class="le-bar-fill" id="le-bar-fill" style="width:0%"></div></div>
+      </div>
+      <div id="le-pass-msg" class="hidden" style="background:var(--green-light);border:1.5px solid var(--green-border);border-radius:12px;padding:11px;margin-bottom:12px">
+        <div style="color:var(--green);font-weight:700;font-size:.88rem">✅ Деңгей өтілді!</div>
+      </div>
+      <div id="le-fail-msg" class="hidden" style="background:var(--red-light);border:1.5px solid var(--red-border);border-radius:12px;padding:11px;margin-bottom:12px">
+        <div style="color:var(--red);font-weight:700;font-size:.88rem">❌ Өтпедіңіз. Қайта тырысыңыз.</div>
+        <div style="color:var(--muted);font-size:.74rem;margin-top:3px">Өту үшін кемінде $7/10$ дұрыс жауап керек</div>
+      </div>
+      <button class="btn btn-primary btn-block" id="le-btn" onclick="continueAfterLevel()">Жалғастыру →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RESULTS ════ -->
+<div class="screen" id="s-results">
+  <div class="res-wrap">
+    <div class="res-card">
+      <div style="font-size:3rem;margin-bottom:8px" id="res-emoji">🏆</div>
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px">Тест аяқталды!</div>
+      <div style="color:var(--muted);font-size:.86rem">Нәтижелеріңіз</div>
+      <div class="res-stats">
+        <div class="res-stat"><div class="res-val" id="res-correct" style="color:var(--green)">0</div><div class="res-lbl">Дұрыс</div></div>
+        <div class="res-stat"><div class="res-val" id="res-levels" style="color:var(--primary)">0/3</div><div class="res-lbl">Деңгей</div></div>
+        <div class="res-stat"><div class="res-val" id="res-pct" style="color:var(--amber)">0%</div><div class="res-lbl">Пайыз</div></div>
+      </div>
+      <p style="color:var(--muted);margin-top:16px;font-size:.82rem">Нәтижелер мұғалімге жіберілді ✓</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const STORAGE_KEY_PREFIX = 'ms_arithorta_';
+// ═══════════════════════════════════════
+
+// opts[0] is ALWAYS the correct answer (shuffled at render time)
+const LEVEL_BANKS = {
+  1: [
+    { q: '3, 5, 7, 9, 11 сандарының арифметикалық ортасы?', opts: ['$7$','$5$','$9$','$6$'] },
+    { q: '4, 8, 12 сандарының арифметикалық ортасы?', opts: ['$8$','$6$','$10$','$7$'] },
+    { q: '10, 20, 30, 40 сандарының арифметикалық ортасы?', opts: ['$25$','$20$','$30$','$22$'] },
+    { q: '2, 4, 6, 8, 10, 12 сандарының арифметикалық ортасы?', opts: ['$7$','$6$','$8$','$5$'] },
+    { q: '15, 25, 35 сандарының арифметикалық ортасы?', opts: ['$25$','$20$','$30$','$24$'] },
+    { q: '60, 70, 80, 90 сандарының арифметикалық ортасы?', opts: ['$75$','$70$','$80$','$72$'] },
+    { q: '5, 10, 15, 20, 25 сандарының арифметикалық ортасы?', opts: ['$15$','$12$','$17$','$13$'] },
+    { q: '100, 200, 300 сандарының арифметикалық ортасы?', opts: ['$200$','$150$','$250$','$600$'] },
+    { q: '14, 16, 18, 20, 22 сандарының арифметикалық ортасы?', opts: ['$18$','$16$','$20$','$17$'] },
+    { q: '1, 2, 3, 4, 5, 6, 7 сандарының арифметикалық ортасы?', opts: ['$4$','$3$','$5$','$3{,}5$'] },
+    { q: '8, 12, 10, 14, 16 сандарының арифметикалық ортасы?', opts: ['$12$','$10$','$14$','$11$'] },
+    { q: '30, 40, 50, 60, 70, 50 сандарының арифметикалық ортасы?', opts: ['$50$','$45$','$55$','$48$'] },
+    { q: '9, 11, 13 сандарының арифметикалық ортасы?', opts: ['$11$','$9$','$13$','$10$'] },
+    { q: '20, 30, 40, 50 сандарының арифметикалық ортасы?', opts: ['$35$','$30$','$40$','$32$'] },
+    { q: '5, 5, 5, 5 сандарының арифметикалық ортасы?', opts: ['$5$','$4$','$6$','$20$'] },
+    { q: '50, 60, 70 сандарының арифметикалық ортасы?', opts: ['$60$','$55$','$65$','$58$'] },
+    { q: '3, 6, 9, 12 сандарының арифметикалық ортасы?', opts: ['$7{,}5$','$6$','$8$','$9$'] },
+    { q: '45, 55 сандарының арифметикалық ортасы?', opts: ['$50$','$45$','$55$','$48$'] },
+    { q: '7, 14, 21, 28 сандарының арифметикалық ортасы?', opts: ['$17{,}5$','$14$','$21$','$17$'] },
+    { q: 'Баскетболшы 5 ойында 12, 18, 10, 15, 20 ұпай жинады. Бір ойындағы орта ұпай?', opts: ['$15$','$12$','$18$','$13$'] },
+    { q: '5 күнде сиырдан 14, 16, 15, 17, 13 л сауылды. Орта тәуліктік мөлшер?', opts: ['$15$','$13$','$17$','$14$'] },
+    { q: 'Арман 4 күнде 20, 25, 30, 35 бет оқыды. Орта бет саны?', opts: ['$27{,}5$','$25$','$30$','$27$'] },
+    { q: '4, 5, 4, 5, 4, 5, 4, 5 сандарының арифметикалық ортасы?', opts: ['$4{,}5$','$4$','$5$','$4{,}8$'] },
+    { q: 'Бес алманың салмағы 120, 150, 130, 140, 160 г. Орта салмақ?', opts: ['$140$','$130$','$150$','$135$'] },
+    { q: 'Оқушы үш күнде 4, 5, 6 км жүрді. Күніне орта жол?', opts: ['$5$','$4$','$6$','$15$'] },
+    { q: 'Кәмпиттердің бағасы: 1200, 1500, 1800, 2100 тг. Орта баға?', opts: ['$1650$','$1500$','$1800$','$1600$'] },
+    { q: '85, 90, 75, 80, 70 сандарының арифметикалық ортасы?', opts: ['$80$','$75$','$85$','$82$'] },
+    { q: '500, 700, 900, 1100 сандарының арифметикалық ортасы?', opts: ['$800$','$700$','$900$','$750$'] },
+    { q: '6, 12, 18, 24, 30 сандарының арифметикалық ортасы?', opts: ['$18$','$15$','$20$','$17$'] },
+    { q: '150, 155, 160, 165, 170 сандарының арифметикалық ортасы?', opts: ['$160$','$155$','$165$','$158$'] }
+  ],
+  2: [
+    { q: '$4$ санның арифметикалық ортасы $10$-ға тең. Осы сандардың қосындысы?', opts: ['$40$','$30$','$50$','$14$'] },
+    { q: '$3$ санның арифметикалық ортасы $15$-ке тең. Екеуі $12$ және $18$. Үшінші сан?', opts: ['$15$','$12$','$18$','$9$'] },
+    { q: '$5$ санның арифметикалық ортасы $8$-ге тең. Сандардың қосындысы?', opts: ['$40$','$13$','$45$','$35$'] },
+    { q: '$6$ санның арифметикалық ортасы $7$-ге тең. Сандардың қосындысы?', opts: ['$42$','$36$','$48$','$13$'] },
+    { q: '$4$ санның қосындысы $36$-ға тең. Олардың арифметикалық ортасы?', opts: ['$9$','$8$','$10$','$32$'] },
+    { q: '$3$ санның арифметикалық ортасы $20$-ға тең. Екеуі $14$ және $22$. Үшіншісі?', opts: ['$24$','$18$','$20$','$26$'] },
+    { q: '$5$ санның арифметикалық ортасы $6$-ға тең. Бір санды алып тастаса, $4$-еуінің ортасы $5$ болады. Алынған сан?', opts: ['$10$','$5$','$8$','$12$'] },
+    { q: '$4$ адамның орташа жасы $20$. Тағы бір адам қосылса, орта $21$ болды. Жаңа адамның жасы?', opts: ['$25$','$21$','$23$','$27$'] },
+    { q: '$3$ санның арифметикалық ортасы $12$. Оларға $24$ санын қоссақ, $4$ санның ортасы?', opts: ['$15$','$13$','$14$','$16$'] },
+    { q: '$5$ санның қосындысы $60$-қа тең. Олардың арифметикалық ортасы?', opts: ['$12$','$10$','$11$','$13$'] },
+    { q: '$3$ санның арифметикалық ортасы $4$-ке тең. Сандардың қосындысы?', opts: ['$12$','$7$','$9$','$16$'] },
+    { q: '$4$ санның арифметикалық ортасы $8{,}5$-ке тең. Сандардың қосындысы?', opts: ['$34$','$30$','$32$','$36$'] },
+    { q: '$6$ санның ортасы $9$. Оның $4$-еуінің ортасы $7$. Қалған $2$-еуінің қосындысы?', opts: ['$26$','$20$','$22$','$24$'] },
+    { q: '$5$ санның ортасы $10$. Тағы $5$ сан қосылды, жаңа $10$ санның ортасы $12$ болды. Жаңа $5$ санның қосындысы?', opts: ['$70$','$60$','$65$','$75$'] },
+    { q: '$8$ адамның орташа жасы $15$. Бір адам кетсе, орта $14$ болады. Кеткен адамның жасы?', opts: ['$22$','$16$','$18$','$20$'] },
+    { q: '$4$ тоқсандық орташа баға $4$-ке тең. Тоқсандық бағалардың қосындысы?', opts: ['$16$','$8$','$12$','$20$'] },
+    { q: '$3$ санның ортасы $9$. Оларға $21$ санын қоссақ, $4$ санның ортасы?', opts: ['$12$','$9$','$10$','$11$'] },
+    { q: '$5$ санның ортасы $10$. Осы сандардың бірін $5$-ке арттырса, жаңа орта?', opts: ['$11$','$10{,}5$','$11{,}5$','$12$'] },
+    { q: '$4$ санның ортасы $20$. Барлығын $2$-ге арттырса, жаңа орта?', opts: ['$22$','$20$','$21$','$24$'] },
+    { q: '$3$ айдағы орташа табыс $200\\,000$ тг. Жалпы табыс?', opts: ['$600\\,000$','$200\\,000$','$400\\,000$','$800\\,000$'] },
+    { q: '$4$ санның ортасы $15$. Осы сандарды $3$-ке азайтса, жаңа орта?', opts: ['$12$','$10$','$13$','$15$'] },
+    { q: '$5$ санның қосындысы $45$-ке тең. Олардың арифметикалық ортасы?', opts: ['$9$','$7$','$8$','$10$'] },
+    { q: '$6$ санның ортасы $11$. Бір санды алып тастаса, $5$-еуінің ортасы $10$ болады. Алынған сан?', opts: ['$16$','$11$','$13$','$15$'] },
+    { q: '$4$ санның ортасы $7$. Тағы бір сан қоссақ, орта $8$ болады. Жаңа сан?', opts: ['$12$','$8$','$10$','$14$'] },
+    { q: '$5$ санның арифметикалық ортасы $16$-ға тең. Осы сандардың қосындысы?', opts: ['$80$','$21$','$60$','$75$'] },
+    { q: '$7$ санның қосындысы $84$-ке тең. Олардың арифметикалық ортасы?', opts: ['$12$','$10$','$11$','$14$'] },
+    { q: '$5$ адамның орташа салмағы $60$ кг. Тағы бір адам ($90$ кг) қосылса, жаңа орта?', opts: ['$65$','$63$','$67$','$70$'] },
+    { q: '$4$ санның ортасы $25$. Барлығын $4$-ке арттырса, жаңа орта?', opts: ['$29$','$25$','$27$','$30$'] },
+    { q: '$4$ санның ортасы $30$. Оның $3$-еуі $20, 30, 40$. Төртінші санды табыңыз.', opts: ['$30$','$25$','$28$','$35$'] },
+    { q: '$7$ адамның орташа салмағы $65$ кг. Тағы бір адам қосылғанда орта $66$ кг болды. Жаңа адамның салмағы?', opts: ['$73$','$65$','$66$','$70$'] }
+  ],
+  3: [
+    { q: 'Автокөлік $2$ сағат $60$ км/сағ, $3$ сағат $80$ км/сағ жүрді. Бүкіл жолдағы орта жылдамдық?', opts: ['$72$','$70$','$75$','$80$'] },
+    { q: 'А сыныбы: $20$ оқушы, орт балл $80$. Б сыныбы: $30$ оқушы, орт балл $90$. Жалпы орт балл?', opts: ['$86$','$84$','$85$','$87$'] },
+    { q: '$5$ санның ортасы $12$. Тағы бір сан қоссақ, орта $13$ болады. Жаңа сан?', opts: ['$18$','$13$','$15$','$20$'] },
+    { q: '$4$ адамның орт жасы $24$. Үш адамның ортасы $20$. Төртінші адамның жасы?', opts: ['$36$','$28$','$32$','$40$'] },
+    { q: 'Велосипедші $30$ км-ді $2$ сағатта, $60$ км-ді $3$ сағатта жүрді. Орта жылдамдық?', opts: ['$18$','$15$','$16$','$20$'] },
+    { q: '$10$ сиырдың $4$-еуі күніне $15$ л, қалған $6$-уы $20$ л береді. Сиырлардың орта сүт мөлшері?', opts: ['$18$','$16$','$17$','$19$'] },
+    { q: '$11$ ойыншының орт жасы $22$. Бір ойыншы шығып, $32$ жастағы кіргенде орта $23$ болды. Шыққан ойыншының жасы?', opts: ['$21$','$19$','$20$','$22$'] },
+    { q: '$6$ санның ортасы $15$. Алғашқы $3$-еуінің ортасы $10$. Соңғы $3$-еуінің қосындысы?', opts: ['$60$','$45$','$50$','$55$'] },
+    { q: '$4$ санды барлығын $5$-ке арттырса, жаңа орта $25$ болды. Бастапқы орта?', opts: ['$20$','$15$','$18$','$22$'] },
+    { q: 'Топ 1: $40$ оқушы, орт балл $70$. Топ 2: $60$ оқушы, орт балл $80$. Жалпы орт балл?', opts: ['$76$','$74$','$75$','$77$'] },
+    { q: '$3$ күн $500\\,000$ тг, $2$ күн $800\\,000$ тг сатылды. $5$ күннің орта сату мөлшері?', opts: ['$620\\,000$','$600\\,000$','$640\\,000$','$660\\,000$'] },
+    { q: 'Пойыз $300$ км жолдың $150$ км-ін $2$ сағатта, $150$ км-ін $3$ сағатта жүрді. Орта жылдамдық?', opts: ['$60$','$55$','$65$','$75$'] },
+    { q: '$5$ санның ортасы $12{,}4$. Тағы бір сан қоссақ, орта $15$ болады. Жаңа сан?', opts: ['$28$','$18$','$23$','$33$'] },
+    { q: '$3$ айдағы орт пайда $300\\,000$ тг. $4$-ші айда $600\\,000$ тг тапса, $4$ ай орт пайдасы?', opts: ['$375\\,000$','$350\\,000$','$360\\,000$','$400\\,000$'] },
+    { q: '$4$ санды барлығын $3$-ке азайтса, жаңа орта $17$ болды. Бастапқы орта?', opts: ['$20$','$14$','$17$','$23$'] },
+    { q: '$10$ адам, орт жас $30$. Тағы $5$ адам (орт жас $24$) қосылса, жаңа $15$ адамның орт жасы?', opts: ['$28$','$26$','$27$','$29$'] },
+    { q: 'Велосипедші $20$ км-ді $2$ сағатта, $10$ км-ді $0{,}5$ сағатта өтті. Орта жылдамдық?', opts: ['$12$','$10$','$11$','$15$'] },
+    { q: 'А сыныбы: $25$ оқушы, орт балл $72$. Б сыныбы: $25$ оқушы, орт балл $88$. Жалпы орт балл?', opts: ['$80$','$78$','$79$','$82$'] },
+    { q: '$8$ санның ортасы $15$. Оның $5$-еуінің ортасы $12$. Қалған $3$-еуінің ортасы?', opts: ['$20$','$18$','$19$','$21$'] },
+    { q: '$6$ санның ортасы $10$. Барлығын $2$-ге көбейтсе, жаңа орта?', opts: ['$20$','$12$','$15$','$18$'] },
+    { q: '$3$ жұмысшының орт өнімділігі $8$. Тағы бір жұмысшы қосылса, орта $9$ болады. Жаңа жұмысшының өнімділігі?', opts: ['$12$','$10$','$11$','$14$'] },
+    { q: 'Автокөлік $200$ км жолдың $120$ км-ін $2$ сағатта, $80$ км-ін $2$ сағатта жүрді. Орта жылдамдық?', opts: ['$50$','$45$','$48$','$52$'] },
+    { q: '$4$ санның ортасы $16$. Ең үлкен санды алып тастаса, $3$-еуінің ортасы $12$ болады. Ең үлкен сан?', opts: ['$28$','$20$','$24$','$32$'] },
+    { q: 'А топ: $15$ студент, орт балл $75$. Б топ: $5$ студент, орт балл $95$. Жалпы орт балл?', opts: ['$80$','$78$','$82$','$85$'] },
+    { q: '$5$ санның ортасы $14$. Оларға $12$ және $16$ санын қоссақ, $7$ санның жаңа ортасы?', opts: ['$14$','$13$','$15$','$16$'] },
+    { q: '$10$ адам, орт салмақ $60$ кг. $2$ адам кетсе (олардың орт салмағы $40$ кг), қалғандардың орт салмағы?', opts: ['$65$','$63$','$64$','$66$'] },
+    { q: '$6$ айдағы орт пайда $500\\,000$ тг. $7$-ші айда $1\\,200\\,000$ тг тапса, $7$ айдың орт пайдасы?', opts: ['$600\\,000$','$550\\,000$','$575\\,000$','$625\\,000$'] },
+    { q: '$4$ санды барлығын $2$-ге бөлсе, жаңа орта $8$ болды. Бастапқы орта?', opts: ['$16$','$4$','$6$','$12$'] },
+    { q: '$3$ санның ортасы $10$, тағы $2$ санның ортасы $7$. Барлық $5$ санның ортасы?', opts: ['$8{,}8$','$8$','$8{,}5$','$9$'] },
+    { q: '$5$ санның ортасы $20$. Ең үлкен санды алып тастаса, $4$-еуінің ортасы $17$ болады. Ең үлкен сан?', opts: ['$32$','$28$','$30$','$35$'] }
+  ]
+};
+
+// ── URL params ─────────────────────────────────────────────────
+const urlParams = new URLSearchParams(location.search);
+const urlCode = (urlParams.get('code') || '').toUpperCase();
+
+// ── State ───────────────────────────────────────────────────────
+let sessionCode = '';
+let studentId = '';
+let studentName = '';
+let currentLevel = 1;
+let levelCorrect = 0;
+let levelWrong = 0;
+let levelsCompleted = 0;
+let totalCorrect = 0;
+let totalAnswered = 0;
+let currentBank = [];
+let currentQIdx = 0;
+let currentQuestion = null; // { q, shuffledOpts, correctIdx }
+let selectedIdx = null;
+let isAnswered = false;
+let submitInterval = null;
+let statusPollInterval = null;
+let quizStarted = false;
+
+// ── Focus tracking ──────────────────────────────────────────────
+let isFocused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let awayStart = null;
+
+function markAway() {
+  if (!isFocused) return;
+  isFocused = false;
+  tabSwitches++;
+  awayStart = Date.now();
+  saveState();
+  sendScore();
+}
+function markBack() {
+  if (isFocused) return;
+  isFocused = true;
+  if (awayStart) {
+    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
+    awayStart = null;
+  }
+  sendScore();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) markAway(); else markBack();
+});
+window.addEventListener('blur', markAway);
+window.addEventListener('focus', markBack);
+
+// ── localStorage helpers ─────────────────────────────────────────
+function saveState() {
+  if (!sessionCode) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + sessionCode, JSON.stringify({
+      studentId, name: studentName,
+      totalCorrect, totalAnswered,
+      levelsCompleted, currentLevel,
+      tabSwitches, awaySeconds: currentAway,
+      ts: Date.now()
+    }));
+  } catch (_) {}
+}
+function loadState(code) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + code);
+      return null;
+    }
+    return data;
+  } catch (_) { return null; }
+}
+function clearState() {
+  if (sessionCode) {
+    try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {}
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function shuffleArray(arr) {
+  const r = [...arr];
+  for (let i = r.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [r[i], r[j]] = [r[j], r[i]];
+  }
+  return r;
+}
+function renderText(text) {
+  return text.replace(/\$([^$]*)\$/g, (match, inner) => {
+    try { return katex.renderToString(inner, { throwOnError: false }); }
+    catch (_) { return match; }
+  });
+}
+function spawnConfetti() {
+  const w = document.getElementById('confetti'); w.innerHTML = '';
+  const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626'];
+  for (let i = 0; i < 60; i++) {
+    const e = document.createElement('div'); e.className = 'cfp';
+    const s = 5 + Math.random() * 9;
+    e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`;
+    w.appendChild(e);
+  }
+  setTimeout(() => w.innerHTML = '', 6000);
+}
+
+// ── Auto-fill code from URL ──────────────────────────────────────
+if (urlCode) {
+  sessionCode = urlCode;
+  document.getElementById('scode').value = urlCode;
+  document.getElementById('code-wrap').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RECONNECTION
+// ══════════════════════════════════════════════════════════════════
+(async function tryReconnect() {
+  if (!urlCode) return;
+  const saved = loadState(urlCode);
+  if (!saved) return;
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${urlCode}`);
+    const data = await res.json();
+    if (data.status === 'not_found' || data.status === 'ended') {
+      clearState(); return;
+    }
+    sessionCode = urlCode;
+    studentId = saved.studentId;
+    studentName = saved.name;
+    totalCorrect = saved.totalCorrect || 0;
+    totalAnswered = saved.totalAnswered || 0;
+    levelsCompleted = saved.levelsCompleted || 0;
+    currentLevel = saved.currentLevel || 1;
+    tabSwitches = saved.tabSwitches || 0;
+    awaySeconds = saved.awaySeconds || 0;
+    if (data.status === 'active') { startQuiz(); }
+    else if (data.status === 'waiting') { showWait(); }
+  } catch (_) {}
+})();
+
+// ══════════════════════════════════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════════════════════════════════
+async function joinQuiz() {
+  const name = document.getElementById('sname').value.trim();
+  const code = (urlCode || document.getElementById('scode').value.trim()).toUpperCase();
+  const errEl = document.getElementById('join-err');
+  if (!name) { errEl.textContent = 'Атыңызды жазыңыз'; errEl.classList.add('on'); return; }
+  if (code.length < 4) { errEl.textContent = 'Бөлме кодын енгізіңіз'; errEl.classList.add('on'); return; }
+  errEl.classList.remove('on');
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = '⏳ Қосылуда...';
+  sessionCode = code;
+  studentName = name;
+  studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
+  currentLevel = 1; levelsCompleted = 0; totalCorrect = 0; totalAnswered = 0;
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${code}`);
+    const data = await res.json();
+    if (data.status === 'not_found') {
+      errEl.textContent = 'Бөлме табылмады. Кодты тексеріңіз.';
+      errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+    }
+    if (data.status === 'ended') {
+      errEl.textContent = 'Бұл сабақ аяқталған.';
+      errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+    }
+    await sendScore();
+    saveState();
+    btn.disabled = false; btn.textContent = '🚀 Кіру';
+    if (data.status === 'active') { startQuiz(); } else { showWait(); }
+  } catch (e) {
+    errEl.textContent = 'Серверге қосылу мүмкін болмады.';
+    errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру';
+  }
+}
+document.addEventListener('keydown', e => {
+  if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz();
+});
+
+// ══════════════════════════════════════════════════════════════════
+//  WAIT
+// ══════════════════════════════════════════════════════════════════
+function showWait() {
+  document.getElementById('wait-name').textContent = studentName;
+  show('s-wait');
+  if (statusPollInterval) clearInterval(statusPollInterval);
+  statusPollInterval = setInterval(pollStatus, 2000);
+}
+async function pollStatus() {
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
+    const data = await res.json();
+    if (data.status === 'active') {
+      clearInterval(statusPollInterval); statusPollInterval = null; startQuiz();
+    } else if (data.status === 'ended' || data.status === 'not_found') {
+      clearInterval(statusPollInterval); statusPollInterval = null; showEnd();
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  START QUIZ
+// ══════════════════════════════════════════════════════════════════
+function startQuiz() {
+  if (quizStarted) return;
+  quizStarted = true;
+  show('s-quiz');
+  startLevel(currentLevel);
+  sendScore();
+  if (submitInterval) clearInterval(submitInterval);
+  submitInterval = setInterval(sendScore, 5000);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  LEVEL MANAGEMENT
+// ══════════════════════════════════════════════════════════════════
+function startLevel(level) {
+  currentLevel = level;
+  levelCorrect = 0;
+  levelWrong = 0;
+  currentBank = shuffleArray(LEVEL_BANKS[level]).slice(0, 10);
+  currentQIdx = 0;
+  selectedIdx = null;
+  isAnswered = false;
+  updateLevelBadge();
+  loadQuestion();
+}
+
+const LEVEL_LABELS = { 1: '🟢 Деңгей 1', 2: '🟡 Деңгей 2', 3: '🔴 Деңгей 3' };
+const LEVEL_COLORS = { 1: 'var(--green)', 2: 'var(--amber)', 3: 'var(--red)' };
+
+function updateLevelBadge() {
+  const badge = document.getElementById('level-badge');
+  badge.textContent = LEVEL_LABELS[currentLevel];
+  badge.className = 'level-badge l' + currentLevel;
+  const statLvl = document.getElementById('st-level');
+  statLvl.textContent = currentLevel;
+  statLvl.style.color = LEVEL_COLORS[currentLevel];
+}
+
+function loadQuestion() {
+  const q = currentBank[currentQIdx];
+  // Shuffle options, track where index 0 (correct) ends up
+  const perm = shuffleArray([0, 1, 2, 3]);
+  const shuffledOpts = perm.map(i => q.opts[i]);
+  const correctIdx = perm.indexOf(0); // correct was at opts[0]
+  currentQuestion = { q: q.q, shuffledOpts, correctIdx };
+  selectedIdx = null;
+  isAnswered = false;
+
+  // Render question text
+  document.getElementById('q-text').innerHTML = renderText(q.q);
+
+  // Render options
+  const labels = ['A', 'B', 'C', 'D'];
+  const container = document.getElementById('opts-container');
+  container.innerHTML = '';
+  shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mcq-opt';
+    btn.dataset.idx = i;
+    btn.innerHTML = `<span class="mcq-label">${labels[i]}</span><span class="mcq-text">${renderText(opt)}</span>`;
+    btn.onclick = () => selectOption(i);
+    container.appendChild(btn);
+  });
+
+  // Reset feedback and buttons
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback hidden'; fb.textContent = '';
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').classList.remove('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+
+  updateStats();
+}
+
+function selectOption(idx) {
+  if (isAnswered) return;
+  selectedIdx = idx;
+  document.querySelectorAll('.mcq-opt').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer() {
+  if (selectedIdx === null || isAnswered) return;
+  isAnswered = true;
+
+  const isCorrect = selectedIdx === currentQuestion.correctIdx;
+  if (isCorrect) { levelCorrect++; totalCorrect++; }
+  else { levelWrong++; }
+  totalAnswered++;
+
+  // Mark options
+  document.querySelectorAll('.mcq-opt').forEach((btn, i) => {
+    btn.style.pointerEvents = 'none';
+    if (i === currentQuestion.correctIdx) btn.classList.add('correct');
+    else if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  // Show feedback
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('hidden', 'correct', 'wrong');
+  if (isCorrect) {
+    fb.classList.add('correct'); fb.textContent = '✓ Дұрыс!';
+  } else {
+    fb.classList.add('wrong'); fb.textContent = '✗ Қате! Дұрыс жауап жасыл түспен белгіленді.';
+  }
+
+  document.getElementById('check-btn').classList.add('hidden');
+  document.getElementById('next-btn').classList.remove('hidden');
+  updateStats();
+  saveState();
+  sendScore();
+}
+
+function nextQuestion() {
+  currentQIdx++;
+  if (currentQIdx >= 10) {
+    showLevelEnd();
+  } else {
+    loadQuestion();
+  }
+}
+
+function updateStats() {
+  document.getElementById('st-correct').textContent = levelCorrect;
+  document.getElementById('st-wrong').textContent = levelWrong;
+  const qNum = Math.min(currentQIdx + 1, 10);
+  document.getElementById('st-q').textContent = qNum + '/10';
+  document.getElementById('q-prog-text').textContent = qNum + '/10';
+  document.getElementById('q-prog-fill').style.width = (qNum * 10) + '%';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  LEVEL END SCREEN
+// ══════════════════════════════════════════════════════════════════
+function showLevelEnd() {
+  const passed = levelCorrect >= 7;
+  const pct = levelCorrect * 10;
+  const lvl = currentLevel;
+
+  document.getElementById('le-emoji').textContent = passed ? (pct === 100 ? '🌟' : '🎉') : '😓';
+  document.getElementById('le-title').textContent = 'Деңгей ' + lvl + ' аяқталды!';
+  document.getElementById('le-sub').textContent = passed
+    ? (lvl < 3 ? 'Керемет! Деңгей ' + (lvl + 1) + '-ге өтесіз.' : 'Барлық деңгейді өттіңіз!')
+    : 'Жаңадан тырысыңыз.';
+
+  document.getElementById('le-score').textContent = levelCorrect + '/10';
+  const bar = document.getElementById('le-bar-fill');
+  bar.style.width = pct + '%';
+  bar.style.background = passed ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('le-pass-msg').classList.toggle('hidden', !passed);
+  document.getElementById('le-fail-msg').classList.toggle('hidden', passed);
+
+  const btnEl = document.getElementById('le-btn');
+  if (!passed) {
+    btnEl.textContent = '🔄 Қайта тырысу';
+    btnEl.className = 'btn btn-red btn-block';
+  } else if (lvl < 3) {
+    btnEl.textContent = 'Деңгей ' + (lvl + 1) + ' → Бастау';
+    btnEl.className = 'btn btn-green btn-block';
+  } else {
+    btnEl.textContent = '🏆 Нәтижелерді көру';
+    btnEl.className = 'btn btn-primary btn-block';
+  }
+
+  if (passed) {
+    levelsCompleted++;
+    spawnConfetti();
+  }
+  saveState();
+  sendScore();
+  show('s-level-end');
+}
+
+function continueAfterLevel() {
+  const passed = levelCorrect >= 7;
+  if (!passed) {
+    show('s-quiz');
+    startLevel(currentLevel);
+  } else if (currentLevel >= 3) {
+    sendScore(true);
+    showEnd();
+  } else {
+    show('s-quiz');
+    startLevel(currentLevel + 1);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SEND SCORE
+// ══════════════════════════════════════════════════════════════════
+async function sendScore(finished) {
+  if (!sessionCode || !studentName) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    const res = await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: sessionCode,
+        studentId,
+        name: studentName + '|' + currentLevel,
+        score: totalCorrect,
+        total: totalAnswered,
+        finished: finished === true,
+        focused: isFocused,
+        tabSwitches,
+        awaySeconds: currentAway
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'ended' || data.status === 'not_found') { showEnd(); }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  END — show final results
+// ══════════════════════════════════════════════════════════════════
+function showEnd() {
+  if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
+  if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+  const pct = totalAnswered > 0 ? Math.round(totalCorrect / totalAnswered * 100) : 0;
+  document.getElementById('res-correct').textContent = totalCorrect;
+  document.getElementById('res-levels').textContent = levelsCompleted + '/3';
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-emoji').textContent = levelsCompleted === 3 ? '🌟' : pct >= 70 ? '🎉' : pct >= 40 ? '👍' : '💪';
+  show('s-results');
+  if (pct >= 70) spawnConfetti();
+  clearState();
+}
+</script>
+</body>
+</html>
