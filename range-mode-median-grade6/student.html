@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Өзгеру құлашы, мода және медиана — Оқушы</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;
+  --rad:16px;--rad-sm:10px;
+  --shadow:0 4px 12px rgba(20,24,38,0.06),0 1px 3px rgba(20,24,38,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+.container{max-width:600px;margin:0 auto;padding:16px;flex:1;width:100%;display:flex;flex-direction:column;}
+
+/* ─── TYPOGRAPHY & FORMS ─── */
+h1{font-weight:800;font-size:24px;letter-spacing:-0.5px;margin-bottom:8px;}
+h2{font-weight:700;font-size:20px;margin-bottom:16px;}
+p{color:var(--text2);line-height:1.5;}
+.subtitle{font-size:15px;color:var(--muted);margin-bottom:24px;}
+
+input{
+  width:100%;padding:14px 16px;border:2px solid var(--border);
+  border-radius:var(--rad-sm);font-size:16px;font-weight:500;
+  outline:none;transition:border-color 0.2s;margin-bottom:16px;
+  background:var(--bg2);color:var(--text);
+}
+input:focus{border-color:var(--primary);}
+
+button{
+  width:100%;display:inline-flex;align-items:center;justify-content:center;
+  gap:8px;font-weight:600;font-size:16px;
+  padding:16px;border-radius:var(--rad-sm);
+  border:none;cursor:pointer;transition:all 0.2s;
+  user-select:none;
+}
+button:active{transform:translateY(2px);}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(67,56,202,0.25);}
+.btn-primary:hover{background:var(--primary-dark);}
+
+/* ─── SCREENS ─── */
+.screen{display:none;animation:fadeIn 0.3s ease forwards;flex:1;flex-direction:column;}
+.screen.active{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.card-box{background:var(--bg2);padding:24px;border-radius:var(--rad);box-shadow:var(--shadow);margin:auto 0;}
+
+/* ─── QUIZ UI ─── */
+.top-nav{
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--bg2);padding:16px;border-radius:var(--rad);
+  box-shadow:var(--shadow);margin-bottom:16px;
+}
+.stat-box{display:flex;flex-direction:column;}
+.stat-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text);}
+.stat-val.score-val{color:var(--primary);}
+
+.q-container{
+  background:var(--bg2);padding:24px;border-radius:var(--rad);
+  box-shadow:var(--shadow);flex:1;display:flex;flex-direction:column;
+}
+.q-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.level-badge{background:var(--primary-light);color:var(--primary);padding:4px 10px;border-radius:6px;font-size:13px;font-weight:700;}
+.q-text{font-size:20px;font-weight:600;line-height:1.4;margin-bottom:24px;color:var(--text);}
+
+.options-grid{display:grid;gap:12px;margin-bottom:auto;}
+.opt-btn{
+  background:var(--bg);border:2px solid var(--border);
+  padding:16px;border-radius:var(--rad-sm);
+  font-size:16px;font-weight:600;color:var(--text);
+  cursor:pointer;transition:all 0.2s;text-align:left;
+  display:flex;align-items:center;gap:12px;
+}
+.opt-btn:hover{border-color:var(--border2);background:var(--bg3);}
+.opt-btn.correct{background:var(--green-light);border-color:var(--green);color:var(--green);}
+.opt-btn.wrong{background:var(--red-light);border-color:var(--red);color:var(--red);}
+.opt-btn.disabled{pointer-events:none;}
+
+.opt-letter{
+  width:28px;height:28px;border-radius:6px;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;
+  color:var(--muted);border:1px solid var(--border);
+}
+.opt-btn.correct .opt-letter{background:var(--green);color:#fff;border-color:var(--green);}
+.opt-btn.wrong .opt-letter{background:var(--red);color:#fff;border-color:var(--red);}
+
+/* ─── LOADER ─── */
+.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.wait-text{text-align:center;font-weight:600;color:var(--text2);}
+
+/* ─── RESULTS ─── */
+.res-hero{text-align:center;padding:32px 0;}
+.res-emoji{font-size:64px;margin-bottom:16px;}
+.res-pct{font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:800;color:var(--primary);line-height:1;}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px;}
+.res-stat{background:var(--bg);padding:16px;border-radius:var(--rad-sm);text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div id="screen-join" class="screen active">
+    <div class="card-box">
+      <h1>Өзгеру құлашы, мода және медиана</h1>
+      <p class="subtitle">Тестке қосылу үшін мәліметтеріңізді енгізіңіз</p>
+      
+      <input type="text" id="inp-name" placeholder="Аты-жөніңіз (мысалы: Асан)" autocomplete="off">
+      <input type="text" id="inp-code" placeholder="Қосылу коды (6 әріп)" autocomplete="off" style="text-transform:uppercase;font-family:'JetBrains Mono',monospace;">
+      
+      <button class="btn-primary" onclick="joinQuiz()">Қосылу</button>
+    </div>
+  </div>
+
+  <div id="screen-wait" class="screen">
+    <div class="card-box" style="text-align:center;">
+      <div class="loader"></div>
+      <div class="wait-text">
+        <h2 style="margin-bottom:8px;">Мұғалімді күтудеміз...</h2>
+        <p class="subtitle">Тест басталған кезде экран автоматты түрде ауысады.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-quiz" class="screen">
+    <div class="top-nav">
+      <div class="stat-box">
+        <span class="stat-label">Сұрақ</span>
+        <span class="stat-val" id="ui-qnum">1/10</span>
+      </div>
+      <div class="stat-box" style="text-align:right;">
+        <span class="stat-label">Ұпай</span>
+        <span class="stat-val score-val" id="ui-score">0</span>
+      </div>
+    </div>
+    
+    <div class="q-container">
+      <div class="q-header">
+        <div class="level-badge" id="ui-level">Деңгей</div>
+      </div>
+      
+      <div class="q-text" id="q-text">Сұрақ мәтіні осында болады...</div>
+      
+      <div class="options-grid" id="options-grid">
+        </div>
+    </div>
+  </div>
+
+  <div id="screen-results" class="screen">
+    <div class="card-box" style="text-align:center;">
+      <div class="res-hero">
+        <div class="res-emoji" id="res-emoji">🎉</div>
+        <h2 style="margin-bottom:8px;">Тест аяқталды!</h2>
+        <p class="subtitle">Сіздің нәтижеңіз:</p>
+        <div class="res-pct" id="res-pct">0%</div>
+      </div>
+      
+      <div class="res-grid">
+        <div class="res-stat">
+          <div class="stat-label">Дұрыс жауап</div>
+          <div class="stat-val score-val" id="res-correct" style="font-size:24px;margin-top:4px;">0</div>
+        </div>
+        <div class="res-stat">
+          <div class="stat-label">Қате жауап</div>
+          <div class="stat-val" id="res-wrong" style="font-size:24px;margin-top:4px;color:var(--red);">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  CONFIG & STATE (DO NOT MODIFY BACKEND URL)
+// ══════════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const STORAGE_KEY_PREFIX = 'ms_stat_rmm_';
+
+let sessionCode = '';
+let studentId = '';
+let studentName = '';
+
+// Selected levels from URL (?sec=sec1,sec2)
+let activeSections = [];
+
+// Quiz State
+let allQuestions = [];
+let currentQIdx = 0;
+let totalCorrect = 0;
+let totalAnswered = 0;
+let finished = false;
+
+// Focus Tracking
+let isFocused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let awayStart = null;
+
+// Intervals
+let statusPollInterval = null;
+let submitInterval = null;
+
+// URL Params parsing
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('code')) {
+  document.getElementById('inp-code').value = urlParams.get('code');
+  document.getElementById('inp-code').parentElement.style.display = 'none'; // hide if pre-filled
+}
+if (urlParams.has('sec')) {
+  activeSections = urlParams.get('sec').split(',');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  QUESTION BANK
+// ══════════════════════════════════════════════════════════════════
+
+const QUESTION_BANK = {
+  'sec1': [
+    { q: 'Осы қатардың өзгеру құлашын табыңыз: $3, 7, 2, 8, 4$', opts: ['$4$', '$5$', '$6$', '$8$'], ans: 'C' },
+    { q: 'Осы қатардың модасы неге тең: $5, 2, 5, 8, 1, 5, 9$', opts: ['$1$', '$2$', '$5$', '$8$'], ans: 'C' },
+    { q: 'Медианасын табыңыз: $1, 3, 5, 7, 9$', opts: ['$3$', '$5$', '$7$', '$9$'], ans: 'B' },
+    { q: 'Өзгеру құлашы дегеніміз не?', opts: ['Ең үлкен және ең кіші мәндердің қосындысы', 'Ең үлкен және ең кіші мәндердің айырмасы', 'Жиі кездесетін сан', 'Ортаңғы сан'], ans: 'B' },
+    { q: 'Осы қатардың модасын табыңыз: $12, 14, 12, 18, 20$', opts: ['$12$', '$14$', '$18$', '$20$'], ans: 'A' },
+    { q: 'Медианасын табыңыз: $2, 4, 6, 8, 10, 12, 14$', opts: ['$4$', '$6$', '$8$', '$10$'], ans: 'C' }
+  ],
+  'sec2': [
+    { q: 'Медианасын табыңыз: $12, 15, 10, 18, 11, 14$', opts: ['$12$', '$12.5$', '$13$', '$14$'], ans: 'C' },
+    { q: 'Осы қатардың неше модасы бар: $4, 4, 6, 8, 8, 10$', opts: ['Бір модасы бар', 'Екі модасы бар ($4$ және $8$)', 'Модасы жоқ', 'Үш модасы бар'], ans: 'B' },
+    { q: 'Егер қатардың ең кіші мүшесі $15$, ал өзгеру құлашы $24$ болса, ең үлкен мүшесін табыңыз.', opts: ['$9$', '$24$', '$39$', '$49$'], ans: 'C' },
+    { q: 'Қатардың модасы жоқ болуы мүмкін бе?', opts: ['Иә, барлық сандар әртүрлі болса', 'Жоқ, әрқашан кем дегенде бір мода бар', 'Иә, тек теріс сандар болса', 'Жоқ, нөл мода болады'], ans: 'A' },
+    { q: 'Медианасын табыңыз: $1, 2, 3, 4, 5, 6$', opts: ['$3$', '$3.5$', '$4$', '$4.5$'], ans: 'B' }
+  ],
+  'sec3': [
+    { q: 'Оқушының бағалары: $4, 5, 3, 4, 5, 5, 3, 4, 5$. Модасы мен медианасының қосындысын табыңыз.', opts: ['$8$', '$9$', '$10$', '$11$'], ans: 'B' },
+    { q: '$x, 7, 9, 12$ қатарының өзгеру құлашы $10$-ға тең ($x$ - ең кіші сан). $x$-тің мәнін табыңыз.', opts: ['$2$', '$3$', '$4$', '$5$'], ans: 'A' },
+    { q: 'Осы қатардың өзгеру құлашын табыңыз: $2.5, 3.1, 2.5, 4.0, 5.2, 3.1$', opts: ['$2.5$', '$2.7$', '$3.1$', '$5.2$'], ans: 'B' },
+    { q: 'Қатарда 5 сан бар. Олардың медианасы $10$. Егер барлық сандарға $2$-ні қосса, жаңа медиана қандай болады?', opts: ['$10$', '$11$', '$12$', '$20$'], ans: 'C' },
+    { q: '$3, 5, x, 12, 15$ өсу ретімен орналасқан. Медиана $8$-ге тең. $x$ неге тең?', opts: ['$5$', '$7$', '$8$', '$10$'], ans: 'C' }
+  ]
+};
+
+const SECTION_NAMES = {
+  'sec1': '1-деңгей',
+  'sec2': '2-деңгей',
+  'sec3': '3-деңгей'
+};
+
+function buildQuiz() {
+  allQuestions = [];
+  if (activeSections.length === 0) activeSections = ['sec1']; // Fallback
+  
+  activeSections.forEach(secKey => {
+    if (QUESTION_BANK[secKey]) {
+      // Shuffle within section and take up to 5 questions per section (so 10-15 total max)
+      const shuffled = QUESTION_BANK[secKey].sort(() => Math.random() - 0.5).slice(0, 5);
+      shuffled.forEach(q => {
+        allQuestions.push({
+          level: SECTION_NAMES[secKey],
+          q: q.q,
+          opts: q.opts,
+          ans: q.ans
+        });
+      });
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  LOCALSTORAGE RECONNECT
+// ══════════════════════════════════════════════════════════════════
+
+function getStorageKey() {
+  return STORAGE_KEY_PREFIX + (urlParams.get('code') || '').toUpperCase();
+}
+
+function saveState() {
+  if (!studentId || !sessionCode) return;
+  const data = {
+    studentId, sessionCode, name: studentName,
+    totalCorrect, totalAnswered, finished,
+    currentQIdx,
+    tabSwitches, awaySeconds: currentAway(),
+    activeSections
+  };
+  localStorage.setItem(getStorageKey(), JSON.stringify(data));
+}
+
+function loadState() {
+  const code = urlParams.get('code');
+  if (!code) return false;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code.toUpperCase());
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    
+    // Only restore if session matches
+    if (data.sessionCode !== code.toUpperCase()) return false;
+
+    studentId = data.studentId;
+    sessionCode = data.sessionCode;
+    studentName = data.name;
+    totalCorrect = data.totalCorrect || 0;
+    totalAnswered = data.totalAnswered || 0;
+    finished = data.finished || false;
+    currentQIdx = data.currentQIdx || 0;
+    tabSwitches = data.tabSwitches || 0;
+    awaySeconds = data.awaySeconds || 0;
+    if(data.activeSections) activeSections = data.activeSections;
+
+    return true;
+  } catch(e) { return false; }
+}
+
+function clearState() {
+  const code = urlParams.get('code');
+  if (code) localStorage.removeItem(STORAGE_KEY_PREFIX + code.toUpperCase());
+}
+
+// Init Check
+window.onload = async () => {
+  if (loadState()) {
+    // Check if session still active
+    try {
+      const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
+      const data = await res.json();
+      if (data.status === 'not_found' || data.status === 'ended') {
+        clearState(); // Dead session, clear and show join
+      } else {
+        // Resume!
+        buildQuiz();
+        if (finished) {
+          showEnd();
+        } else {
+          startCore();
+          if (data.status === 'active') showQuiz();
+          else showScreen('screen-wait');
+        }
+        return;
+      }
+    } catch(e) {}
+  }
+};
+
+
+// ══════════════════════════════════════════════════════════════════
+//  JOIN & LIFECYCLE
+// ══════════════════════════════════════════════════════════════════
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+async function joinQuiz() {
+  const name = document.getElementById('inp-name').value.trim();
+  const code = document.getElementById('inp-code').value.trim().toUpperCase();
+  
+  if (!name || !code) return alert('Аты-жөніңізді және кодты енгізіңіз');
+  
+  const btn = document.querySelector('#screen-join button');
+  btn.disabled = true; btn.textContent = 'Қосылуда...';
+  
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${code}`);
+    const data = await res.json();
+    
+    if (data.status === 'not_found') {
+      alert('Бұл код қате немесе тест аяқталған.');
+      btn.disabled = false; btn.textContent = 'Қосылу';
+      return;
+    }
+    
+    sessionCode = code;
+    studentName = name;
+    studentId = Math.random().toString(36).substr(2, 9);
+    
+    buildQuiz();
+    saveState();
+    startCore();
+    
+    if (data.status === 'active') {
+      showQuiz();
+    } else {
+      showScreen('screen-wait');
+    }
+  } catch (err) {
+    alert('Серверге қосылу мүмкін емес');
+    btn.disabled = false; btn.textContent = 'Қосылу';
+  }
+}
+
+function startCore() {
+  // Start polling
+  pollStatus();
+  statusPollInterval = setInterval(pollStatus, 2000);
+  
+  // Start submitting score
+  sendScore();
+  submitInterval = setInterval(sendScore, 5000);
+}
+
+async function pollStatus() {
+  if (finished) return;
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
+    const data = await res.json();
+    if (data.status === 'active' && document.getElementById('screen-wait').classList.contains('active')) {
+      showQuiz();
+    }
+    if (data.status === 'ended' || data.status === 'not_found') {
+      showEnd();
+    }
+  } catch (err) {}
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+//  QUIZ RENDER & LOGIC
+// ══════════════════════════════════════════════════════════════════
+
+function showQuiz() {
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (currentQIdx >= allQuestions.length) {
+    finished = true;
+    saveState();
+    sendScore();
+    showEnd();
+    return;
+  }
+
+  const q = allQuestions[currentQIdx];
+  
+  document.getElementById('ui-qnum').textContent = `${currentQIdx + 1}/${allQuestions.length}`;
+  document.getElementById('ui-score').textContent = totalCorrect;
+  document.getElementById('ui-level').textContent = q.level;
+  
+  document.getElementById('q-text').innerHTML = q.q;
+  
+  const letters = ['A', 'B', 'C', 'D'];
+  const optsHtml = q.opts.map((opt, i) => `
+    <div class="opt-btn" onclick="checkAnswer('${letters[i]}', this)">
+      <div class="opt-letter">${letters[i]}</div>
+      <div class="opt-text">${opt}</div>
+    </div>
+  `).join('');
+  
+  document.getElementById('options-grid').innerHTML = optsHtml;
+  
+  // Render LaTeX
+  renderMathInElement(document.getElementById('screen-quiz'), {
+    delimiters: [
+      {left: '$$', right: '$$', display: true},
+      {left: '$', right: '$', display: false}
+    ]
+  });
+}
+
+function checkAnswer(selectedLetter, btnEl) {
+  // Disable all buttons immediately
+  const allBtns = document.querySelectorAll('.opt-btn');
+  allBtns.forEach(b => b.classList.add('disabled'));
+  
+  const q = allQuestions[currentQIdx];
+  const isCorrect = (selectedLetter === q.ans);
+  
+  totalAnswered++;
+  if (isCorrect) {
+    totalCorrect++;
+    btnEl.classList.add('correct');
+  } else {
+    btnEl.classList.add('wrong');
+    // Highlight correct
+    const letters = ['A', 'B', 'C', 'D'];
+    const correctIdx = letters.indexOf(q.ans);
+    if(allBtns[correctIdx]) allBtns[correctIdx].classList.add('correct');
+  }
+  
+  document.getElementById('ui-score').textContent = totalCorrect;
+  
+  saveState();
+  sendScore(); // send immediately on answer
+  
+  setTimeout(() => {
+    currentQIdx++;
+    saveState();
+    renderQuestion();
+  }, 1500);
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+//  FOCUS TRACKING (CRITICAL)
+// ══════════════════════════════════════════════════════════════════
+
+function currentAway() {
+  let t = awaySeconds;
+  if (awayStart) t += Math.round((Date.now() - awayStart) / 1000);
+  return t;
+}
+
+function markAway() {
+  if (!isFocused || finished) return;
+  isFocused = false;
+  tabSwitches++;
+  awayStart = Date.now();
+  saveState();
+  sendScore();
+}
+
+function markBack() {
+  if (isFocused || finished) return;
+  isFocused = true;
+  if (awayStart) {
+    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
+    awayStart = null;
+  }
+  saveState();
+  sendScore();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) markAway(); else markBack();
+});
+window.addEventListener('blur', markAway);
+window.addEventListener('focus', markBack);
+
+
+// ══════════════════════════════════════════════════════════════════
+//  SUBMIT SCORE
+// ══════════════════════════════════════════════════════════════════
+
+async function sendScore() {
+  if (!studentId || !sessionCode) return;
+  
+  // Format name nicely with current level
+  const currLvl = allQuestions[currentQIdx] ? allQuestions[currentQIdx].level : 'Аяқтады';
+  const displayObj = `${studentName}|${currLvl}`;
+  
+  try {
+    const res = await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: sessionCode,
+        studentId,
+        name: displayObj,
+        score: totalCorrect,
+        total: totalAnswered,
+        finished: finished,
+        focused: isFocused,
+        tabSwitches,
+        awaySeconds: currentAway()
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'ended' || data.status === 'not_found') { 
+      showEnd(); 
+    }
+  } catch (_) {}
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+//  RESULTS
+// ══════════════════════════════════════════════════════════════════
+
+function showEnd() {
+  finished = true;
+  if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
+  if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+  
+  const pct = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+  
+  document.getElementById('res-correct').textContent = totalCorrect;
+  document.getElementById('res-wrong').textContent = totalAnswered - totalCorrect;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-emoji').textContent = pct >= 80 ? '🌟' : pct >= 50 ? '👍' : '💪';
+  
+  clearState(); // Quiz is over, no need to resume
+  showScreen('screen-results');
+}
+</script>
+</body>
+</html>
