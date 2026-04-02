@@ -16,172 +16,172 @@
   --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
   --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
   --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
-  --amber:#d97706;
-  --rad:16px;--rad-sm:10px;
-  --shadow:0 4px 12px rgba(20,24,38,0.06),0 1px 3px rgba(20,24,38,0.04);
+  --amber:#d97706;--amber-light:#fffbeb;--amber-border:#fcd34d;
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
+  --shadow-lg:0 8px 30px rgba(20,24,38,.10);
 }
-*{box-sizing:border-box;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
-body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-.container{max-width:600px;margin:0 auto;padding:16px;flex:1;width:100%;display:flex;flex-direction:column;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+.screen{display:none;min-height:100vh;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.container{max-width:520px;margin:0 auto;padding:1rem;padding-bottom:2rem}
 
-/* ─── TYPOGRAPHY & FORMS ─── */
-h1{font-weight:800;font-size:24px;letter-spacing:-0.5px;margin-bottom:8px;}
-h2{font-weight:700;font-size:20px;margin-bottom:16px;}
-p{color:var(--text2);line-height:1.5;}
-.subtitle{font-size:15px;color:var(--muted);margin-bottom:24px;}
+/* JOIN */
+.join-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.join-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.join-logo{text-align:center;margin-bottom:20px}
+.join-icon{font-size:2.4rem;margin-bottom:6px}
+.join-title{font-size:1.3rem;font-weight:800;margin-bottom:2px}
+.join-sub{color:var(--muted);font-size:.82rem}
+.field{margin-bottom:12px}
+.field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px}
+.field input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;outline:none;transition:border-color .15s;background:var(--bg)}
+.field input:focus{border-color:var(--primary)}
+.field input.code-input{font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:6px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 
-input{
-  width:100%;padding:14px 16px;border:2px solid var(--border);
-  border-radius:var(--rad-sm);font-size:16px;font-weight:500;
-  outline:none;transition:border-color 0.2s;margin-bottom:16px;
-  background:var(--bg2);color:var(--text);
-}
-input:focus{border-color:var(--primary);}
+/* WAIT */
+.wait-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.wait-icon{font-size:3.5rem;margin-bottom:12px}
+.wait-title{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+.wait-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.wait-name{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.82rem;font-weight:700;margin-top:8px}
+.dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-top:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
 
-button{
-  width:100%;display:inline-flex;align-items:center;justify-content:center;
-  gap:8px;font-weight:600;font-size:16px;
-  padding:16px;border-radius:var(--rad-sm);
-  border:none;cursor:pointer;transition:all 0.2s;
-  user-select:none;
-}
-button:active{transform:translateY(2px);}
-.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(67,56,202,0.25);}
-.btn-primary:hover{background:var(--primary-dark);}
+/* QUIZ */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.6rem .4rem;text-align:center;box-shadow:var(--shadow-sm)}
+.stat-icon{font-size:1rem;margin-bottom:.15rem}
+.stat-value{font-size:1.25rem;font-weight:800}
+.stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow)}
 
-/* ─── SCREENS ─── */
-.screen{display:none;animation:fadeIn 0.3s ease forwards;flex:1;flex-direction:column;}
-.screen.active{display:flex;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.level-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.level-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.level-badge.l1{background:var(--green-light);color:var(--green);border:1.5px solid var(--green-border)}
+.level-badge.l2{background:var(--amber-light);color:var(--amber);border:1.5px solid var(--amber-border)}
+.level-badge.l3{background:var(--red-light);color:var(--red);border:1.5px solid var(--red-border)}
+.q-progress{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);font-weight:700}
+.q-prog-bar{width:80px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.q-prog-fill{height:100%;background:var(--primary);border-radius:3px;transition:width .3s ease}
 
-.card-box{background:var(--bg2);padding:24px;border-radius:var(--rad);box-shadow:var(--shadow);margin:auto 0;}
+.q-text{font-size:1.1rem;font-weight:600;color:var(--text);text-align:center;padding:1.2rem 1rem;background:var(--primary-light);border:1.5px solid rgba(67,56,202,.18);border-radius:14px;margin-bottom:1rem;line-height:1.5}
 
-/* ─── QUIZ UI ─── */
-.top-nav{
-  display:flex;justify-content:space-between;align-items:center;
-  background:var(--bg2);padding:16px;border-radius:var(--rad);
-  box-shadow:var(--shadow);margin-bottom:16px;
-}
-.stat-box{display:flex;flex-direction:column;}
-.stat-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
-.stat-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text);}
-.stat-val.score-val{color:var(--primary);}
-
-.q-container{
-  background:var(--bg2);padding:24px;border-radius:var(--rad);
-  box-shadow:var(--shadow);flex:1;display:flex;flex-direction:column;
-}
-.q-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.level-badge{background:var(--primary-light);color:var(--primary);padding:4px 10px;border-radius:6px;font-size:13px;font-weight:700;}
-.q-text{font-size:20px;font-weight:600;line-height:1.4;margin-bottom:24px;color:var(--text);}
-
-.options-grid{display:grid;gap:12px;margin-bottom:auto;}
-.opt-btn{
-  background:var(--bg);border:2px solid var(--border);
-  padding:16px;border-radius:var(--rad-sm);
-  font-size:16px;font-weight:600;color:var(--text);
-  cursor:pointer;transition:all 0.2s;text-align:left;
-  display:flex;align-items:center;gap:12px;
-}
-.opt-btn:hover{border-color:var(--border2);background:var(--bg3);}
-.opt-btn.correct{background:var(--green-light);border-color:var(--green);color:var(--green);}
-.opt-btn.wrong{background:var(--red-light);border-color:var(--red);color:var(--red);}
-.opt-btn.disabled{pointer-events:none;}
-
-.opt-letter{
-  width:28px;height:28px;border-radius:6px;background:var(--bg2);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;
-  color:var(--muted);border:1px solid var(--border);
-}
-.opt-btn.correct .opt-letter{background:var(--green);color:#fff;border-color:var(--green);}
-.opt-btn.wrong .opt-letter{background:var(--red);color:#fff;border-color:var(--red);}
-
-/* ─── LOADER ─── */
-.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.wait-text{text-align:center;font-weight:600;color:var(--text2);}
-
-/* ─── RESULTS ─── */
-.res-hero{text-align:center;padding:32px 0;}
-.res-emoji{font-size:64px;margin-bottom:16px;}
-.res-pct{font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:800;color:var(--primary);line-height:1;}
-.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px;}
-.res-stat{background:var(--bg);padding:16px;border-radius:var(--rad-sm);text-align:center;}
+.mcq-opts{display:flex;flex-direction:column;gap:10px}
+.mcq-opt{width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;background:var(--bg2);cursor:pointer;font-size:1rem;font-weight:600;color:var(--text);text-align:left;transition:all .2s;display:flex;align-items:center;gap:12px}
+.mcq-opt:hover{border-color:var(--primary);background:var(--bg3)}
+.mcq-opt.correct{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.mcq-opt.wrong{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.mcq-opt.disabled{pointer-events:none}
+.opt-letter{width:28px;height:28px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--text2);border:1px solid var(--border)}
+.mcq-opt.correct .opt-letter{background:var(--green);color:#fff;border-color:var(--green)}
+.mcq-opt.wrong .opt-letter{background:var(--red);color:#fff;border-color:var(--red)}
 </style>
 </head>
 <body>
 
-<div class="container">
-
-  <div id="screen-join" class="screen active">
-    <div class="card-box">
-      <h1>Өзгеру құлашы, мода және медиана</h1>
-      <p class="subtitle">Тестке қосылу үшін мәліметтеріңізді енгізіңіз</p>
-      
-      <input type="text" id="inp-name" placeholder="Аты-жөніңіз (мысалы: Асан)" autocomplete="off">
-      <input type="text" id="inp-code" placeholder="Қосылу коды (6 әріп)" autocomplete="off" style="text-transform:uppercase;font-family:'JetBrains Mono',monospace;">
-      
-      <button class="btn-primary" onclick="joinQuiz()">Қосылу</button>
+<div id="screen-join" class="screen active">
+  <div class="join-wrap">
+    <div class="join-card">
+      <div class="join-logo">
+        <div class="join-icon">📊</div>
+        <div class="join-title">Өзгеру құлашы, мода</div>
+        <div class="join-sub">Тестке қосылу</div>
+      </div>
+      <div class="field">
+        <label>Аты-жөніңіз</label>
+        <input type="text" id="inp-name" placeholder="Мысалы: Асан" autocomplete="off">
+      </div>
+      <div class="field" id="field-code">
+        <label>Қосылу коды</label>
+        <input type="text" id="inp-code" class="code-input" placeholder="------" autocomplete="off">
+      </div>
+      <button class="btn btn-primary btn-block" onclick="joinQuiz()" id="btn-join">Қосылу</button>
     </div>
   </div>
+</div>
 
-  <div id="screen-wait" class="screen">
-    <div class="card-box" style="text-align:center;">
-      <div class="loader"></div>
-      <div class="wait-text">
-        <h2 style="margin-bottom:8px;">Мұғалімді күтудеміз...</h2>
-        <p class="subtitle">Тест басталған кезде экран автоматты түрде ауысады.</p>
-      </div>
-    </div>
+<div id="screen-wait" class="screen">
+  <div class="wait-wrap">
+    <div class="wait-icon">⏳</div>
+    <div class="wait-title">Мұғалімді күтудеміз...</div>
+    <div class="wait-sub">Тест басталған кезде экран автоматты түрде ауысады.</div>
+    <div class="wait-name" id="wait-name-display">Асан</div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
   </div>
+</div>
 
-  <div id="screen-quiz" class="screen">
-    <div class="top-nav">
-      <div class="stat-box">
-        <span class="stat-label">Сұрақ</span>
-        <span class="stat-val" id="ui-qnum">1/10</span>
+<div id="screen-quiz" class="screen">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value" id="st-level">1</div>
+        <div class="stat-label">Деңгей</div>
       </div>
-      <div class="stat-box" style="text-align:right;">
-        <span class="stat-label">Ұпай</span>
-        <span class="stat-val score-val" id="ui-score">0</span>
+      <div class="stat-card">
+        <div class="stat-icon">✓</div>
+        <div class="stat-value" id="st-correct" style="color:var(--green)">0</div>
+        <div class="stat-label">Дұрыс</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✗</div>
+        <div class="stat-value" id="st-wrong" style="color:var(--red)">0</div>
+        <div class="stat-label">Қате</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-value" id="st-q">1/10</div>
+        <div class="stat-label">Сұрақ</div>
       </div>
     </div>
     
-    <div class="q-container">
-      <div class="q-header">
-        <div class="level-badge" id="ui-level">Деңгей</div>
+    <div class="quiz-card">
+      <div class="level-row">
+        <div class="level-badge l1" id="ui-level-badge">🟢 1-деңгей</div>
+        <div class="q-progress">
+          <span id="ui-qnum">1 / 10</span>
+          <div class="q-prog-bar"><div class="q-prog-fill" id="ui-prog" style="width:10%"></div></div>
+        </div>
       </div>
       
-      <div class="q-text" id="q-text">Сұрақ мәтіні осында болады...</div>
+      <div class="q-text" id="q-text">Сұрақ жүктелуде...</div>
       
-      <div class="options-grid" id="options-grid">
-        </div>
+      <div class="mcq-opts" id="options-grid"></div>
     </div>
   </div>
+</div>
 
-  <div id="screen-results" class="screen">
-    <div class="card-box" style="text-align:center;">
-      <div class="res-hero">
-        <div class="res-emoji" id="res-emoji">🎉</div>
-        <h2 style="margin-bottom:8px;">Тест аяқталды!</h2>
-        <p class="subtitle">Сіздің нәтижеңіз:</p>
-        <div class="res-pct" id="res-pct">0%</div>
+<div id="screen-end" class="screen">
+  <div class="wait-wrap">
+    <div class="wait-icon" id="res-emoji">🎉</div>
+    <div class="wait-title">Тест аяқталды!</div>
+    <div class="wait-sub">Нәтижеңіз: <span id="res-pct" style="font-size:2.5rem;font-weight:800;color:var(--primary);display:block;margin-top:10px;">0%</span></div>
+    
+    <div class="stats-bar" style="width:100%;max-width:320px;grid-template-columns:1fr 1fr;margin-top:20px;">
+      <div class="stat-card">
+        <div class="stat-icon">✓</div>
+        <div class="stat-value" id="res-correct" style="color:var(--green)">0</div>
+        <div class="stat-label">Барлық дұрыс</div>
       </div>
-      
-      <div class="res-grid">
-        <div class="res-stat">
-          <div class="stat-label">Дұрыс жауап</div>
-          <div class="stat-val score-val" id="res-correct" style="font-size:24px;margin-top:4px;">0</div>
-        </div>
-        <div class="res-stat">
-          <div class="stat-label">Қате жауап</div>
-          <div class="stat-val" id="res-wrong" style="font-size:24px;margin-top:4px;color:var(--red);">0</div>
-        </div>
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value" id="res-levels">3/3</div>
+        <div class="stat-label">Өткен деңгей</div>
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -191,57 +191,45 @@ button:active{transform:translateY(2px);}
 const BACKEND = 'https://mathsabaq.online';
 const STORAGE_KEY_PREFIX = 'ms_stat_rmm_';
 
-let sessionCode = '';
-let studentId = '';
-let studentName = '';
-
+let sessionCode = '', studentId = '', studentName = '';
 let activeSections = [];
 
-let allQuestions = [];
-let currentQIdx = 0;
-let totalCorrect = 0;
-let totalAnswered = 0;
-let finished = false;
+// Quiz Stats
+let totalCorrect = 0, totalAnswered = 0, finished = false;
+let levelsCompleted = 0, currentLevel = 1;
+let currentBank = [], currentQIdx = 0, isAnswered = false;
 
-let isFocused = true;
-let tabSwitches = 0;
-let awaySeconds = 0;
-let awayStart = null;
+// Focus
+let isFocused = true, tabSwitches = 0, awaySeconds = 0, awayStart = null;
+let statusPollInterval = null, submitInterval = null;
 
-let statusPollInterval = null;
-let submitInterval = null;
-
-// ТҮЗЕТІЛДІ: parentElement орнына тек input-тың өзін жасырамыз
+// URL Params
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('code')) {
   document.getElementById('inp-code').value = urlParams.get('code');
-  document.getElementById('inp-code').style.display = 'none'; // Қателік осы жерде болған
+  document.getElementById('field-code').style.display = 'none';
 }
-if (urlParams.has('sec')) {
-  activeSections = urlParams.get('sec').split(',');
-}
+if (urlParams.has('sec')) activeSections = urlParams.get('sec').split(',');
 
 // ══════════════════════════════════════════════════════════════════
 //  QUESTION BANK
 // ══════════════════════════════════════════════════════════════════
-
-const QUESTION_BANK = {
-  'sec1': [
+const LEVEL_BANKS = {
+  1: [
     { q: 'Осы қатардың өзгеру құлашын табыңыз: $3, 7, 2, 8, 4$', opts: ['$4$', '$5$', '$6$', '$8$'], ans: 'C' },
     { q: 'Осы қатардың модасы неге тең: $5, 2, 5, 8, 1, 5, 9$', opts: ['$1$', '$2$', '$5$', '$8$'], ans: 'C' },
     { q: 'Медианасын табыңыз: $1, 3, 5, 7, 9$', opts: ['$3$', '$5$', '$7$', '$9$'], ans: 'B' },
     { q: 'Өзгеру құлашы дегеніміз не?', opts: ['Ең үлкен және ең кіші мәндердің қосындысы', 'Ең үлкен және ең кіші мәндердің айырмасы', 'Жиі кездесетін сан', 'Ортаңғы сан'], ans: 'B' },
-    { q: 'Осы қатардың модасын табыңыз: $12, 14, 12, 18, 20$', opts: ['$12$', '$14$', '$18$', '$20$'], ans: 'A' },
-    { q: 'Медианасын табыңыз: $2, 4, 6, 8, 10, 12, 14$', opts: ['$4$', '$6$', '$8$', '$10$'], ans: 'C' }
+    { q: 'Осы қатардың модасын табыңыз: $12, 14, 12, 18, 20$', opts: ['$12$', '$14$', '$18$', '$20$'], ans: 'A' }
   ],
-  'sec2': [
+  2: [
     { q: 'Медианасын табыңыз: $12, 15, 10, 18, 11, 14$', opts: ['$12$', '$12.5$', '$13$', '$14$'], ans: 'C' },
     { q: 'Осы қатардың неше модасы бар: $4, 4, 6, 8, 8, 10$', opts: ['Бір модасы бар', 'Екі модасы бар ($4$ және $8$)', 'Модасы жоқ', 'Үш модасы бар'], ans: 'B' },
     { q: 'Егер қатардың ең кіші мүшесі $15$, ал өзгеру құлашы $24$ болса, ең үлкен мүшесін табыңыз.', opts: ['$9$', '$24$', '$39$', '$49$'], ans: 'C' },
     { q: 'Қатардың модасы жоқ болуы мүмкін бе?', opts: ['Иә, барлық сандар әртүрлі болса', 'Жоқ, әрқашан кем дегенде бір мода бар', 'Иә, тек теріс сандар болса', 'Жоқ, нөл мода болады'], ans: 'A' },
     { q: 'Медианасын табыңыз: $1, 2, 3, 4, 5, 6$', opts: ['$3$', '$3.5$', '$4$', '$4.5$'], ans: 'B' }
   ],
-  'sec3': [
+  3: [
     { q: 'Оқушының бағалары: $4, 5, 3, 4, 5, 5, 3, 4, 5$. Модасы мен медианасының қосындысын табыңыз.', opts: ['$8$', '$9$', '$10$', '$11$'], ans: 'B' },
     { q: '$x, 7, 9, 12$ қатарының өзгеру құлашы $10$-ға тең ($x$ - ең кіші сан). $x$-тің мәнін табыңыз.', opts: ['$2$', '$3$', '$4$', '$5$'], ans: 'A' },
     { q: 'Осы қатардың өзгеру құлашын табыңыз: $2.5, 3.1, 2.5, 4.0, 5.2, 3.1$', opts: ['$2.5$', '$2.7$', '$3.1$', '$5.2$'], ans: 'B' },
@@ -250,79 +238,40 @@ const QUESTION_BANK = {
   ]
 };
 
-const SECTION_NAMES = {
-  'sec1': '1-деңгей',
-  'sec2': '2-деңгей',
-  'sec3': '3-деңгей'
-};
-
-function buildQuiz() {
-  allQuestions = [];
-  if (activeSections.length === 0) activeSections = ['sec1']; 
-  
-  activeSections.forEach(secKey => {
-    if (QUESTION_BANK[secKey]) {
-      const shuffled = QUESTION_BANK[secKey].sort(() => Math.random() - 0.5).slice(0, 5);
-      shuffled.forEach(q => {
-        allQuestions.push({
-          level: SECTION_NAMES[secKey],
-          q: q.q,
-          opts: q.opts,
-          ans: q.ans
-        });
-      });
-    }
-  });
+// ══════════════════════════════════════════════════════════════════
+//  CORE & RECONNECT
+// ══════════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-// ══════════════════════════════════════════════════════════════════
-//  LOCALSTORAGE RECONNECT
-// ══════════════════════════════════════════════════════════════════
-
-function getStorageKey() {
-  return STORAGE_KEY_PREFIX + (urlParams.get('code') || '').toUpperCase();
-}
+function getStorageKey() { return STORAGE_KEY_PREFIX + (urlParams.get('code') || '').toUpperCase(); }
 
 function saveState() {
-  if (!studentId || !sessionCode) return;
-  const data = {
+  if(!studentId || !sessionCode) return;
+  localStorage.setItem(getStorageKey(), JSON.stringify({
     studentId, sessionCode, name: studentName,
-    totalCorrect, totalAnswered, finished,
-    currentQIdx,
-    tabSwitches, awaySeconds: currentAway(),
-    activeSections
-  };
-  localStorage.setItem(getStorageKey(), JSON.stringify(data));
+    totalCorrect, totalAnswered, finished, levelsCompleted, currentLevel,
+    tabSwitches, awaySeconds: currentAway()
+  }));
 }
 
 function loadState() {
   const code = urlParams.get('code');
-  if (!code) return false;
+  if(!code) return false;
   try {
     const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code.toUpperCase());
-    if (!raw) return false;
+    if(!raw) return false;
     const data = JSON.parse(raw);
+    if(data.sessionCode !== code.toUpperCase()) return false;
     
-    if (data.sessionCode !== code.toUpperCase()) return false;
-
-    studentId = data.studentId;
-    sessionCode = data.sessionCode;
-    studentName = data.name;
-    totalCorrect = data.totalCorrect || 0;
-    totalAnswered = data.totalAnswered || 0;
-    finished = data.finished || false;
-    currentQIdx = data.currentQIdx || 0;
-    tabSwitches = data.tabSwitches || 0;
-    awaySeconds = data.awaySeconds || 0;
-    if(data.activeSections) activeSections = data.activeSections;
-
+    studentId = data.studentId; sessionCode = data.sessionCode; studentName = data.name;
+    totalCorrect = data.totalCorrect||0; totalAnswered = data.totalAnswered||0;
+    finished = data.finished||false; levelsCompleted = data.levelsCompleted||0;
+    currentLevel = data.currentLevel||1; tabSwitches = data.tabSwitches||0;
     return true;
   } catch(e) { return false; }
-}
-
-function clearState() {
-  const code = urlParams.get('code');
-  if (code) localStorage.removeItem(STORAGE_KEY_PREFIX + code.toUpperCase());
 }
 
 window.onload = async () => {
@@ -331,14 +280,13 @@ window.onload = async () => {
       const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
       const data = await res.json();
       if (data.status === 'not_found' || data.status === 'ended') {
-        clearState();
+        localStorage.removeItem(getStorageKey());
       } else {
-        buildQuiz();
-        if (finished) {
-          showEnd();
-        } else {
+        document.getElementById('wait-name-display').textContent = studentName;
+        if (finished) { showEnd(); } 
+        else {
           startCore();
-          if (data.status === 'active') showQuiz();
+          if (data.status === 'active') startQuiz();
           else showScreen('screen-wait');
         }
         return;
@@ -347,24 +295,13 @@ window.onload = async () => {
   }
 };
 
-
-// ══════════════════════════════════════════════════════════════════
-//  JOIN & LIFECYCLE
-// ══════════════════════════════════════════════════════════════════
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
 async function joinQuiz() {
   const name = document.getElementById('inp-name').value.trim();
   const code = document.getElementById('inp-code').value.trim().toUpperCase();
+  if(!name || !code) return alert('Аты-жөніңізді және кодты енгізіңіз');
   
-  if (!name || !code) return alert('Аты-жөніңізді және кодты енгізіңіз');
-  
-  const btn = document.querySelector('#screen-join button');
-  btn.disabled = true; btn.textContent = 'Қосылуда...';
+  document.getElementById('btn-join').disabled = true;
+  document.getElementById('btn-join').textContent = 'Қосылуда...';
   
   try {
     const res = await fetch(`${BACKEND}/status?code=${code}`);
@@ -372,33 +309,34 @@ async function joinQuiz() {
     
     if (data.status === 'not_found') {
       alert('Бұл код қате немесе тест аяқталған.');
-      btn.disabled = false; btn.textContent = 'Қосылу';
+      document.getElementById('btn-join').disabled = false;
+      document.getElementById('btn-join').textContent = 'Қосылу';
       return;
     }
     
-    sessionCode = code;
-    studentName = name;
+    sessionCode = code; studentName = name;
     studentId = Math.random().toString(36).substr(2, 9);
+    document.getElementById('wait-name-display').textContent = studentName;
     
-    buildQuiz();
     saveState();
     startCore();
     
+    // БҰЛ ЖЕР ТҮЗЕТІЛДІ: Егер мұғалім "Бастау" баспаса, міндетті түрде күту залына барады.
     if (data.status === 'active') {
-      showQuiz();
+      startQuiz();
     } else {
       showScreen('screen-wait');
     }
   } catch (err) {
     alert('Серверге қосылу мүмкін емес');
-    btn.disabled = false; btn.textContent = 'Қосылу';
+    document.getElementById('btn-join').disabled = false;
+    document.getElementById('btn-join').textContent = 'Қосылу';
   }
 }
 
 function startCore() {
   pollStatus();
   statusPollInterval = setInterval(pollStatus, 2000);
-  
   sendScore();
   submitInterval = setInterval(sendScore, 5000);
 }
@@ -409,7 +347,7 @@ async function pollStatus() {
     const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
     const data = await res.json();
     if (data.status === 'active' && document.getElementById('screen-wait').classList.contains('active')) {
-      showQuiz();
+      startQuiz();
     }
     if (data.status === 'ended' || data.status === 'not_found') {
       showEnd();
@@ -417,56 +355,72 @@ async function pollStatus() {
   } catch (err) {}
 }
 
-
 // ══════════════════════════════════════════════════════════════════
-//  QUIZ RENDER & LOGIC
+//  QUIZ ENGINE (3 LEVELS)
 // ══════════════════════════════════════════════════════════════════
-
-function showQuiz() {
+function startQuiz() {
   showScreen('screen-quiz');
+  if (currentBank.length === 0) setupLevel();
+  else renderQuestion();
+}
+
+function setupLevel() {
+  if (currentLevel > 3) { showEnd(); return; }
+  currentBank = LEVEL_BANKS[currentLevel].sort(() => Math.random() - 0.5).slice(0, 5);
+  currentQIdx = 0;
+  updateUI();
   renderQuestion();
 }
 
+const LEVEL_LABELS = { 1: '🟢 1-деңгей', 2: '🟡 2-деңгей', 3: '🔴 3-деңгей' };
+const LEVEL_CLASSES = { 1: 'l1', 2: 'l2', 3: 'l3' };
+
+function updateUI() {
+  document.getElementById('st-level').textContent = currentLevel;
+  document.getElementById('st-correct').textContent = totalCorrect;
+  document.getElementById('st-wrong').textContent = totalAnswered - totalCorrect;
+  
+  const b = document.getElementById('ui-level-badge');
+  b.className = `level-badge ${LEVEL_CLASSES[currentLevel]}`;
+  b.textContent = LEVEL_LABELS[currentLevel];
+}
+
 function renderQuestion() {
-  if (currentQIdx >= allQuestions.length) {
-    finished = true;
+  isAnswered = false;
+  if (currentQIdx >= currentBank.length) {
+    levelsCompleted++;
+    currentLevel++;
     saveState();
-    sendScore();
-    showEnd();
+    setupLevel();
     return;
   }
-
-  const q = allQuestions[currentQIdx];
   
-  document.getElementById('ui-qnum').textContent = `${currentQIdx + 1}/${allQuestions.length}`;
-  document.getElementById('ui-score').textContent = totalCorrect;
-  document.getElementById('ui-level').textContent = q.level;
-  
+  const q = currentBank[currentQIdx];
+  document.getElementById('ui-qnum').textContent = `${currentQIdx + 1} / ${currentBank.length}`;
+  document.getElementById('ui-prog').style.width = ((currentQIdx + 1) / currentBank.length * 100) + '%';
   document.getElementById('q-text').innerHTML = q.q;
   
   const letters = ['A', 'B', 'C', 'D'];
-  const optsHtml = q.opts.map((opt, i) => `
-    <div class="opt-btn" onclick="checkAnswer('${letters[i]}', this)">
+  document.getElementById('options-grid').innerHTML = q.opts.map((opt, i) => `
+    <div class="mcq-opt" onclick="checkAnswer('${letters[i]}', this)">
       <div class="opt-letter">${letters[i]}</div>
       <div class="opt-text">${opt}</div>
     </div>
   `).join('');
   
-  document.getElementById('options-grid').innerHTML = optsHtml;
-  
   renderMathInElement(document.getElementById('screen-quiz'), {
-    delimiters: [
-      {left: '$$', right: '$$', display: true},
-      {left: '$', right: '$', display: false}
-    ]
+    delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]
   });
 }
 
 function checkAnswer(selectedLetter, btnEl) {
-  const allBtns = document.querySelectorAll('.opt-btn');
+  if (isAnswered) return;
+  isAnswered = true;
+  
+  const allBtns = document.querySelectorAll('.mcq-opt');
   allBtns.forEach(b => b.classList.add('disabled'));
   
-  const q = allQuestions[currentQIdx];
+  const q = currentBank[currentQIdx];
   const isCorrect = (selectedLetter === q.ans);
   
   totalAnswered++;
@@ -475,15 +429,13 @@ function checkAnswer(selectedLetter, btnEl) {
     btnEl.classList.add('correct');
   } else {
     btnEl.classList.add('wrong');
-    const letters = ['A', 'B', 'C', 'D'];
-    const correctIdx = letters.indexOf(q.ans);
+    const correctIdx = ['A','B','C','D'].indexOf(q.ans);
     if(allBtns[correctIdx]) allBtns[correctIdx].classList.add('correct');
   }
   
-  document.getElementById('ui-score').textContent = totalCorrect;
-  
+  updateUI();
   saveState();
-  sendScore(); 
+  sendScore();
   
   setTimeout(() => {
     currentQIdx++;
@@ -492,11 +444,9 @@ function checkAnswer(selectedLetter, btnEl) {
   }, 1500);
 }
 
-
 // ══════════════════════════════════════════════════════════════════
-//  FOCUS TRACKING
+//  FOCUS & SUBMIT
 // ══════════════════════════════════════════════════════════════════
-
 function currentAway() {
   let t = awaySeconds;
   if (awayStart) t += Math.round((Date.now() - awayStart) / 1000);
@@ -505,83 +455,50 @@ function currentAway() {
 
 function markAway() {
   if (!isFocused || finished) return;
-  isFocused = false;
-  tabSwitches++;
-  awayStart = Date.now();
-  saveState();
-  sendScore();
+  isFocused = false; tabSwitches++; awayStart = Date.now();
+  saveState(); sendScore();
 }
-
 function markBack() {
   if (isFocused || finished) return;
   isFocused = true;
-  if (awayStart) {
-    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
-    awayStart = null;
-  }
-  saveState();
-  sendScore();
+  if (awayStart) { awaySeconds += Math.round((Date.now() - awayStart) / 1000); awayStart = null; }
+  saveState(); sendScore();
 }
-
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) markAway(); else markBack();
-});
+document.addEventListener('visibilitychange', () => { if(document.hidden) markAway(); else markBack(); });
 window.addEventListener('blur', markAway);
 window.addEventListener('focus', markBack);
 
-
-// ══════════════════════════════════════════════════════════════════
-//  SUBMIT SCORE
-// ══════════════════════════════════════════════════════════════════
-
 async function sendScore() {
-  if (!studentId || !sessionCode) return;
-  
-  const currLvl = allQuestions[currentQIdx] ? allQuestions[currentQIdx].level : 'Аяқтады';
-  const displayObj = `${studentName}|${currLvl}`;
-  
+  if(!studentId || !sessionCode) return;
   try {
     const res = await fetch(`${BACKEND}/submit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        code: sessionCode,
-        studentId,
-        name: displayObj,
-        score: totalCorrect,
-        total: totalAnswered,
-        finished: finished,
-        focused: isFocused,
-        tabSwitches,
-        awaySeconds: currentAway()
+        code: sessionCode, studentId,
+        name: studentName + '|Деңгей ' + (currentLevel <= 3 ? currentLevel : 3),
+        score: totalCorrect, total: totalAnswered,
+        finished: finished === true,
+        focused: isFocused, tabSwitches, awaySeconds: currentAway()
       })
     });
     const data = await res.json();
-    if (data.status === 'ended' || data.status === 'not_found') { 
-      showEnd(); 
-    }
+    if (data.status === 'ended' || data.status === 'not_found') showEnd();
   } catch (_) {}
 }
 
-
-// ══════════════════════════════════════════════════════════════════
-//  RESULTS
-// ══════════════════════════════════════════════════════════════════
-
 function showEnd() {
   finished = true;
-  if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
-  if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+  if(submitInterval) clearInterval(submitInterval);
+  if(statusPollInterval) clearInterval(statusPollInterval);
   
   const pct = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
-  
   document.getElementById('res-correct').textContent = totalCorrect;
-  document.getElementById('res-wrong').textContent = totalAnswered - totalCorrect;
+  document.getElementById('res-levels').textContent = levelsCompleted + '/3';
   document.getElementById('res-pct').textContent = pct + '%';
-  document.getElementById('res-emoji').textContent = pct >= 80 ? '🌟' : pct >= 50 ? '👍' : '💪';
+  document.getElementById('res-emoji').textContent = levelsCompleted === 3 ? '🌟' : pct >= 50 ? '👍' : '💪';
   
-  clearState(); 
-  showScreen('screen-results');
+  localStorage.removeItem(getStorageKey());
+  showScreen('screen-end');
 }
 </script>
 </body>
