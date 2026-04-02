@@ -186,7 +186,7 @@ button:active{transform:translateY(2px);}
 
 <script>
 // ══════════════════════════════════════════════════════════════════
-//  CONFIG & STATE (DO NOT MODIFY BACKEND URL)
+//  CONFIG & STATE
 // ══════════════════════════════════════════════════════════════════
 const BACKEND = 'https://mathsabaq.online';
 const STORAGE_KEY_PREFIX = 'ms_stat_rmm_';
@@ -195,31 +195,27 @@ let sessionCode = '';
 let studentId = '';
 let studentName = '';
 
-// Selected levels from URL (?sec=sec1,sec2)
 let activeSections = [];
 
-// Quiz State
 let allQuestions = [];
 let currentQIdx = 0;
 let totalCorrect = 0;
 let totalAnswered = 0;
 let finished = false;
 
-// Focus Tracking
 let isFocused = true;
 let tabSwitches = 0;
 let awaySeconds = 0;
 let awayStart = null;
 
-// Intervals
 let statusPollInterval = null;
 let submitInterval = null;
 
-// URL Params parsing
+// ТҮЗЕТІЛДІ: parentElement орнына тек input-тың өзін жасырамыз
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('code')) {
   document.getElementById('inp-code').value = urlParams.get('code');
-  document.getElementById('inp-code').parentElement.style.display = 'none'; // hide if pre-filled
+  document.getElementById('inp-code').style.display = 'none'; // Қателік осы жерде болған
 }
 if (urlParams.has('sec')) {
   activeSections = urlParams.get('sec').split(',');
@@ -262,11 +258,10 @@ const SECTION_NAMES = {
 
 function buildQuiz() {
   allQuestions = [];
-  if (activeSections.length === 0) activeSections = ['sec1']; // Fallback
+  if (activeSections.length === 0) activeSections = ['sec1']; 
   
   activeSections.forEach(secKey => {
     if (QUESTION_BANK[secKey]) {
-      // Shuffle within section and take up to 5 questions per section (so 10-15 total max)
       const shuffled = QUESTION_BANK[secKey].sort(() => Math.random() - 0.5).slice(0, 5);
       shuffled.forEach(q => {
         allQuestions.push({
@@ -308,7 +303,6 @@ function loadState() {
     if (!raw) return false;
     const data = JSON.parse(raw);
     
-    // Only restore if session matches
     if (data.sessionCode !== code.toUpperCase()) return false;
 
     studentId = data.studentId;
@@ -331,17 +325,14 @@ function clearState() {
   if (code) localStorage.removeItem(STORAGE_KEY_PREFIX + code.toUpperCase());
 }
 
-// Init Check
 window.onload = async () => {
   if (loadState()) {
-    // Check if session still active
     try {
       const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
       const data = await res.json();
       if (data.status === 'not_found' || data.status === 'ended') {
-        clearState(); // Dead session, clear and show join
+        clearState();
       } else {
-        // Resume!
         buildQuiz();
         if (finished) {
           showEnd();
@@ -405,11 +396,9 @@ async function joinQuiz() {
 }
 
 function startCore() {
-  // Start polling
   pollStatus();
   statusPollInterval = setInterval(pollStatus, 2000);
   
-  // Start submitting score
   sendScore();
   submitInterval = setInterval(sendScore, 5000);
 }
@@ -465,7 +454,6 @@ function renderQuestion() {
   
   document.getElementById('options-grid').innerHTML = optsHtml;
   
-  // Render LaTeX
   renderMathInElement(document.getElementById('screen-quiz'), {
     delimiters: [
       {left: '$$', right: '$$', display: true},
@@ -475,7 +463,6 @@ function renderQuestion() {
 }
 
 function checkAnswer(selectedLetter, btnEl) {
-  // Disable all buttons immediately
   const allBtns = document.querySelectorAll('.opt-btn');
   allBtns.forEach(b => b.classList.add('disabled'));
   
@@ -488,7 +475,6 @@ function checkAnswer(selectedLetter, btnEl) {
     btnEl.classList.add('correct');
   } else {
     btnEl.classList.add('wrong');
-    // Highlight correct
     const letters = ['A', 'B', 'C', 'D'];
     const correctIdx = letters.indexOf(q.ans);
     if(allBtns[correctIdx]) allBtns[correctIdx].classList.add('correct');
@@ -497,7 +483,7 @@ function checkAnswer(selectedLetter, btnEl) {
   document.getElementById('ui-score').textContent = totalCorrect;
   
   saveState();
-  sendScore(); // send immediately on answer
+  sendScore(); 
   
   setTimeout(() => {
     currentQIdx++;
@@ -508,7 +494,7 @@ function checkAnswer(selectedLetter, btnEl) {
 
 
 // ══════════════════════════════════════════════════════════════════
-//  FOCUS TRACKING (CRITICAL)
+//  FOCUS TRACKING
 // ══════════════════════════════════════════════════════════════════
 
 function currentAway() {
@@ -551,7 +537,6 @@ window.addEventListener('focus', markBack);
 async function sendScore() {
   if (!studentId || !sessionCode) return;
   
-  // Format name nicely with current level
   const currLvl = allQuestions[currentQIdx] ? allQuestions[currentQIdx].level : 'Аяқтады';
   const displayObj = `${studentName}|${currLvl}`;
   
@@ -595,7 +580,7 @@ function showEnd() {
   document.getElementById('res-pct').textContent = pct + '%';
   document.getElementById('res-emoji').textContent = pct >= 80 ? '🌟' : pct >= 50 ? '👍' : '💪';
   
-  clearState(); // Quiz is over, no need to resume
+  clearState(); 
   showScreen('screen-results');
 }
 </script>
