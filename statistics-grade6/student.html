@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Статистика негіздері — Оқушы</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;--amber-light:#fffbeb;--amber-border:#fcd34d;
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
+  --shadow-lg:0 8px 30px rgba(20,24,38,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+.screen{display:none;min-height:100vh;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes pop{0%{transform:scale(.95);opacity:0}100%{transform:scale(1);opacity:1}}
+.container{max-width:520px;margin:0 auto;padding:1rem;padding-bottom:2rem}
+
+/* JOIN */
+.join-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.join-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.join-logo{text-align:center;margin-bottom:20px}
+.join-icon{font-size:2.4rem;margin-bottom:6px}
+.join-title{font-size:1.3rem;font-weight:800;margin-bottom:2px}
+.join-sub{color:var(--muted);font-size:.82rem}
+.field{margin-bottom:12px}
+.field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px}
+.field input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;outline:none;transition:border-color .15s;background:var(--bg)}
+.field input:focus{border-color:var(--primary)}
+.field input.code-input{font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:6px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
+.err.on{display:block}
+
+/* WAIT */
+.wait-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.wait-icon{font-size:3.5rem;margin-bottom:12px}
+.wait-title{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+.wait-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.wait-name{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.82rem;font-weight:700;margin-top:8px}
+.dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-top:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+
+/* QUIZ */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.6rem .4rem;text-align:center;box-shadow:var(--shadow-sm)}
+.stat-icon{font-size:1rem;margin-bottom:.15rem}
+.stat-value{font-size:1.25rem;font-weight:800}
+.stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow)}
+
+/* Level indicator */
+.level-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.level-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.level-badge.l1{background:var(--green-light);color:var(--green);border:1.5px solid var(--green-border)}
+.level-badge.l2{background:#dbeafe;color:#1d4ed8;border:1.5px solid #93c5fd}
+.level-badge.l3{background:var(--amber-light);color:var(--amber);border:1.5px solid var(--amber-border)}
+.level-badge.l4{background:#f3e8ff;color:#7c3aed;border:1.5px solid #c4b5fd}
+.level-badge.l5{background:var(--red-light);color:var(--red);border:1.5px solid var(--red-border)}
+.q-progress{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);font-weight:700}
+.q-prog-bar{width:80px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.q-prog-fill{height:100%;background:var(--primary);border-radius:3px;transition:width .3s ease}
+
+/* Question text */
+.q-text{font-size:1rem;font-weight:600;color:var(--text);text-align:center;padding:.9rem 1rem;background:var(--primary-light);border:1.5px solid rgba(67,56,202,.18);border-radius:14px;margin-bottom:1rem;line-height:1.7}
+
+/* MCQ Options */
+.mcq-opt{width:100%;padding:12px 14px;border:2.5px solid var(--border);border-radius:12px;background:var(--bg2);cursor:pointer;transition:all .18s;text-align:left;display:flex;align-items:center;gap:12px;margin-bottom:8px;touch-action:manipulation;font-family:inherit;font-size:.9rem;font-weight:500}
+.mcq-opt:last-child{margin-bottom:0}
+.mcq-opt:active{transform:scale(.99)}
+.mcq-opt.selected{border-color:var(--primary);background:var(--primary-light)}
+.mcq-opt.correct{border-color:var(--green);background:var(--green-light)}
+.mcq-opt.wrong{border-color:var(--red);background:var(--red-light)}
+.mcq-opt:disabled{pointer-events:none}
+.mcq-label{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.76rem;background:var(--bg3);color:var(--text2);flex-shrink:0;transition:all .18s}
+.mcq-opt.selected .mcq-label{background:var(--primary);color:#fff}
+.mcq-opt.correct .mcq-label{background:var(--green);color:#fff}
+.mcq-opt.wrong .mcq-label{background:var(--red);color:#fff}
+.mcq-text{flex:1;line-height:1.4}
+
+.feedback{text-align:center;padding:.75rem;border-radius:12px;margin-top:.75rem;font-weight:700;font-size:.88rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.feedback.correct{background:var(--green-light);color:var(--green);border:1px solid var(--green-border)}
+.feedback.wrong{background:var(--red-light);color:var(--red);border:1px solid var(--red-border)}
+
+/* Solution box */
+.solution-box{background:#f8fafc;border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;margin-top:.75rem;font-size:.84rem;line-height:1.8;color:var(--text2)}
+.solution-box .sol-title{font-weight:800;color:var(--primary);font-size:.76rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.solution-box .sol-step{margin-bottom:4px}
+.solution-box .sol-result{font-weight:800;color:var(--green);margin-top:6px;font-size:.9rem}
+
+.btn-group{display:flex;gap:.6rem;justify-content:center;align-items:center}
+.hidden{display:none!important}
+
+/* LEVEL END */
+.le-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.le-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;text-align:center;box-shadow:var(--shadow-lg);animation:pop .35s ease}
+.le-score-box{background:var(--bg);border-radius:14px;padding:16px;margin:16px 0}
+.le-score-val{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:800}
+.le-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-top:8px}
+.le-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+
+/* RESULTS */
+.res-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.res-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg)}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.res-stat{background:var(--bg);border-radius:12px;padding:12px 8px}
+.res-val{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.res-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+
+.cfw{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.cfp{position:absolute;animation:cfFall linear forwards}
+</style>
+</head>
+<body>
+<div class="cfw" id="confetti"></div>
+
+<!-- ════ JOIN ════ -->
+<div class="screen active" id="s-join">
+  <div class="join-wrap">
+    <div class="join-card">
+      <div class="join-logo">
+        <div class="join-icon">📊</div>
+        <div class="join-title">Статистика негіздері</div>
+        <div class="join-sub">Құлаш · Мода · Медиана · Орта · 5 деңгей</div>
+      </div>
+      <div class="err" id="join-err"></div>
+      <div class="field">
+        <label>Аты-жөні</label>
+        <input type="text" id="sname" placeholder="Атыңызды жазыңыз" maxlength="20" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="field" id="code-wrap">
+        <label>Бөлме коды</label>
+        <input type="text" id="scode" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
+      </div>
+      <button class="btn btn-primary btn-block" id="join-btn" style="margin-top:4px" onclick="joinQuiz()">🚀 Кіру</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WAIT ════ -->
+<div class="screen" id="s-wait">
+  <div class="wait-wrap">
+    <div class="wait-icon">✅</div>
+    <div class="wait-title">Қосылдыңыз!</div>
+    <div class="wait-sub">Мұғалім сабақты бастағанша күтіңіз</div>
+    <div class="wait-name" id="wait-name"></div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div class="screen" id="s-quiz">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value" id="st-level" style="color:var(--green)">1</div><div class="stat-label">Деңгей</div></div>
+      <div class="stat-card"><div class="stat-icon">✓</div><div class="stat-value" id="st-correct" style="color:var(--green)">0</div><div class="stat-label">Дұрыс</div></div>
+      <div class="stat-card"><div class="stat-icon">✗</div><div class="stat-value" id="st-wrong" style="color:var(--red)">0</div><div class="stat-label">Қате</div></div>
+      <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-value" id="st-q" style="color:var(--amber)">1/10</div><div class="stat-label">Сұрақ</div></div>
+    </div>
+    <div class="quiz-card">
+      <div class="level-row">
+        <span class="level-badge l1" id="level-badge">⬤ Деңгей 1</span>
+        <div class="q-progress">
+          <span id="q-prog-text">1/10</span>
+          <div class="q-prog-bar"><div class="q-prog-fill" id="q-prog-fill" style="width:10%"></div></div>
+        </div>
+      </div>
+      <div class="q-text" id="q-text"></div>
+      <div id="opts-container"></div>
+      <div class="feedback hidden" id="feedback"></div>
+      <div class="solution-box hidden" id="solution-box"></div>
+      <div class="btn-group" style="margin-top:.75rem">
+        <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()" disabled>✓ Тексеру</button>
+        <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Келесі →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ LEVEL END ════ -->
+<div class="screen" id="s-level-end">
+  <div class="le-wrap">
+    <div class="le-card">
+      <div style="font-size:3rem;margin-bottom:10px" id="le-emoji">🎉</div>
+      <div style="font-size:1.2rem;font-weight:800;margin-bottom:4px" id="le-title">Деңгей аяқталды!</div>
+      <div style="color:var(--muted);font-size:.84rem" id="le-sub">Нәтижеңіз:</div>
+      <div class="le-score-box">
+        <div class="le-score-val" id="le-score">0/10</div>
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px">Ұпай</div>
+        <div class="le-bar"><div class="le-bar-fill" id="le-bar-fill" style="width:0%"></div></div>
+      </div>
+      <div id="le-pass-msg" class="hidden" style="background:var(--green-light);border:1.5px solid var(--green-border);border-radius:12px;padding:11px;margin-bottom:12px">
+        <div style="color:var(--green);font-weight:700;font-size:.88rem">✅ Деңгей өтілді!</div>
+      </div>
+      <div id="le-fail-msg" class="hidden" style="background:var(--red-light);border:1.5px solid var(--red-border);border-radius:12px;padding:11px;margin-bottom:12px">
+        <div style="color:var(--red);font-weight:700;font-size:.88rem">❌ Өтпедіңіз. Қайта тырысыңыз.</div>
+        <div style="color:var(--muted);font-size:.74rem;margin-top:3px">Өту үшін кемінде 7/10 дұрыс жауап керек</div>
+      </div>
+      <button class="btn btn-primary btn-block" id="le-btn" onclick="continueAfterLevel()">Жалғастыру →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RESULTS ════ -->
+<div class="screen" id="s-results">
+  <div class="res-wrap">
+    <div class="res-card">
+      <div style="font-size:3rem;margin-bottom:8px" id="res-emoji">🏆</div>
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px">Тест аяқталды!</div>
+      <div style="color:var(--muted);font-size:.86rem">Нәтижелеріңіз</div>
+      <div class="res-stats">
+        <div class="res-stat"><div class="res-val" id="res-correct" style="color:var(--green)">0</div><div class="res-lbl">Дұрыс</div></div>
+        <div class="res-stat"><div class="res-val" id="res-levels" style="color:var(--primary)">0/5</div><div class="res-lbl">Деңгей</div></div>
+        <div class="res-stat"><div class="res-val" id="res-pct" style="color:var(--amber)">0%</div><div class="res-lbl">Пайыз</div></div>
+      </div>
+      <p style="color:var(--muted);margin-top:16px;font-size:.82rem">Нәтижелер мұғалімге жіберілді ✓</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const STORAGE_KEY_PREFIX = 'ms_stats6_';
+const MAX_LEVEL = 5;
+// ═══════════════════════════════════════
+
+// ── URL params ─────────────────────────────────────────────────
+const urlParams = new URLSearchParams(location.search);
+const urlCode = (urlParams.get('code') || '').toUpperCase();
+
+// ── State ───────────────────────────────────────────────────────
+let sessionCode = '';
+let studentId = '';
+let studentName = '';
+let currentLevel = 1;
+let levelCorrect = 0;
+let levelWrong = 0;
+let levelsCompleted = 0;
+let totalCorrect = 0;
+let totalAnswered = 0;
+let currentBank = [];
+let currentQIdx = 0;
+let currentQuestion = null;
+let selectedIdx = null;
+let isAnswered = false;
+let submitInterval = null;
+let statusPollInterval = null;
+let quizStarted = false;
+
+// ── Focus tracking ──────────────────────────────────────────────
+let isFocused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let awayStart = null;
+
+function markAway() {
+  if (!isFocused) return;
+  isFocused = false;
+  tabSwitches++;
+  awayStart = Date.now();
+  saveState();
+  sendScore();
+}
+function markBack() {
+  if (isFocused) return;
+  isFocused = true;
+  if (awayStart) {
+    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
+    awayStart = null;
+  }
+  sendScore();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) markAway(); else markBack();
+});
+window.addEventListener('blur', markAway);
+window.addEventListener('focus', markBack);
+
+// ── localStorage helpers ─────────────────────────────────────────
+function saveState() {
+  if (!sessionCode) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + sessionCode, JSON.stringify({
+      studentId, name: studentName,
+      totalCorrect, totalAnswered,
+      levelsCompleted, currentLevel,
+      tabSwitches, awaySeconds: currentAway,
+      ts: Date.now()
+    }));
+  } catch (_) {}
+}
+function loadState(code) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + code);
+      return null;
+    }
+    return data;
+  } catch (_) { return null; }
+}
+function clearState() {
+  if (sessionCode) {
+    try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {}
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function shuffleArray(arr) {
+  const r = [...arr];
+  for (let i = r.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [r[i], r[j]] = [r[j], r[i]];
+  }
+  return r;
+}
+function renderText(text) {
+  return text.replace(/\$([^$]*)\$/g, (match, inner) => {
+    try { return katex.renderToString(inner, { throwOnError: false }); }
+    catch (_) { return match; }
+  });
+}
+function spawnConfetti() {
+  const w = document.getElementById('confetti'); w.innerHTML = '';
+  const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626'];
+  for (let i = 0; i < 60; i++) {
+    const e = document.createElement('div'); e.className = 'cfp';
+    const s = 5 + Math.random() * 9;
+    e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`;
+    w.appendChild(e);
+  }
+  setTimeout(() => w.innerHTML = '', 6000);
+}
+
+// ── Auto-fill code from URL ──────────────────────────────────────
+if (urlCode) {
+  sessionCode = urlCode;
+  document.getElementById('scode').value = urlCode;
+  document.getElementById('code-wrap').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  QUESTION GENERATORS — Numbers change every time
+// ══════════════════════════════════════════════════════════════════
+
+function randInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function sortNum(arr) { return [...arr].sort((a, b) => a - b); }
+function sum(arr) { return arr.reduce((s, x) => s + x, 0); }
+function mean(arr) { return sum(arr) / arr.length; }
+function median(arr) {
+  const s = sortNum(arr);
+  const n = s.length;
+  if (n % 2 === 1) return s[(n - 1) / 2];
+  return (s[n / 2 - 1] + s[n / 2]) / 2;
+}
+function mode(arr) {
+  const freq = {};
+  arr.forEach(x => freq[x] = (freq[x] || 0) + 1);
+  const maxF = Math.max(...Object.values(freq));
+  const modes = Object.keys(freq).filter(k => freq[k] === maxF).map(Number);
+  return modes;
+}
+function range(arr) { return Math.max(...arr) - Math.min(...arr); }
+
+function fmtNum(n) {
+  if (Number.isInteger(n)) return '' + n;
+  // Show as fraction or decimal
+  const s = n.toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+  return s.replace('.', '{,}');
+}
+function fmtKatex(n) { return '$' + fmtNum(n) + '$'; }
+
+// Generate plausible wrong options for a numeric answer
+function wrongOpts(correct, count, minDelta, maxDelta) {
+  const wrongs = new Set();
+  let tries = 0;
+  while (wrongs.size < count && tries < 100) {
+    tries++;
+    let delta = randInt(minDelta, maxDelta);
+    if (Math.random() < 0.5) delta = -delta;
+    if (delta === 0) continue;
+    let w;
+    if (Number.isInteger(correct)) {
+      w = correct + delta;
+    } else {
+      w = Math.round((correct + delta * 0.5) * 100) / 100;
+    }
+    if (w !== correct && w > 0) wrongs.add(w);
+  }
+  // Fill remaining
+  while (wrongs.size < count) {
+    let w = correct + (wrongs.size + 1) * (Math.random() < 0.5 ? 1 : -1);
+    if (w <= 0) w = correct + wrongs.size + 1;
+    wrongs.add(w);
+  }
+  return [...wrongs].slice(0, count);
+}
+
+// ── LEVEL 1: Simple integer sequences ─────────────────────
+function genLevel1() {
+  const questions = [];
+  const topics = ['range', 'mode', 'median', 'mean'];
+
+  for (let i = 0; i < 10; i++) {
+    const topic = topics[i % 4];
+    const len = randInt(5, 8);
+    let nums;
+
+    if (topic === 'mode') {
+      // Ensure there's a clear mode
+      nums = [];
+      const modeVal = randInt(3, 30);
+      const modeCount = randInt(2, 3);
+      for (let j = 0; j < modeCount; j++) nums.push(modeVal);
+      while (nums.length < len) {
+        const v = randInt(1, 35);
+        if (v !== modeVal) nums.push(v);
+      }
+      nums = shuffleArray(nums);
+    } else {
+      nums = [];
+      for (let j = 0; j < len; j++) nums.push(randInt(2, 50));
+    }
+
+    const sorted = sortNum(nums);
+    const numsStr = nums.join('; ');
+    let correct, qText, solution;
+
+    if (topic === 'range') {
+      correct = range(nums);
+      qText = `$${numsStr}$ сандар қатарының өзгеру құлашын табыңыз.`;
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Реттелген қатар: $${sorted.join('; ')}$</div>
+        <div class="sol-step">Ең үлкені: $${Math.max(...nums)}$, ең кішісі: $${Math.min(...nums)}$</div>
+        <div class="sol-step">Құлаш $= ${Math.max(...nums)} - ${Math.min(...nums)} = ${correct}$</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    } else if (topic === 'mode') {
+      const m = mode(nums);
+      correct = m[0];
+      qText = `$${numsStr}$ сандар қатарының модасын анықтаңыз.`;
+      const freq = {};
+      nums.forEach(x => freq[x] = (freq[x] || 0) + 1);
+      const freqStr = Object.entries(freq).sort((a,b) => b[1] - a[1]).map(([k,v]) => `${k} → ${v} рет`).join(', ');
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Жиілік: ${freqStr}</div>
+        <div class="sol-step">Ең жиі кездесетін сан: $${correct}$</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    } else if (topic === 'median') {
+      correct = median(nums);
+      qText = `$${numsStr}$ сандар қатарының медианасын табыңыз.`;
+      const n = sorted.length;
+      let medStep;
+      if (n % 2 === 1) {
+        medStep = `Қатардың ортаңғы мүшесі (${Math.ceil(n/2)}-ші): $${correct}$`;
+      } else {
+        medStep = `Ортаңғы 2 мүше: $${sorted[n/2-1]}$ және $${sorted[n/2]}$. Медиана $= \\dfrac{${sorted[n/2-1]} + ${sorted[n/2]}}{2} = ${fmtNum(correct)}$`;
+      }
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Реттелген қатар: $${sorted.join('; ')}$ (${n} мүше)</div>
+        <div class="sol-step">${medStep}</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    } else {
+      correct = Math.round(mean(nums) * 100) / 100;
+      qText = `$${numsStr}$ сандарының арифметикалық ортасын табыңыз.`;
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Қосынды: $${nums.join(' + ')} = ${sum(nums)}$</div>
+        <div class="sol-step">Сандар саны: $${nums.length}$</div>
+        <div class="sol-step">Орта $= \\dfrac{${sum(nums)}}{${nums.length}} = ${fmtNum(correct)}$</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    }
+
+    const wrongs = wrongOpts(correct, 3, 1, 5);
+    const opts = [fmtKatex(correct), ...wrongs.map(fmtKatex)];
+    questions.push({ q: qText, opts, solution });
+  }
+  return questions;
+}
+
+// ── LEVEL 2: Word problems with context ───────────────────
+function genLevel2() {
+  const questions = [];
+  const contexts = [
+    { pre: 'Оқушылар жарыста', unit: 'ұпай', gen: () => Array.from({length: randInt(5,7)}, () => randInt(8, 30)) },
+    { pre: 'Апта ішіндегі температура', unit: '°C', gen: () => Array.from({length: 7}, () => randInt(15, 35)) },
+    { pre: 'Кітапханадан алынған кітаптар саны', unit: 'кітап', gen: () => Array.from({length: 5}, () => randInt(4, 20)) },
+    { pre: 'Дүкендегі тауар бағасы', unit: 'тг', gen: () => Array.from({length: randInt(4,6)}, () => randInt(3, 15) * 100) },
+    { pre: 'Бес күндегі жүрілген қашықтық', unit: 'км', gen: () => Array.from({length: 5}, () => randInt(3, 20)) },
+    { pre: 'Оқушылардың бойы', unit: 'см', gen: () => Array.from({length: randInt(5,8)}, () => randInt(140, 175)) },
+    { pre: 'Алмалардың салмағы', unit: 'г', gen: () => Array.from({length: randInt(4,6)}, () => randInt(80, 200)) },
+    { pre: 'Футболшылардың жинаған голдары', unit: 'гол', gen: () => Array.from({length: randInt(5,7)}, () => randInt(0, 15)) },
+    { pre: 'Сынып оқушыларының бағалары', unit: 'балл', gen: () => Array.from({length: randInt(5,7)}, () => randInt(2, 5)) },
+    { pre: 'Автокөліктердің жылдамдығы', unit: 'км/сағ', gen: () => Array.from({length: randInt(4,6)}, () => randInt(40, 120)) }
+  ];
+  const topics = ['range', 'mode', 'median', 'mean'];
+
+  // Use one context for 2 questions (about different topics), cycling through
+  for (let i = 0; i < 10; i++) {
+    const ctx = contexts[i % contexts.length];
+    let nums = ctx.gen();
+    const topic = topics[i % 4];
+
+    // For mode questions, ensure a clear mode
+    if (topic === 'mode') {
+      const modeVal = pick(nums);
+      // Add one more copy to ensure mode
+      nums.push(modeVal);
+    }
+
+    const sorted = sortNum(nums);
+    const numsStr = nums.join('; ');
+    let correct, qText, solution;
+
+    if (topic === 'range') {
+      correct = range(nums);
+      qText = `${ctx.pre}: $${numsStr}$ ${ctx.unit}. Өзгеру құлашын табыңыз.`;
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Ең үлкен мән: $${Math.max(...nums)}$ ${ctx.unit}</div>
+        <div class="sol-step">Ең кіші мән: $${Math.min(...nums)}$ ${ctx.unit}</div>
+        <div class="sol-step">Құлаш $= ${Math.max(...nums)} - ${Math.min(...nums)} = ${correct}$ ${ctx.unit}</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    } else if (topic === 'mode') {
+      const m = mode(nums);
+      correct = m[0];
+      qText = `${ctx.pre}: $${numsStr}$ ${ctx.unit}. Модасын анықтаңыз.`;
+      const freq = {};
+      nums.forEach(x => freq[x] = (freq[x] || 0) + 1);
+      const freqStr = Object.entries(freq).sort((a,b) => b[1] - a[1]).map(([k,v]) => `${k} → ${v} рет`).join(', ');
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Жиілік: ${freqStr}</div>
+        <div class="sol-step">Ең жиі кездесетін: $${correct}$ ${ctx.unit}</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    } else if (topic === 'median') {
+      correct = median(nums);
+      qText = `${ctx.pre}: $${numsStr}$ ${ctx.unit}. Медианасын табыңыз.`;
+      const n = sorted.length;
+      let medStep;
+      if (n % 2 === 1) {
+        medStep = `Ортаңғы мүше (${Math.ceil(n/2)}-ші): $${sorted[(n-1)/2]}$`;
+      } else {
+        medStep = `Ортаңғы 2 мүше: $${sorted[n/2-1]}$ және $${sorted[n/2]}$. Медиана $= \\dfrac{${sorted[n/2-1]} + ${sorted[n/2]}}{2} = ${fmtNum(correct)}$`;
+      }
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Реттелген қатар: $${sorted.join('; ')}$</div>
+        <div class="sol-step">${medStep}</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    } else {
+      correct = Math.round(mean(nums) * 100) / 100;
+      qText = `${ctx.pre}: $${numsStr}$ ${ctx.unit}. Арифметикалық ортасын табыңыз.`;
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Қосынды: $${sum(nums)}$</div>
+        <div class="sol-step">Орта $= \\dfrac{${sum(nums)}}{${nums.length}} = ${fmtNum(correct)}$</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    }
+
+    const wrongs = wrongOpts(correct, 3, 1, Math.max(3, Math.round(correct * 0.15)));
+    const opts = [fmtKatex(correct), ...wrongs.map(fmtKatex)];
+    questions.push({ q: qText, opts, solution });
+  }
+  return questions;
+}
+
+// ── LEVEL 3: Decimal numbers ──────────────────────────────
+function genLevel3() {
+  const questions = [];
+  const topics = ['range', 'mode', 'median', 'mean'];
+
+  for (let i = 0; i < 10; i++) {
+    const topic = topics[i % 4];
+    const len = randInt(5, 7);
+    let nums;
+
+    if (topic === 'mode') {
+      const modeVal = randInt(1, 50) / 10;
+      nums = [modeVal, modeVal];
+      while (nums.length < len) {
+        const v = randInt(1, 80) / 10;
+        if (v !== modeVal) nums.push(v);
+      }
+      nums = shuffleArray(nums);
+    } else {
+      nums = Array.from({length: len}, () => randInt(5, 95) / 10);
+    }
+
+    const sorted = sortNum(nums);
+    const numsStr = nums.map(n => fmtNum(n)).join(';\\; ');
+    let correct, qText, solution;
+
+    if (topic === 'range') {
+      correct = Math.round(range(nums) * 100) / 100;
+      qText = `$${numsStr}$ сандар қатарының өзгеру құлашын табыңыз.`;
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Ең үлкен: $${fmtNum(Math.max(...nums))}$, ең кіші: $${fmtNum(Math.min(...nums))}$</div>
+        <div class="sol-step">Құлаш $= ${fmtNum(Math.max(...nums))} - ${fmtNum(Math.min(...nums))} = ${fmtNum(correct)}$</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    } else if (topic === 'mode') {
+      const m = mode(nums);
+      correct = m[0];
+      qText = `$${numsStr}$ сандар қатарының модасын табыңыз.`;
+      const freq = {};
+      nums.forEach(x => freq[x] = (freq[x] || 0) + 1);
+      const freqStr = Object.entries(freq).sort((a,b) => b[1] - a[1]).map(([k,v]) => `${fmtNum(Number(k))} → ${v} рет`).join(', ');
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Жиілік: ${freqStr}</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    } else if (topic === 'median') {
+      correct = median(nums);
+      correct = Math.round(correct * 100) / 100;
+      qText = `$${numsStr}$ сандар қатарының медианасын табыңыз.`;
+      const n = sorted.length;
+      let medStep;
+      if (n % 2 === 1) {
+        medStep = `Ортаңғы мүше: $${fmtNum(sorted[(n-1)/2])}$`;
+      } else {
+        medStep = `Ортаңғы 2 мүше: $${fmtNum(sorted[n/2-1])}$ және $${fmtNum(sorted[n/2])}$. Медиана $= ${fmtNum(correct)}$`;
+      }
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Реттелген қатар: $${sorted.map(fmtNum).join(';\\; ')}$</div>
+        <div class="sol-step">${medStep}</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    } else {
+      correct = Math.round(mean(nums) * 100) / 100;
+      qText = `$${numsStr}$ сандарының арифметикалық ортасын табыңыз.`;
+      const s = Math.round(sum(nums) * 100) / 100;
+      solution = `<div class="sol-title">📝 Шешуі</div>
+        <div class="sol-step">Қосынды: $${fmtNum(s)}$</div>
+        <div class="sol-step">Орта $= \\dfrac{${fmtNum(s)}}{${nums.length}} = ${fmtNum(correct)}$</div>
+        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+    }
+
+    const wrongs = wrongOpts(correct, 3, 0.1, 1.5);
+    const opts = [fmtKatex(correct), ...wrongs.map(w => fmtKatex(Math.round(w*100)/100))];
+    questions.push({ q: qText, opts, solution });
+  }
+  return questions;
+}
+
+// ── LEVEL 4: Find unknown variable ────────────────────────
+function genLevel4() {
+  const questions = [];
+  const types = [
+    // Type 0: Range = R, min = a, max = x → x = a + R
+    () => {
+      const a = randInt(3, 15);
+      const R = randInt(5, 20);
+      const x = a + R;
+      const others = [a, ...Array.from({length: randInt(2,3)}, () => randInt(a, a + R - 1))];
+      const nums = shuffleArray([...others, 'x']);
+      const numsStr = nums.map(n => n === 'x' ? 'x' : n).join(';\\; ');
+      return {
+        q: `$${numsStr}$ қатарының өзгеру құлашы $${R}$ болса, $x$-тің мәнін табыңыз (ең үлкен сан $x$).`,
+        correct: x,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Құлаш $= x_{\\max} - x_{\\min} = ${R}$</div>
+          <div class="sol-step">Ең кіші мән: $${a}$</div>
+          <div class="sol-step">$x = ${a} + ${R} = ${x}$</div>
+          <div class="sol-result">Жауап: $${x}$</div>`
+      };
+    },
+    // Type 1: Median = M with x in sorted position
+    () => {
+      const n = 5;
+      const M = randInt(8, 25);
+      const a = randInt(M - 6, M - 1);
+      const b = randInt(M - 4, M - 1);
+      const sorted = sortNum([a, b]);
+      const d = randInt(M + 1, M + 5);
+      const e = randInt(M + 2, M + 7);
+      const allNums = [...sorted, M, ...sortNum([d, e])];
+      // x is at median position
+      return {
+        q: `$${a};\\; ${sortNum([a,b])[1]};\\; x;\\; ${sortNum([d,e])[0]};\\; ${sortNum([d,e])[1]}$ қатарының медианасы $${M}$ болса, $x$ неге тең?`,
+        correct: M,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">5 мүшелі реттелген қатардың медианасы — 3-ші мүше</div>
+          <div class="sol-step">3-ші мүше $= x = ${M}$</div>
+          <div class="sol-result">Жауап: $${M}$</div>`
+      };
+    },
+    // Type 2: Mean = M, find sum or missing number
+    () => {
+      const n = randInt(3, 5);
+      const M = randInt(8, 20);
+      const S = n * M;
+      const known = [];
+      let remaining = S;
+      for (let i = 0; i < n - 1; i++) {
+        const v = randInt(M - 5, M + 5);
+        known.push(v);
+        remaining -= v;
+      }
+      const x = remaining;
+      const numsStr = [...known, 'x'].join(';\\; ');
+      return {
+        q: `$${numsStr}$ сандарының арифметикалық ортасы $${M}$-ге тең. $x$ неге тең?`,
+        correct: x,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Орта $= \\dfrac{\\text{қосынды}}{${n}} = ${M}$</div>
+          <div class="sol-step">Қосынды $= ${n} \\times ${M} = ${S}$</div>
+          <div class="sol-step">$x = ${S} - (${known.join(' + ')}) = ${S} - ${sum(known)} = ${x}$</div>
+          <div class="sol-result">Жауап: $${x}$</div>`
+      };
+    },
+    // Type 3: n numbers have mean M. Add a number, new mean = ?
+    () => {
+      const n = randInt(3, 5);
+      const M = randInt(8, 18);
+      const S = n * M;
+      const newNum = randInt(M + 3, M + 15);
+      const newMean = Math.round((S + newNum) / (n + 1) * 100) / 100;
+      return {
+        q: `$${n}$ санның арифметикалық ортасы $${M}$-ге тең. Оларға $${newNum}$ санын қоссақ, жаңа орта неге тең?`,
+        correct: newMean,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Бастапқы қосынды $= ${n} \\times ${M} = ${S}$</div>
+          <div class="sol-step">Жаңа қосынды $= ${S} + ${newNum} = ${S + newNum}$</div>
+          <div class="sol-step">Жаңа орта $= \\dfrac{${S + newNum}}{${n + 1}} = ${fmtNum(newMean)}$</div>
+          <div class="sol-result">Жауап: $${fmtNum(newMean)}$</div>`
+      };
+    },
+    // Type 4: All numbers increased by k, what happens to range?
+    () => {
+      const nums = Array.from({length: 5}, () => randInt(5, 30));
+      const k = randInt(2, 8);
+      const R = range(nums);
+      return {
+        q: `$${nums.join(';\\; ')}$ қатарының әр мүшесін $${k}$-ге арттырса, өзгеру құлашы неге тең болады?`,
+        correct: R,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Бастапқы құлаш $= ${Math.max(...nums)} - ${Math.min(...nums)} = ${R}$</div>
+          <div class="sol-step">Әр мүшеге бірдей сан қосқанда құлаш өзгермейді!</div>
+          <div class="sol-step">Себебі: $(x_{\\max} + ${k}) - (x_{\\min} + ${k}) = x_{\\max} - x_{\\min}$</div>
+          <div class="sol-result">Жауап: $${R}$</div>`
+      };
+    },
+    // Type 5: Find mode given constraint
+    () => {
+      const modeVal = randInt(4, 15);
+      const a = randInt(1, modeVal - 1);
+      const b = randInt(modeVal + 1, modeVal + 8);
+      return {
+        q: `$${a};\\; ${modeVal};\\; ${b};\\; x;\\; ${modeVal + randInt(1,4)}$ қатарының модасы $${modeVal}$ болса, $x$ неге тең?`,
+        correct: modeVal,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Мода — ең жиі кездесетін сан</div>
+          <div class="sol-step">$${modeVal}$ бір рет кездескен. Мода болуы үшін тағы бір рет кездесуі керек.</div>
+          <div class="sol-step">Сондықтан $x = ${modeVal}$</div>
+          <div class="sol-result">Жауап: $${modeVal}$</div>`
+      };
+    }
+  ];
+
+  // Generate 10 questions using different types
+  const typeOrder = shuffleArray([0,1,2,3,4,5,0,1,2,3]);
+  for (let i = 0; i < 10; i++) {
+    const gen = types[typeOrder[i]];
+    const { q, correct, solution } = gen();
+    const wrongs = wrongOpts(correct, 3, 1, Math.max(3, Math.round(Math.abs(correct) * 0.2)));
+    const opts = [fmtKatex(correct), ...wrongs.map(fmtKatex)];
+    questions.push({ q, opts, solution });
+  }
+  return questions;
+}
+
+// ── LEVEL 5: Logic & theory ──────────────────────────────
+function genLevel5() {
+  const questions = [];
+  const types = [
+    // Type 0: Multiply all by k, what happens to mean?
+    () => {
+      const nums = Array.from({length: 5}, () => randInt(3, 15));
+      const k = randInt(2, 4);
+      const M = Math.round(mean(nums) * 100) / 100;
+      const newM = Math.round(M * k * 100) / 100;
+      return {
+        q: `$${nums.join(';\\; ')}$ сандарының арифметикалық ортасы $${fmtNum(M)}$. Барлығын $${k}$-ге көбейтсе, жаңа орта?`,
+        correct: newM,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Бастапқы орта: $${fmtNum(M)}$</div>
+          <div class="sol-step">Барлығын $${k}$-ге көбейтсе, орта да $${k}$-ге көбейеді</div>
+          <div class="sol-step">Жаңа орта $= ${fmtNum(M)} \\times ${k} = ${fmtNum(newM)}$</div>
+          <div class="sol-result">Жауап: $${fmtNum(newM)}$</div>`
+      };
+    },
+    // Type 1: Weighted mean — two groups
+    () => {
+      const n1 = randInt(15, 30);
+      const m1 = randInt(60, 80);
+      const n2 = randInt(10, 25);
+      const m2 = randInt(70, 95);
+      const wm = Math.round((n1 * m1 + n2 * m2) / (n1 + n2) * 100) / 100;
+      return {
+        q: `А сыныбы: $${n1}$ оқушы, орт балл $${m1}$. Б сыныбы: $${n2}$ оқушы, орт балл $${m2}$. Жалпы орт балл?`,
+        correct: wm,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">А жалпы балл $= ${n1} \\times ${m1} = ${n1*m1}$</div>
+          <div class="sol-step">Б жалпы балл $= ${n2} \\times ${m2} = ${n2*m2}$</div>
+          <div class="sol-step">Жалпы орта $= \\dfrac{${n1*m1} + ${n2*m2}}{${n1} + ${n2}} = \\dfrac{${n1*m1+n2*m2}}{${n1+n2}} = ${fmtNum(wm)}$</div>
+          <div class="sol-result">Жауап: $${fmtNum(wm)}$</div>`
+      };
+    },
+    // Type 2: Remove one person, what's new mean?
+    () => {
+      const n = randInt(6, 10);
+      const M = randInt(15, 30);
+      const S = n * M;
+      const removed = randInt(M + 5, M + 15);
+      const newM = Math.round((S - removed) / (n - 1) * 100) / 100;
+      return {
+        q: `$${n}$ адамның орташа жасы $${M}$. Бір адам ($${removed}$ жас) кетсе, қалғандардың орташа жасы?`,
+        correct: newM,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Жалпы жас $= ${n} \\times ${M} = ${S}$</div>
+          <div class="sol-step">Кеткеннен кейін: $${S} - ${removed} = ${S - removed}$</div>
+          <div class="sol-step">Жаңа орта $= \\dfrac{${S - removed}}{${n - 1}} = ${fmtNum(newM)}$</div>
+          <div class="sol-result">Жауап: $${fmtNum(newM)}$</div>`
+      };
+    },
+    // Type 3: Multiply all by k, range?
+    () => {
+      const nums = Array.from({length: 5}, () => randInt(3, 20));
+      const k = randInt(2, 5);
+      const R = range(nums);
+      const newR = R * k;
+      return {
+        q: `$${nums.join(';\\; ')}$ қатарының әр мүшесін $${k}$-ге көбейтсе, өзгеру құлашы неге тең болады?`,
+        correct: newR,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Бастапқы құлаш $= ${Math.max(...nums)} - ${Math.min(...nums)} = ${R}$</div>
+          <div class="sol-step">Көбейтсе, құлаш та $${k}$-ге көбейеді</div>
+          <div class="sol-step">Жаңа құлаш $= ${R} \\times ${k} = ${newR}$</div>
+          <div class="sol-result">Жауап: $${newR}$</div>`
+      };
+    },
+    // Type 4: Mean speed problem
+    () => {
+      const d1 = randInt(30, 100);
+      const t1 = randInt(1, 3);
+      const d2 = randInt(30, 100);
+      const t2 = randInt(1, 4);
+      const avgSpeed = Math.round((d1 + d2) / (t1 + t2) * 100) / 100;
+      return {
+        q: `Автокөлік $${d1}$ км-ді $${t1}$ сағатта, $${d2}$ км-ді $${t2}$ сағатта жүрді. Бүкіл жолдағы орта жылдамдық?`,
+        correct: avgSpeed,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Жалпы жол $= ${d1} + ${d2} = ${d1 + d2}$ км</div>
+          <div class="sol-step">Жалпы уақыт $= ${t1} + ${t2} = ${t1 + t2}$ сағат</div>
+          <div class="sol-step">Орта жылдамдық $= \\dfrac{${d1 + d2}}{${t1 + t2}} = ${fmtNum(avgSpeed)}$ км/сағ</div>
+          <div class="sol-result">Жауап: $${fmtNum(avgSpeed)}$</div>`
+      };
+    },
+    // Type 5: Subtract k from all, new mean = ?
+    () => {
+      const n = randInt(4, 6);
+      const k = randInt(2, 7);
+      const newM = randInt(10, 25);
+      const oldM = newM + k;
+      return {
+        q: `$${n}$ санды барлығын $${k}$-ге азайтса, жаңа орта $${newM}$ болды. Бастапқы орта?`,
+        correct: oldM,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Барлығын $${k}$-ге азайтса, орта да $${k}$-ге азаяды</div>
+          <div class="sol-step">Бастапқы орта $= ${newM} + ${k} = ${oldM}$</div>
+          <div class="sol-result">Жауап: $${oldM}$</div>`
+      };
+    },
+    // Type 6: Biggest removed, find it from mean difference
+    () => {
+      const n = randInt(4, 6);
+      const M = randInt(12, 22);
+      const S = n * M;
+      const smallM = randInt(M - 4, M - 1);
+      const removed = S - (n - 1) * smallM;
+      return {
+        q: `$${n}$ санның ортасы $${M}$. Ең үлкенін алып тастаса, $${n-1}$-еуінің ортасы $${smallM}$. Ең үлкен сан?`,
+        correct: removed,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Жалпы қосынды $= ${n} \\times ${M} = ${S}$</div>
+          <div class="sol-step">Қалғандардың қосындысы $= ${n-1} \\times ${smallM} = ${(n-1)*smallM}$</div>
+          <div class="sol-step">Ең үлкен $= ${S} - ${(n-1)*smallM} = ${removed}$</div>
+          <div class="sol-result">Жауап: $${removed}$</div>`
+      };
+    },
+    // Type 7: Range is 0, what's the mode?
+    () => {
+      const v = randInt(3, 20);
+      const n = randInt(4, 7);
+      return {
+        q: `$${n}$ санның өзгеру құлашы $0$ болса, олардың модасы неге тең?`,
+        correct: v,
+        solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Құлаш $= 0$ болса, барлық сандар бірдей</div>
+          <div class="sol-step">Бірдей сандар бір ғана мәнге ие</div>
+          <div class="sol-step">Мода — сол сандың өзі (кез келген мән болуы мүмкін)</div>
+          <div class="sol-result">Жауап: Сандардың өзіне тең (кез келген бүтін сан дұрыс)</div>`,
+        special: true,
+        correctText: 'Сандардың өзі'
+      };
+    }
+  ];
+
+  // Type 7 (special) only once; rest cycle
+  const order = shuffleArray([0,1,2,3,4,5,6,0,1,2]);
+  for (let i = 0; i < 10; i++) {
+    const gen = types[order[i]];
+    const result = gen();
+
+    if (result.special) {
+      // Special question with text answer
+      const v = randInt(3, 20);
+      questions.push({
+        q: result.q,
+        opts: [`$${v}$`, `$0$`, `$${v * 2}$`, 'Анықтау мүмкін емес'],
+        solution: result.solution,
+        correctOverride: 0
+      });
+    } else {
+      const wrongs = wrongOpts(result.correct, 3, 1, Math.max(3, Math.round(Math.abs(result.correct) * 0.15)));
+      const opts = [fmtKatex(result.correct), ...wrongs.map(fmtKatex)];
+      questions.push({ q: result.q, opts, solution: result.solution });
+    }
+  }
+  return questions;
+}
+
+// Level generators map
+const LEVEL_GENERATORS = {
+  1: genLevel1,
+  2: genLevel2,
+  3: genLevel3,
+  4: genLevel4,
+  5: genLevel5
+};
+
+// ══════════════════════════════════════════════════════════════════
+//  RECONNECTION
+// ══════════════════════════════════════════════════════════════════
+(async function tryReconnect() {
+  if (!urlCode) return;
+  const saved = loadState(urlCode);
+  if (!saved) return;
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${urlCode}`);
+    const data = await res.json();
+    if (data.status === 'not_found' || data.status === 'ended') {
+      clearState(); return;
+    }
+    sessionCode = urlCode;
+    studentId = saved.studentId;
+    studentName = saved.name;
+    totalCorrect = saved.totalCorrect || 0;
+    totalAnswered = saved.totalAnswered || 0;
+    levelsCompleted = saved.levelsCompleted || 0;
+    currentLevel = saved.currentLevel || 1;
+    tabSwitches = saved.tabSwitches || 0;
+    awaySeconds = saved.awaySeconds || 0;
+    if (data.status === 'active') { startQuiz(); }
+    else if (data.status === 'waiting') { showWait(); }
+  } catch (_) {}
+})();
+
+// ══════════════════════════════════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════════════════════════════════
+async function joinQuiz() {
+  const name = document.getElementById('sname').value.trim();
+  const code = (urlCode || document.getElementById('scode').value.trim()).toUpperCase();
+  const errEl = document.getElementById('join-err');
+  if (!name) { errEl.textContent = 'Атыңызды жазыңыз'; errEl.classList.add('on'); return; }
+  if (code.length < 4) { errEl.textContent = 'Бөлме кодын енгізіңіз'; errEl.classList.add('on'); return; }
+  errEl.classList.remove('on');
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = '⏳ Қосылуда...';
+  sessionCode = code;
+  studentName = name;
+  studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
+  currentLevel = 1; levelsCompleted = 0; totalCorrect = 0; totalAnswered = 0;
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${code}`);
+    const data = await res.json();
+    if (data.status === 'not_found') {
+      errEl.textContent = 'Бөлме табылмады. Кодты тексеріңіз.';
+      errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+    }
+    if (data.status === 'ended') {
+      errEl.textContent = 'Бұл сабақ аяқталған.';
+      errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+    }
+    await sendScore();
+    saveState();
+    btn.disabled = false; btn.textContent = '🚀 Кіру';
+    if (data.status === 'active') { startQuiz(); } else { showWait(); }
+  } catch (e) {
+    errEl.textContent = 'Серверге қосылу мүмкін болмады.';
+    errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру';
+  }
+}
+document.addEventListener('keydown', e => {
+  if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz();
+});
+
+// ══════════════════════════════════════════════════════════════════
+//  WAIT
+// ══════════════════════════════════════════════════════════════════
+function showWait() {
+  document.getElementById('wait-name').textContent = studentName;
+  show('s-wait');
+  if (statusPollInterval) clearInterval(statusPollInterval);
+  statusPollInterval = setInterval(pollStatus, 2000);
+}
+async function pollStatus() {
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
+    const data = await res.json();
+    if (data.status === 'active') {
+      clearInterval(statusPollInterval); statusPollInterval = null; startQuiz();
+    } else if (data.status === 'ended' || data.status === 'not_found') {
+      clearInterval(statusPollInterval); statusPollInterval = null; showEnd();
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  START QUIZ
+// ══════════════════════════════════════════════════════════════════
+function startQuiz() {
+  if (quizStarted) return;
+  quizStarted = true;
+  show('s-quiz');
+  startLevel(currentLevel);
+  sendScore();
+  if (submitInterval) clearInterval(submitInterval);
+  submitInterval = setInterval(sendScore, 5000);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  LEVEL MANAGEMENT
+// ══════════════════════════════════════════════════════════════════
+function startLevel(level) {
+  currentLevel = level;
+  levelCorrect = 0;
+  levelWrong = 0;
+  // Generate fresh questions every time (numbers change!)
+  currentBank = LEVEL_GENERATORS[level]();
+  currentQIdx = 0;
+  selectedIdx = null;
+  isAnswered = false;
+  updateLevelBadge();
+  loadQuestion();
+}
+
+const LEVEL_LABELS = { 1: '🟢 Деңгей 1', 2: '🔵 Деңгей 2', 3: '🟡 Деңгей 3', 4: '🟣 Деңгей 4', 5: '🔴 Деңгей 5' };
+const LEVEL_COLORS = { 1: 'var(--green)', 2: '#1d4ed8', 3: 'var(--amber)', 4: '#7c3aed', 5: 'var(--red)' };
+
+function updateLevelBadge() {
+  const badge = document.getElementById('level-badge');
+  badge.textContent = LEVEL_LABELS[currentLevel];
+  badge.className = 'level-badge l' + currentLevel;
+  const statLvl = document.getElementById('st-level');
+  statLvl.textContent = currentLevel;
+  statLvl.style.color = LEVEL_COLORS[currentLevel];
+}
+
+function loadQuestion() {
+  const q = currentBank[currentQIdx];
+  // Shuffle options, track correct
+  const correctIdx = q.correctOverride !== undefined ? q.correctOverride : 0;
+  const indices = [0, 1, 2, 3];
+  const perm = shuffleArray(indices);
+  const shuffledOpts = perm.map(i => q.opts[i]);
+  const newCorrectIdx = perm.indexOf(correctIdx);
+  currentQuestion = { q: q.q, shuffledOpts, correctIdx: newCorrectIdx, solution: q.solution };
+  selectedIdx = null;
+  isAnswered = false;
+
+  document.getElementById('q-text').innerHTML = renderText(q.q);
+
+  const labels = ['A', 'B', 'C', 'D'];
+  const container = document.getElementById('opts-container');
+  container.innerHTML = '';
+  shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mcq-opt';
+    btn.dataset.idx = i;
+    btn.innerHTML = `<span class="mcq-label">${labels[i]}</span><span class="mcq-text">${renderText(opt)}</span>`;
+    btn.onclick = () => selectOption(i);
+    container.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback hidden'; fb.textContent = '';
+  document.getElementById('solution-box').classList.add('hidden');
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').classList.remove('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+
+  updateStats();
+}
+
+function selectOption(idx) {
+  if (isAnswered) return;
+  selectedIdx = idx;
+  document.querySelectorAll('.mcq-opt').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer() {
+  if (selectedIdx === null || isAnswered) return;
+  isAnswered = true;
+
+  const isCorrect = selectedIdx === currentQuestion.correctIdx;
+  if (isCorrect) { levelCorrect++; totalCorrect++; }
+  else { levelWrong++; }
+  totalAnswered++;
+
+  document.querySelectorAll('.mcq-opt').forEach((btn, i) => {
+    btn.style.pointerEvents = 'none';
+    if (i === currentQuestion.correctIdx) btn.classList.add('correct');
+    else if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('hidden', 'correct', 'wrong');
+  if (isCorrect) {
+    fb.classList.add('correct'); fb.textContent = '✓ Дұрыс!';
+  } else {
+    fb.classList.add('wrong'); fb.textContent = '✗ Қате!';
+  }
+
+  // Show detailed solution
+  const solBox = document.getElementById('solution-box');
+  solBox.innerHTML = renderText(currentQuestion.solution);
+  solBox.classList.remove('hidden');
+
+  document.getElementById('check-btn').classList.add('hidden');
+  document.getElementById('next-btn').classList.remove('hidden');
+  updateStats();
+  saveState();
+  sendScore();
+}
+
+function nextQuestion() {
+  currentQIdx++;
+  if (currentQIdx >= 10) {
+    showLevelEnd();
+  } else {
+    loadQuestion();
+  }
+}
+
+function updateStats() {
+  document.getElementById('st-correct').textContent = levelCorrect;
+  document.getElementById('st-wrong').textContent = levelWrong;
+  const qNum = Math.min(currentQIdx + 1, 10);
+  document.getElementById('st-q').textContent = qNum + '/10';
+  document.getElementById('q-prog-text').textContent = qNum + '/10';
+  document.getElementById('q-prog-fill').style.width = (qNum * 10) + '%';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  LEVEL END SCREEN
+// ══════════════════════════════════════════════════════════════════
+function showLevelEnd() {
+  const passed = levelCorrect >= 7;
+  const pct = levelCorrect * 10;
+  const lvl = currentLevel;
+
+  document.getElementById('le-emoji').textContent = passed ? (pct === 100 ? '🌟' : '🎉') : '😓';
+  document.getElementById('le-title').textContent = 'Деңгей ' + lvl + ' аяқталды!';
+  document.getElementById('le-sub').textContent = passed
+    ? (lvl < MAX_LEVEL ? 'Керемет! Деңгей ' + (lvl + 1) + '-ге өтесіз.' : 'Барлық деңгейді өттіңіз!')
+    : 'Жаңадан тырысыңыз.';
+
+  document.getElementById('le-score').textContent = levelCorrect + '/10';
+  const bar = document.getElementById('le-bar-fill');
+  bar.style.width = pct + '%';
+  bar.style.background = passed ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('le-pass-msg').classList.toggle('hidden', !passed);
+  document.getElementById('le-fail-msg').classList.toggle('hidden', passed);
+
+  const btnEl = document.getElementById('le-btn');
+  if (!passed) {
+    btnEl.textContent = '🔄 Қайта тырысу';
+    btnEl.className = 'btn btn-red btn-block';
+  } else if (lvl < MAX_LEVEL) {
+    btnEl.textContent = 'Деңгей ' + (lvl + 1) + ' → Бастау';
+    btnEl.className = 'btn btn-green btn-block';
+  } else {
+    btnEl.textContent = '🏆 Нәтижелерді көру';
+    btnEl.className = 'btn btn-primary btn-block';
+  }
+
+  if (passed) {
+    levelsCompleted++;
+    spawnConfetti();
+  }
+  saveState();
+  sendScore();
+  show('s-level-end');
+}
+
+function continueAfterLevel() {
+  const passed = levelCorrect >= 7;
+  if (!passed) {
+    show('s-quiz');
+    startLevel(currentLevel); // Re-generates questions with new numbers!
+  } else if (currentLevel >= MAX_LEVEL) {
+    sendScore(true);
+    showEnd();
+  } else {
+    show('s-quiz');
+    startLevel(currentLevel + 1);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SEND SCORE
+// ══════════════════════════════════════════════════════════════════
+async function sendScore(finished) {
+  if (!sessionCode || !studentName) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    const res = await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: sessionCode,
+        studentId,
+        name: studentName + '|' + currentLevel,
+        score: totalCorrect,
+        total: totalAnswered,
+        finished: finished === true,
+        focused: isFocused,
+        tabSwitches,
+        awaySeconds: currentAway
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'ended' || data.status === 'not_found') { showEnd(); }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  END — show final results
+// ══════════════════════════════════════════════════════════════════
+function showEnd() {
+  if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
+  if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+  const pct = totalAnswered > 0 ? Math.round(totalCorrect / totalAnswered * 100) : 0;
+  document.getElementById('res-correct').textContent = totalCorrect;
+  document.getElementById('res-levels').textContent = levelsCompleted + '/' + MAX_LEVEL;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-emoji').textContent = levelsCompleted === MAX_LEVEL ? '🌟' : pct >= 70 ? '🎉' : pct >= 40 ? '👍' : '💪';
+  show('s-results');
+  if (pct >= 70) spawnConfetti();
+  clearState();
+}
+</script>
+</body>
+</html>
