@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Өзгеру құлашы, мода және медиана — Мұғалім</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;--border2:#bcc2d3;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;--amber-light:#fffbeb;--amber-border:#fcd34d;
+  --rad:16px;--rad-sm:10px;
+  --shadow:0 4px 12px rgba(20,24,38,0.06),0 1px 3px rgba(20,24,38,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+.container{max-width:1000px;margin:0 auto;padding:24px;flex:1;width:100%;}
+
+/* ─── HEADERS & TYPOGRAPHY ─── */
+h1{font-weight:800;font-size:26px;letter-spacing:-0.5px;margin-bottom:8px;}
+p{color:var(--text2);line-height:1.5;}
+.subtitle{font-size:15px;color:var(--muted);margin-bottom:24px;}
+
+/* ─── BUTTONS ─── */
+button{
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:8px;font-weight:600;font-size:15px;
+  padding:14px 24px;border-radius:var(--rad-sm);
+  border:none;cursor:pointer;transition:all 0.2s;
+  user-select:none;
+}
+button:active{transform:translateY(2px);}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(67,56,202,0.25);}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-danger:hover{background:#b91c1c;}
+
+/* ─── SCREENS ─── */
+.screen{display:none;animation:fadeIn 0.4s ease forwards;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ─── SETUP SCREEN ─── */
+.setup-box{background:var(--bg2);padding:32px;border-radius:var(--rad);box-shadow:var(--shadow);}
+.sections-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:24px 0;}
+.sec-btn{
+  background:var(--bg);border:2px solid var(--border);
+  padding:16px;border-radius:var(--rad-sm);
+  font-size:15px;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:all 0.2s;text-align:center;
+}
+.sec-btn.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary);}
+.sec-btn:hover:not(.selected){border-color:var(--border2);background:var(--bg3);}
+
+/* ─── LOBBY SCREEN ─── */
+.lobby-grid{display:grid;grid-template-columns:300px 1fr;gap:24px;}
+@media(max-width:768px){.lobby-grid{grid-template-columns:1fr;}}
+.lobby-qr-card{background:var(--bg2);padding:24px;border-radius:var(--rad);box-shadow:var(--shadow);text-align:center;}
+.qr-code{background:#fff;padding:16px;border-radius:12px;display:inline-block;margin:16px 0;border:1px solid var(--border);}
+.qr-code img{display:block;}
+.join-url{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--primary);background:var(--primary-light);padding:8px 12px;border-radius:8px;margin-bottom:16px;word-break:break-all;}
+.lobby-code{font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:800;letter-spacing:4px;color:var(--text);margin:16px 0;}
+
+/* ─── LIVE DASHBOARD ─── */
+.top-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--bg2);padding:16px 24px;border-radius:var(--rad);
+  box-shadow:var(--shadow);margin-bottom:24px;flex-wrap:wrap;gap:16px;
+}
+.timer{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--text);}
+.timer.danger{color:var(--red);animation:pulse 1s infinite;}
+.stats-pill{background:var(--bg);padding:8px 16px;border-radius:24px;font-weight:600;font-size:14px;color:var(--text2);}
+.stats-pill.away-warn{background:var(--red-light);color:var(--red);}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.card{
+  background:var(--bg2);border-radius:var(--rad);padding:16px;
+  box-shadow:var(--shadow);border:2px solid transparent;
+  display:flex;flex-direction:column;gap:12px;position:relative;
+  transition:transform 0.2s;
+}
+.card.flash-green{animation:flashGreen 1s ease;}
+.card.flash-red{animation:flashRed 1s ease;}
+@keyframes flashGreen{0%{border-color:var(--green);background:var(--green-light);}100%{border-color:transparent;background:var(--bg2);}}
+@keyframes flashRed{0%{border-color:var(--red);background:var(--red-light);}100%{border-color:transparent;background:var(--bg2);}}
+
+.c-head{display:flex;justify-content:space-between;align-items:flex-start;}
+.c-name{font-weight:700;font-size:16px;color:var(--text);}
+.c-level{font-size:12px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.c-score{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--primary);}
+.c-frac{font-size:13px;color:var(--muted);font-weight:500;}
+
+.c-bar-bg{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin-top:4px;}
+.c-bar-fg{height:100%;background:var(--primary);border-radius:4px;transition:width 0.4s ease;}
+
+.c-foot{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;}
+.s-focus{display:flex;align-items:center;gap:6px;}
+.s-focus-dot{width:10px;height:10px;border-radius:50%;}
+.s-focus-dot.on{background:var(--green);animation:breathe 2s infinite;}
+.s-focus-dot.off{background:var(--red);animation:pulse 1s infinite;}
+.s-focus-text{color:var(--muted);}
+.s-focus-text.away{color:var(--red);}
+.tab-warn{background:var(--red-light);border:1px solid var(--red-border);color:var(--red);padding:2px 6px;border-radius:6px;font-family:'JetBrains Mono',monospace;}
+.fin-badge{background:var(--green-light);color:var(--green);padding:4px 8px;border-radius:6px;font-size:12px;}
+
+@keyframes breathe{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.6;transform:scale(0.8);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* ─── LEADERBOARD ─── */
+.lb-box{background:var(--bg2);border-radius:var(--rad);box-shadow:var(--shadow);overflow:hidden;}
+.lb-row{
+  display:flex;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border);
+  gap:16px;
+}
+.lb-row:last-child{border-bottom:none;}
+.lb-rank{font-size:24px;font-weight:800;width:32px;text-align:center;}
+.lb-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;}
+.lb-info{flex:1;}
+.lb-name{font-weight:700;font-size:16px;}
+.lb-stats{font-size:13px;color:var(--muted);margin-top:2px;display:flex;gap:12px;}
+.lb-score{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;}
+.empty-msg{padding:48px;text-align:center;color:var(--muted);font-weight:500;}
+
+/* Confetti */
+.confetti{position:fixed;width:10px;height:10px;background-color:#f00;z-index:9999;animation:fall linear forwards;}
+@keyframes fall{to{transform:translateY(100vh) rotate(720deg);}}
+</style>
+</head>
+<body>
+
+<div class="container">
+  
+  <div id="screen-setup" class="screen active">
+    <div class="setup-box">
+      <h1>Өзгеру құлашы, мода және медиана</h1>
+      <p class="subtitle">Оқушыларға арналған деңгейлерді таңдаңыз.</p>
+      
+      <div class="sections-grid" id="sections-grid">
+        <div class="sec-btn selected" data-id="sec1">1-деңгей: Жеңіл</div>
+        <div class="sec-btn selected" data-id="sec2">2-деңгей: Орташа</div>
+        <div class="sec-btn selected" data-id="sec3">3-деңгей: Күрделі</div>
+      </div>
+      
+      <button class="btn-primary" onclick="createSession()" style="width:100%;font-size:16px;padding:16px;">
+        Бөлме құру
+      </button>
+    </div>
+  </div>
+
+  <div id="screen-lobby" class="screen">
+    <div class="lobby-grid">
+      <div class="lobby-qr-card">
+        <h2>Қосылу коды:</h2>
+        <div class="lobby-code" id="display-code">------</div>
+        <div class="qr-code" id="qr-container"></div>
+        <div class="join-url" id="join-url-text"></div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:24px;">Оқушылар осы сілтеме немесе QR арқылы қосыла алады.</p>
+        
+        <button class="btn-primary" onclick="startQuiz()" style="width:100%;">
+          ▶ Бастау
+        </button>
+      </div>
+      
+      <div class="setup-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2>Күту залы</h2>
+          <div class="stats-pill" id="lobby-count">0 оқушы</div>
+        </div>
+        <div class="grid" id="lobby-students">
+          <div class="empty-msg">Әзірге ешкім қосылған жоқ...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-live" class="screen">
+    <div class="top-bar">
+      <div>
+        <h1>Тест жүріп жатыр...</h1>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--primary);margin-top:4px;">
+          КОД: <span id="live-code"></span>
+        </div>
+      </div>
+      
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="stats-pill" id="live-count">0 оқушы</div>
+        <div class="stats-pill away-warn" id="live-away-count" style="display:none;">👀 0 сыртта</div>
+        <div class="timer" id="timer">45:00</div>
+        <button class="btn-danger" onclick="endQuiz()">Аяқтау</button>
+      </div>
+    </div>
+    
+    <div class="grid" id="live-students"></div>
+  </div>
+
+  <div id="screen-results" class="screen">
+    <div class="top-bar">
+      <div>
+        <h1>Қорытынды</h1>
+        <p class="subtitle">Нәтижелер мен статистика</p>
+      </div>
+      <div class="stats-pill" id="res-sub">0 оқушы</div>
+    </div>
+    
+    <div class="lb-box" id="leaderboard"></div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  CONFIG & STATE
+// ══════════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const STUDENT_URL = 'https://sultan19235.github.io/mathsabaq-apps/range-mode-median-grade6/student.html';
+
+let sessionCode = '';
+let sseSource = null;
+let students = new Map();
+let prevTotals = new Map();
+let startTime = null;
+let timerInterval = null;
+
+// UI Elements
+const els = {
+  setup: document.getElementById('screen-setup'),
+  lobby: document.getElementById('screen-lobby'),
+  live: document.getElementById('screen-live'),
+  results: document.getElementById('screen-results')
+};
+
+function showScreen(id) {
+  Object.values(els).forEach(e => e.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Setup Section Toggles
+document.querySelectorAll('.sec-btn').forEach(btn => {
+  btn.addEventListener('click', () => btn.classList.toggle('selected'));
+});
+
+// ══════════════════════════════════════════════════════════════════
+//  LIFECYCLE API
+// ══════════════════════════════════════════════════════════════════
+
+async function createSession() {
+  const selected = Array.from(document.querySelectorAll('.sec-btn.selected')).map(b => b.dataset.id);
+  if (selected.length === 0) return alert('Кем дегенде 1 деңгейді таңдаңыз!');
+  
+  try {
+    const res = await fetch(`${BACKEND}/session`, { method: 'POST' });
+    const data = await res.json();
+    sessionCode = data.code;
+    
+    // Setup Lobby URLs
+    document.getElementById('display-code').textContent = sessionCode;
+    document.getElementById('live-code').textContent = sessionCode;
+    
+    const joinUrl = `${STUDENT_URL}?code=${sessionCode}&sec=${selected.join(',')}`;
+    document.getElementById('join-url-text').textContent = joinUrl;
+    
+    document.getElementById('qr-container').innerHTML = '';
+    new QRCode(document.getElementById('qr-container'), {
+      text: joinUrl, width: 160, height: 160,
+      colorDark: "#141826", colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.L
+    });
+    
+    startSSE();
+    showScreen('screen-lobby');
+  } catch (err) {
+    alert('Қате: Серверге қосылу мүмкін емес.');
+  }
+}
+
+async function startQuiz() {
+  try {
+    await fetch(`${BACKEND}/start`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ code: sessionCode })
+    });
+  } catch (err) {}
+}
+
+async function endQuiz() {
+  if(!confirm('Тестті аяқтауға сенімдісіз бе?')) return;
+  try {
+    await fetch(`${BACKEND}/end`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ code: sessionCode })
+    });
+  } catch (err) {}
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SSE & REALTIME
+// ══════════════════════════════════════════════════════════════════
+
+function startSSE() {
+  sseSource = new EventSource(`${BACKEND}/live?code=${sessionCode}`);
+  
+  sseSource.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      if (data.type === 'snapshot') {
+        data.students.forEach(s => students.set(s.studentId, s));
+        updateUI(data.status, data.timeLeft);
+      } 
+      else if (data.type === 'update') {
+        students.set(data.studentId, { studentId: data.studentId, ...data.data });
+        updateUI('active', data.timeLeft);
+      }
+      else if (data.type === 'started') {
+        showScreen('screen-live');
+      }
+      else if (data.type === 'ended') {
+        sseSource.close();
+        clearInterval(timerInterval);
+        showResults();
+      }
+    } catch(err) {}
+  };
+}
+
+function updateUI(status, timeLeft) {
+  if (status === 'waiting') {
+    renderLobby();
+  } else if (status === 'active') {
+    if (!els.live.classList.contains('active')) showScreen('screen-live');
+    renderLive();
+    updateTimer(timeLeft);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RENDERING
+// ══════════════════════════════════════════════════════════════════
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function parseName(raw) {
+  if(!raw) return {name:'Белгісіз', level:''};
+  const parts = raw.split('|');
+  return { name: parts[0] || 'Белгісіз', level: parts[1] || '' };
+}
+
+function renderLobby() {
+  const arr = Array.from(students.values());
+  document.getElementById('lobby-count').textContent = arr.length + ' оқушы';
+  
+  const cont = document.getElementById('lobby-students');
+  if (arr.length === 0) {
+    cont.innerHTML = '<div class="empty-msg">Әзірге ешкім қосылған жоқ...</div>';
+    return;
+  }
+  
+  cont.innerHTML = arr.map(s => {
+    const { name } = parseName(s.name);
+    return `<div class="card" style="padding:12px;display:flex;flex-direction:row;align-items:center;gap:12px;">
+      <div class="lb-av" style="background:var(--primary-light);color:var(--primary);width:32px;height:32px;font-size:14px;">
+        ${esc(name.charAt(0).toUpperCase())}
+      </div>
+      <div style="font-weight:600;">${esc(name)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderLive() {
+  const arr = Array.from(students.values()).sort((a,b) => (b.score||0) - (a.score||0));
+  document.getElementById('live-count').textContent = arr.length + ' оқушы';
+  
+  let awayCount = 0;
+  
+  const html = arr.map(s => {
+    const id = s.studentId;
+    const { name, level } = parseName(s.name);
+    const score = s.score || 0;
+    const total = s.total || 0;
+    const finished = s.finished === true;
+    const focused = s.focused !== false;
+    const tabSw = s.tabSwitches || 0;
+    const awaySec = s.awaySeconds || 0;
+    
+    if (!focused && !finished) awayCount++;
+    
+    // Check for flash animation ONLY on answer count change
+    let flashClass = '';
+    const prevT = prevTotals.get(id) || 0;
+    if (total > prevT) {
+      const prevS = prevTotals.get(id + '_s') || 0;
+      flashClass = (score > prevS) ? 'flash-green' : 'flash-red';
+    }
+    prevTotals.set(id, total);
+    prevTotals.set(id + '_s', score);
+
+    const pct = total > 0 ? (score / total) * 100 : 0;
+    const warnBadge = tabSw > 0 ? `<span class="tab-warn">👀 ${tabSw}× · ${awaySec}с</span>` : '';
+    
+    let focusHtml = '';
+    if (finished) {
+      focusHtml = `<span class="fin-badge">✓ Бітірді</span>`;
+    } else {
+      focusHtml = `
+        <div class="s-focus">
+          <span class="s-focus-dot ${focused ? 'on' : 'off'}"></span>
+          <span class="s-focus-text ${focused ? '' : 'away'}">${focused ? 'Экранда' : 'Сыртта'}</span>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="card ${flashClass}" id="card-${id}">
+        <div class="c-head">
+          <div>
+            <div class="c-name">${esc(name)} ${warnBadge}</div>
+            <div class="c-level">${esc(level)}</div>
+          </div>
+          <div class="c-score" style="color:${pct>=70?'var(--green)':pct>=40?'var(--amber)':'var(--red)'}">
+            ${score}
+          </div>
+        </div>
+        
+        <div>
+          <div class="c-frac">${score} дұрыс / ${total - score} қате</div>
+          <div class="c-bar-bg">
+            <div class="c-bar-fg" style="width:${pct}%;background:${pct>=70?'var(--green)':pct>=40?'var(--amber)':'var(--red)'}"></div>
+          </div>
+        </div>
+        
+        <div class="c-foot">
+          ${focusHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  document.getElementById('live-students').innerHTML = html || '<div class="empty-msg">Оқушылар күтілуде...</div>';
+  
+  const awayEl = document.getElementById('live-away-count');
+  if (awayCount > 0) {
+    awayEl.style.display = 'block';
+    awayEl.textContent = `👀 ${awayCount} сыртта`;
+  } else {
+    awayEl.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  TIMER & RESULTS
+// ══════════════════════════════════════════════════════════════════
+
+function updateTimer(msLeft) {
+  if(!msLeft || msLeft <= 0) {
+    document.getElementById('timer').textContent = '00:00';
+    return;
+  }
+  const totalSec = Math.floor(msLeft / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  const el = document.getElementById('timer');
+  el.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  
+  if(m < 5) el.classList.add('danger');
+  else el.classList.remove('danger');
+}
+
+function showResults() {
+  showScreen('screen-results');
+  shootConfetti();
+  
+  const arr = Array.from(students.values()).sort((a,b) => {
+    // Sort by level (highest first), then percentage, then score
+    const la = parseName(a.name).level;
+    const lb = parseName(b.name).level;
+    if (lb !== la) return lb.localeCompare(la);
+    
+    const pA = a.total > 0 ? a.score / a.total : 0;
+    const pB = b.total > 0 ? b.score / b.total : 0;
+    if(pB !== pA) return pB - pA;
+    return (b.score||0) - (a.score||0);
+  });
+  
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('res-sub').textContent = arr.length + ' оқушы';
+  
+  document.getElementById('leaderboard').innerHTML = arr.map((s, i) => {
+    const { name, level } = parseName(s.name);
+    const score = s.score || 0, total = s.total || 0;
+    const pct = total > 0 ? Math.round((score/total)*100) : 0;
+    const col = pct>=70 ? 'var(--green)' : pct>=40 ? 'var(--amber)' : 'var(--red)';
+    const tabSw = s.tabSwitches || 0, awaySec = s.awaySeconds || 0;
+    const warnStr = tabSw > 0 ? `<span class="tab-warn" style="margin-left:8px;">👀 ${tabSw}× · ${awaySec}с</span>` : '';
+    
+    return `
+      <div class="lb-row">
+        <div class="lb-rank">${medals[i] || (i+1)}</div>
+        <div class="lb-av" style="background:${col}18;color:${col}">${esc(name.charAt(0).toUpperCase())}</div>
+        <div class="lb-info">
+          <div class="lb-name">${esc(name)} ${warnStr}</div>
+          <div class="lb-stats">
+            <span>Деңгей: <b>${esc(level)}</b></span>
+            <span>Дұрыс: <b style="color:${col}">${score}/${total}</b> (${pct}%)</span>
+          </div>
+        </div>
+        <div class="lb-score" style="color:${col}">${score}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function shootConfetti() {
+  for(let i=0; i<80; i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.backgroundColor = ['#4338ca','#059669','#dc2626','#d97706','#3b82f6'][Math.floor(Math.random()*5)];
+    c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    c.style.animationDelay = (Math.random() * 1) + 's';
+    document.body.appendChild(c);
+  }
+}
+</script>
+</body>
+</html>
