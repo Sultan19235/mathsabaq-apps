@@ -6,8 +6,6 @@
 <title>Өзгеру құлашы, мода және медиана — Мұғалім</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <style>
 :root{
   --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
@@ -17,202 +15,177 @@
   --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
   --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
   --amber:#d97706;--amber-light:#fffbeb;--amber-border:#fcd34d;
-  --rad:16px;--rad-sm:10px;
-  --shadow:0 4px 12px rgba(20,24,38,0.06),0 1px 3px rgba(20,24,38,0.04);
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
 }
-*{box-sizing:border-box;margin:0;padding:0;font-family:'DM Sans',sans-serif;}
-body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-.container{max-width:1000px;margin:0 auto;padding:24px;flex:1;width:100%;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent;overflow:hidden}
 
-/* ─── HEADERS & TYPOGRAPHY ─── */
-h1{font-weight:800;font-size:26px;letter-spacing:-0.5px;margin-bottom:8px;}
-p{color:var(--text2);line-height:1.5;}
-.subtitle{font-size:15px;color:var(--muted);margin-bottom:24px;}
+.screen{display:none;position:fixed;inset:0;flex-direction:column;overflow:hidden;animation:fadeUp .3s ease}
+.screen.active{display:flex}
+.si{flex:1;display:flex;flex-direction:column;align-items:center;padding:14px;overflow:hidden}
+.si.center{justify-content:center}
+.si.top{justify-content:flex-start}
 
-/* ─── BUTTONS ─── */
-button{
-  display:inline-flex;align-items:center;justify-content:center;
-  gap:8px;font-weight:600;font-size:15px;
-  padding:14px 24px;border-radius:var(--rad-sm);
-  border:none;cursor:pointer;transition:all 0.2s;
-  user-select:none;
-}
-button:active{transform:translateY(2px);}
-.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(67,56,202,0.25);}
-.btn-primary:hover{background:var(--primary-dark);}
-.btn-danger{background:var(--red);color:#fff;}
-.btn-danger:hover{background:#b91c1c;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(5,150,105,.4)}50%{box-shadow:0 0 0 5px rgba(5,150,105,0)}}
 
-/* ─── SCREENS ─── */
-.screen{display:none;animation:fadeIn 0.4s ease forwards;}
-.screen.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.logo{font-size:1.5rem;font-weight:800;letter-spacing:-.5px}
+.logo b{color:var(--primary)}
+.logo-sub{color:var(--muted);font-size:.78rem;margin-top:2px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm)}
+.card-title{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+.btn-sm{padding:7px 14px;font-size:.76rem;min-height:36px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 
-/* ─── SETUP SCREEN ─── */
-.setup-box{background:var(--bg2);padding:32px;border-radius:var(--rad);box-shadow:var(--shadow);}
-.sections-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:24px 0;}
-.sec-btn{
-  background:var(--bg);border:2px solid var(--border);
-  padding:16px;border-radius:var(--rad-sm);
-  font-size:15px;font-weight:600;color:var(--text2);
-  cursor:pointer;transition:all 0.2s;text-align:center;
-}
-.sec-btn.selected{background:var(--primary-light);border-color:var(--primary);color:var(--primary);}
-.sec-btn:hover:not(.selected){border-color:var(--border2);background:var(--bg3);}
+/* ── SETUP ── */
+.setup-wrap{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;justify-content:center}
+.setup-hero{text-align:center;margin-bottom:24px}
+.setup-info{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.setup-info-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.setup-info-row:last-child{border-bottom:none}
 
-/* ─── LOBBY SCREEN ─── */
-.lobby-grid{display:grid;grid-template-columns:300px 1fr;gap:24px;}
-@media(max-width:768px){.lobby-grid{grid-template-columns:1fr;}}
-.lobby-qr-card{background:var(--bg2);padding:24px;border-radius:var(--rad);box-shadow:var(--shadow);text-align:center;}
-.qr-code{background:#fff;padding:16px;border-radius:12px;display:inline-block;margin:16px 0;border:1px solid var(--border);}
-.qr-code img{display:block;}
-.join-url{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--primary);background:var(--primary-light);padding:8px 12px;border-radius:8px;margin-bottom:16px;word-break:break-all;}
-.lobby-code{font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:800;letter-spacing:4px;color:var(--text);margin:16px 0;}
+/* ── LOBBY ── */
+.lobby-wrap{width:100%;max-width:860px;height:100%;display:flex;flex-direction:column}
+.lobby-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;flex-shrink:0}
+.code-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 20px;display:flex;align-items:center;gap:20px;flex-shrink:0;box-shadow:var(--shadow-sm)}
+.code-val{font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:800;letter-spacing:4px;color:var(--text);line-height:1}
+.qr-box{background:#fff;padding:8px;border-radius:10px;border:1px solid var(--border)}
+.lobby-main{flex:1;display:flex;flex-direction:column;min-height:0;margin-top:10px}
+.lobby-list{flex:1;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;align-content:start}
+.l-stu{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);font-weight:600;font-size:.9rem}
+.l-stu-av{width:28px;height:28px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0}
 
-/* ─── LIVE DASHBOARD ─── */
-.top-bar{
-  display:flex;justify-content:space-between;align-items:center;
-  background:var(--bg2);padding:16px 24px;border-radius:var(--rad);
-  box-shadow:var(--shadow);margin-bottom:24px;flex-wrap:wrap;gap:16px;
-}
-.timer{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--text);}
-.timer.danger{color:var(--red);animation:pulse 1s infinite;}
-.stats-pill{background:var(--bg);padding:8px 16px;border-radius:24px;font-weight:600;font-size:14px;color:var(--text2);}
-.stats-pill.away-warn{background:var(--red-light);color:var(--red);}
+/* ── LIVE ── */
+.live-wrap{width:100%;max-width:1100px;height:100%;display:flex;flex-direction:column}
+.live-top{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:12px;flex-shrink:0;box-shadow:var(--shadow-sm)}
+.live-timer{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--text)}
+.live-timer.danger{color:var(--red);animation:pulse 1s infinite}
+.live-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;align-content:start;padding-bottom:20px}
+.s-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;position:relative;transition:transform .2s;display:flex;flex-direction:column;gap:10px}
+.s-card.flash-g{animation:flashG .8s ease}
+.s-card.flash-r{animation:flashR .8s ease}
+@keyframes flashG{0%{border-color:var(--green);background:var(--green-light)}100%{border-color:var(--border);background:var(--bg2)}}
+@keyframes flashR{0%{border-color:var(--red);background:var(--red-light)}100%{border-color:var(--border);background:var(--bg2)}}
+.sc-head{display:flex;justify-content:space-between;align-items:flex-start}
+.sc-name{font-weight:700;font-size:1rem}
+.sc-lvl{font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:2px}
+.sc-score{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:800;line-height:1}
+.sc-bar-wrap{background:var(--bg3);height:6px;border-radius:3px;overflow:hidden}
+.sc-bar{height:100%;background:var(--primary);border-radius:3px;transition:width .3s}
+.sc-foot{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;font-weight:700}
+.sc-focus{display:flex;align-items:center;gap:6px}
+.f-dot{width:8px;height:8px;border-radius:50%}
+.f-dot.on{background:var(--green);animation:breathe 2s infinite}
+.f-dot.off{background:var(--red);animation:pulse 1s infinite}
+.sc-warn{background:var(--red-light);color:var(--red);border:1px solid var(--red-border);padding:2px 6px;border-radius:6px;font-family:'JetBrains Mono',monospace}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
-.card{
-  background:var(--bg2);border-radius:var(--rad);padding:16px;
-  box-shadow:var(--shadow);border:2px solid transparent;
-  display:flex;flex-direction:column;gap:12px;position:relative;
-  transition:transform 0.2s;
-}
-.card.flash-green{animation:flashGreen 1s ease;}
-.card.flash-red{animation:flashRed 1s ease;}
-@keyframes flashGreen{0%{border-color:var(--green);background:var(--green-light);}100%{border-color:transparent;background:var(--bg2);}}
-@keyframes flashRed{0%{border-color:var(--red);background:var(--red-light);}100%{border-color:transparent;background:var(--bg2);}}
-
-.c-head{display:flex;justify-content:space-between;align-items:flex-start;}
-.c-name{font-weight:700;font-size:16px;color:var(--text);}
-.c-level{font-size:12px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace;}
-.c-score{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--primary);}
-.c-frac{font-size:13px;color:var(--muted);font-weight:500;}
-
-.c-bar-bg{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin-top:4px;}
-.c-bar-fg{height:100%;background:var(--primary);border-radius:4px;transition:width 0.4s ease;}
-
-.c-foot{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;}
-.s-focus{display:flex;align-items:center;gap:6px;}
-.s-focus-dot{width:10px;height:10px;border-radius:50%;}
-.s-focus-dot.on{background:var(--green);animation:breathe 2s infinite;}
-.s-focus-dot.off{background:var(--red);animation:pulse 1s infinite;}
-.s-focus-text{color:var(--muted);}
-.s-focus-text.away{color:var(--red);}
-.tab-warn{background:var(--red-light);border:1px solid var(--red-border);color:var(--red);padding:2px 6px;border-radius:6px;font-family:'JetBrains Mono',monospace;}
-.fin-badge{background:var(--green-light);color:var(--green);padding:4px 8px;border-radius:6px;font-size:12px;}
-
-@keyframes breathe{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.6;transform:scale(0.8);}}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-
-/* ─── LEADERBOARD ─── */
-.lb-box{background:var(--bg2);border-radius:var(--rad);box-shadow:var(--shadow);overflow:hidden;}
-.lb-row{
-  display:flex;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border);
-  gap:16px;
-}
-.lb-row:last-child{border-bottom:none;}
-.lb-rank{font-size:24px;font-weight:800;width:32px;text-align:center;}
-.lb-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;}
-.lb-info{flex:1;}
-.lb-name{font-weight:700;font-size:16px;}
-.lb-stats{font-size:13px;color:var(--muted);margin-top:2px;display:flex;gap:12px;}
-.lb-score{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;}
-.empty-msg{padding:48px;text-align:center;color:var(--muted);font-weight:500;}
-
-/* Confetti */
-.confetti{position:fixed;width:10px;height:10px;background-color:#f00;z-index:9999;animation:fall linear forwards;}
-@keyframes fall{to{transform:translateY(100vh) rotate(720deg);}}
+/* ── RESULTS ── */
+.res-wrap{width:100%;max-width:700px;height:100%;display:flex;flex-direction:column}
+.lb-list{flex:1;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);display:flex;flex-direction:column}
+.lb-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);gap:12px}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{font-size:1.2rem;font-weight:800;width:24px;text-align:center}
+.lb-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem}
+.lb-info{flex:1}
+.lb-name{font-weight:700;font-size:1rem}
+.lb-stats{font-size:.75rem;color:var(--muted);font-weight:600;margin-top:2px}
+.lb-score{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:800}
 </style>
 </head>
 <body>
 
-<div class="container">
-  
-  <div id="screen-setup" class="screen active">
-    <div class="setup-box">
-      <h1>Өзгеру құлашы, мода және медиана</h1>
-      <p class="subtitle">Оқушыларға арналған деңгейлерді таңдаңыз.</p>
-      
-      <div class="sections-grid" id="sections-grid">
-        <div class="sec-btn selected" data-id="sec1">1-деңгей: Жеңіл</div>
-        <div class="sec-btn selected" data-id="sec2">2-деңгей: Орташа</div>
-        <div class="sec-btn selected" data-id="sec3">3-деңгей: Күрделі</div>
+<div id="screen-setup" class="screen active">
+  <div class="si center">
+    <div class="setup-wrap">
+      <div class="setup-hero">
+        <div class="logo">Math<b>Sabaq</b></div>
+        <div class="logo-sub">Өзгеру құлашы, мода және медиана (3 деңгей)</div>
       </div>
-      
-      <button class="btn-primary" onclick="createSession()" style="width:100%;font-size:16px;padding:16px;">
-        Бөлме құру
-      </button>
-    </div>
-  </div>
-
-  <div id="screen-lobby" class="screen">
-    <div class="lobby-grid">
-      <div class="lobby-qr-card">
-        <h2>Қосылу коды:</h2>
-        <div class="lobby-code" id="display-code">------</div>
-        <div class="qr-code" id="qr-container"></div>
-        <div class="join-url" id="join-url-text"></div>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:24px;">Оқушылар осы сілтеме немесе QR арқылы қосыла алады.</p>
-        
-        <button class="btn-primary" onclick="startQuiz()" style="width:100%;">
-          ▶ Бастау
-        </button>
-      </div>
-      
-      <div class="setup-box">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <h2>Күту залы</h2>
-          <div class="stats-pill" id="lobby-count">0 оқушы</div>
+      <div class="setup-info">
+        <div class="setup-info-row">
+          <div class="setup-info-icon">⏱️</div>
+          <div class="setup-info-text">Уақыт шектеуі</div>
+          <div class="setup-info-val">45 минут</div>
         </div>
-        <div class="grid" id="lobby-students">
-          <div class="empty-msg">Әзірге ешкім қосылған жоқ...</div>
+        <div class="setup-info-row">
+          <div class="setup-info-icon">🎯</div>
+          <div class="setup-info-text">Сұрақтар</div>
+          <div class="setup-info-val">Шексіз (3 деңгей)</div>
         </div>
       </div>
+      <button class="btn btn-primary btn-block" onclick="createSession()">Бөлме құру</button>
     </div>
   </div>
+</div>
 
-  <div id="screen-live" class="screen">
-    <div class="top-bar">
-      <div>
-        <h1>Тест жүріп жатыр...</h1>
-        <div style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--primary);margin-top:4px;">
-          КОД: <span id="live-code"></span>
+<div id="screen-lobby" class="screen">
+  <div class="si top">
+    <div class="lobby-wrap">
+      <div class="lobby-top">
+        <div>
+          <div class="logo">Math<b>Sabaq</b></div>
+          <div class="logo-sub">Оқушылардың қосылуын күтудеміз...</div>
+        </div>
+        <button class="btn btn-primary" onclick="startQuiz()">▶ Бастау</button>
+      </div>
+      <div class="code-panel">
+        <div>
+          <div class="card-title" style="margin-bottom:4px">Қосылу коды</div>
+          <div class="code-val" id="display-code">------</div>
+        </div>
+        <div class="qr-box" id="qr-container"></div>
+      </div>
+      <div class="lobby-main">
+        <div class="card-title" style="display:flex;justify-content:space-between">
+          <span>Күту залы</span>
+          <span id="lobby-count">0 оқушы</span>
+        </div>
+        <div class="lobby-list" id="lobby-students"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-live" class="screen">
+  <div class="si top">
+    <div class="live-wrap">
+      <div class="live-top">
+        <div>
+          <div class="logo" style="font-size:1.2rem">Math<b>Sabaq</b> <span style="color:var(--muted);font-weight:600;font-size:1rem;margin-left:8px">КОД: <span id="live-code"></span></span></div>
+          <div class="logo-sub" id="live-count">0 оқушы</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="live-timer" id="timer">45:00</div>
+          <button class="btn btn-red btn-sm" onclick="endQuiz()">Аяқтау</button>
         </div>
       </div>
-      
-      <div style="display:flex;align-items:center;gap:16px;">
-        <div class="stats-pill" id="live-count">0 оқушы</div>
-        <div class="stats-pill away-warn" id="live-away-count" style="display:none;">👀 0 сыртта</div>
-        <div class="timer" id="timer">45:00</div>
-        <button class="btn-danger" onclick="endQuiz()">Аяқтау</button>
-      </div>
+      <div class="live-grid" id="live-students"></div>
     </div>
-    
-    <div class="grid" id="live-students"></div>
   </div>
+</div>
 
-  <div id="screen-results" class="screen">
-    <div class="top-bar">
-      <div>
-        <h1>Қорытынды</h1>
-        <p class="subtitle">Нәтижелер мен статистика</p>
+<div id="screen-results" class="screen">
+  <div class="si center">
+    <div class="res-wrap">
+      <div class="lobby-top" style="margin-bottom:16px">
+        <div>
+          <div class="logo">Қорытынды</div>
+          <div class="logo-sub">Тест аяқталды</div>
+        </div>
+        <div class="card-title" style="margin:0" id="res-sub">0 оқушы</div>
       </div>
-      <div class="stats-pill" id="res-sub">0 оқушы</div>
+      <div class="lb-list" id="leaderboard"></div>
     </div>
-    
-    <div class="lb-box" id="leaderboard"></div>
   </div>
-
 </div>
 
 <script>
@@ -226,59 +199,35 @@ let sessionCode = '';
 let sseSource = null;
 let students = new Map();
 let prevTotals = new Map();
-let startTime = null;
 let timerInterval = null;
 
-// UI Elements
-const els = {
-  setup: document.getElementById('screen-setup'),
-  lobby: document.getElementById('screen-lobby'),
-  live: document.getElementById('screen-live'),
-  results: document.getElementById('screen-results')
-};
-
 function showScreen(id) {
-  Object.values(els).forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
-// Setup Section Toggles
-document.querySelectorAll('.sec-btn').forEach(btn => {
-  btn.addEventListener('click', () => btn.classList.toggle('selected'));
-});
 
 // ══════════════════════════════════════════════════════════════════
 //  LIFECYCLE API
 // ══════════════════════════════════════════════════════════════════
-
 async function createSession() {
-  const selected = Array.from(document.querySelectorAll('.sec-btn.selected')).map(b => b.dataset.id);
-  if (selected.length === 0) return alert('Кем дегенде 1 деңгейді таңдаңыз!');
-  
   try {
     const res = await fetch(`${BACKEND}/session`, { method: 'POST' });
     const data = await res.json();
     sessionCode = data.code;
     
-    // Setup Lobby URLs
     document.getElementById('display-code').textContent = sessionCode;
     document.getElementById('live-code').textContent = sessionCode;
     
-    const joinUrl = `${STUDENT_URL}?code=${sessionCode}&sec=${selected.join(',')}`;
-    document.getElementById('join-url-text').textContent = joinUrl;
-    
+    const joinUrl = `${STUDENT_URL}?code=${sessionCode}`;
     document.getElementById('qr-container').innerHTML = '';
     new QRCode(document.getElementById('qr-container'), {
-      text: joinUrl, width: 160, height: 160,
-      colorDark: "#141826", colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.L
+      text: joinUrl, width: 80, height: 80,
+      colorDark: "#141826", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.L
     });
     
     startSSE();
     showScreen('screen-lobby');
-  } catch (err) {
-    alert('Қате: Серверге қосылу мүмкін емес.');
-  }
+  } catch (err) { alert('Қате: Серверге қосылу мүмкін емес.'); }
 }
 
 async function startQuiz() {
@@ -303,10 +252,8 @@ async function endQuiz() {
 // ══════════════════════════════════════════════════════════════════
 //  SSE & REALTIME
 // ══════════════════════════════════════════════════════════════════
-
 function startSSE() {
   sseSource = new EventSource(`${BACKEND}/live?code=${sessionCode}`);
-  
   sseSource.onmessage = (e) => {
     try {
       const data = JSON.parse(e.data);
@@ -318,23 +265,18 @@ function startSSE() {
         students.set(data.studentId, { studentId: data.studentId, ...data.data });
         updateUI('active', data.timeLeft);
       }
-      else if (data.type === 'started') {
-        showScreen('screen-live');
-      }
+      else if (data.type === 'started') showScreen('screen-live');
       else if (data.type === 'ended') {
-        sseSource.close();
-        clearInterval(timerInterval);
-        showResults();
+        sseSource.close(); clearInterval(timerInterval); showResults();
       }
     } catch(err) {}
   };
 }
 
 function updateUI(status, timeLeft) {
-  if (status === 'waiting') {
-    renderLobby();
-  } else if (status === 'active') {
-    if (!els.live.classList.contains('active')) showScreen('screen-live');
+  if (status === 'waiting') renderLobby();
+  else if (status === 'active') {
+    if (!document.getElementById('screen-live').classList.contains('active')) showScreen('screen-live');
     renderLive();
     updateTimer(timeLeft);
   }
@@ -343,13 +285,7 @@ function updateUI(status, timeLeft) {
 // ══════════════════════════════════════════════════════════════════
 //  RENDERING
 // ══════════════════════════════════════════════════════════════════
-
-function esc(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
+function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 function parseName(raw) {
   if(!raw) return {name:'Белгісіз', level:''};
   const parts = raw.split('|');
@@ -359,21 +295,9 @@ function parseName(raw) {
 function renderLobby() {
   const arr = Array.from(students.values());
   document.getElementById('lobby-count').textContent = arr.length + ' оқушы';
-  
-  const cont = document.getElementById('lobby-students');
-  if (arr.length === 0) {
-    cont.innerHTML = '<div class="empty-msg">Әзірге ешкім қосылған жоқ...</div>';
-    return;
-  }
-  
-  cont.innerHTML = arr.map(s => {
+  document.getElementById('lobby-students').innerHTML = arr.map(s => {
     const { name } = parseName(s.name);
-    return `<div class="card" style="padding:12px;display:flex;flex-direction:row;align-items:center;gap:12px;">
-      <div class="lb-av" style="background:var(--primary-light);color:var(--primary);width:32px;height:32px;font-size:14px;">
-        ${esc(name.charAt(0).toUpperCase())}
-      </div>
-      <div style="font-weight:600;">${esc(name)}</div>
-    </div>`;
+    return `<div class="l-stu"><div class="l-stu-av">${esc(name.charAt(0).toUpperCase())}</div>${esc(name)}</div>`;
   }).join('');
 }
 
@@ -381,155 +305,85 @@ function renderLive() {
   const arr = Array.from(students.values()).sort((a,b) => (b.score||0) - (a.score||0));
   document.getElementById('live-count').textContent = arr.length + ' оқушы';
   
-  let awayCount = 0;
-  
-  const html = arr.map(s => {
+  document.getElementById('live-students').innerHTML = arr.map(s => {
     const id = s.studentId;
     const { name, level } = parseName(s.name);
-    const score = s.score || 0;
-    const total = s.total || 0;
-    const finished = s.finished === true;
-    const focused = s.focused !== false;
-    const tabSw = s.tabSwitches || 0;
-    const awaySec = s.awaySeconds || 0;
+    const score = s.score || 0, total = s.total || 0;
+    const finished = s.finished === true, focused = s.focused !== false;
+    const tabSw = s.tabSwitches || 0, awaySec = s.awaySeconds || 0;
     
-    if (!focused && !finished) awayCount++;
-    
-    // Check for flash animation ONLY on answer count change
     let flashClass = '';
     const prevT = prevTotals.get(id) || 0;
     if (total > prevT) {
       const prevS = prevTotals.get(id + '_s') || 0;
-      flashClass = (score > prevS) ? 'flash-green' : 'flash-red';
+      flashClass = (score > prevS) ? 'flash-g' : 'flash-r';
     }
-    prevTotals.set(id, total);
-    prevTotals.set(id + '_s', score);
+    prevTotals.set(id, total); prevTotals.set(id + '_s', score);
 
     const pct = total > 0 ? (score / total) * 100 : 0;
-    const warnBadge = tabSw > 0 ? `<span class="tab-warn">👀 ${tabSw}× · ${awaySec}с</span>` : '';
+    const warnBadge = tabSw > 0 ? `<span class="sc-warn">👀 ${tabSw}× · ${awaySec}с</span>` : '';
+    const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
     
-    let focusHtml = '';
-    if (finished) {
-      focusHtml = `<span class="fin-badge">✓ Бітірді</span>`;
-    } else {
-      focusHtml = `
-        <div class="s-focus">
-          <span class="s-focus-dot ${focused ? 'on' : 'off'}"></span>
-          <span class="s-focus-text ${focused ? '' : 'away'}">${focused ? 'Экранда' : 'Сыртта'}</span>
-        </div>
-      `;
-    }
+    let focusHtml = finished ? `<span style="color:var(--green);font-weight:800">✓ Бітірді</span>` : 
+      `<div class="sc-focus"><div class="f-dot ${focused?'on':'off'}"></div><span style="color:${focused?'var(--muted)':'var(--red)'}">${focused?'Экранда':'Сыртта'}</span></div>`;
 
     return `
-      <div class="card ${flashClass}" id="card-${id}">
-        <div class="c-head">
-          <div>
-            <div class="c-name">${esc(name)} ${warnBadge}</div>
-            <div class="c-level">${esc(level)}</div>
-          </div>
-          <div class="c-score" style="color:${pct>=70?'var(--green)':pct>=40?'var(--amber)':'var(--red)'}">
-            ${score}
-          </div>
+      <div class="s-card ${flashClass}">
+        <div class="sc-head">
+          <div><div class="sc-name">${esc(name)} ${warnBadge}</div><div class="sc-lvl">${esc(level)}</div></div>
+          <div class="sc-score" style="color:${col}">${score}</div>
         </div>
-        
-        <div>
-          <div class="c-frac">${score} дұрыс / ${total - score} қате</div>
-          <div class="c-bar-bg">
-            <div class="c-bar-fg" style="width:${pct}%;background:${pct>=70?'var(--green)':pct>=40?'var(--amber)':'var(--red)'}"></div>
-          </div>
-        </div>
-        
-        <div class="c-foot">
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:${pct}%;background:${col}"></div></div>
+        <div class="sc-foot">
+          <span>${score} дұрыс / ${total - score} қате</span>
           ${focusHtml}
         </div>
       </div>
     `;
   }).join('');
-  
-  document.getElementById('live-students').innerHTML = html || '<div class="empty-msg">Оқушылар күтілуде...</div>';
-  
-  const awayEl = document.getElementById('live-away-count');
-  if (awayCount > 0) {
-    awayEl.style.display = 'block';
-    awayEl.textContent = `👀 ${awayCount} сыртта`;
-  } else {
-    awayEl.style.display = 'none';
-  }
 }
 
-// ══════════════════════════════════════════════════════════════════
-//  TIMER & RESULTS
-// ══════════════════════════════════════════════════════════════════
-
 function updateTimer(msLeft) {
-  if(!msLeft || msLeft <= 0) {
-    document.getElementById('timer').textContent = '00:00';
-    return;
-  }
+  if(!msLeft || msLeft <= 0) return document.getElementById('timer').textContent = '00:00';
   const totalSec = Math.floor(msLeft / 1000);
-  const m = Math.floor(totalSec / 60);
-  const s = totalSec % 60;
+  const m = Math.floor(totalSec / 60), s = totalSec % 60;
   const el = document.getElementById('timer');
   el.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-  
-  if(m < 5) el.classList.add('danger');
-  else el.classList.remove('danger');
+  if(m < 5) el.classList.add('danger'); else el.classList.remove('danger');
 }
 
 function showResults() {
   showScreen('screen-results');
-  shootConfetti();
-  
   const arr = Array.from(students.values()).sort((a,b) => {
-    // Sort by level (highest first), then percentage, then score
-    const la = parseName(a.name).level;
-    const lb = parseName(b.name).level;
+    const { level: la } = parseName(a.name); const { level: lb } = parseName(b.name);
     if (lb !== la) return lb.localeCompare(la);
-    
-    const pA = a.total > 0 ? a.score / a.total : 0;
-    const pB = b.total > 0 ? b.score / b.total : 0;
+    const pA = a.total > 0 ? a.score / a.total : 0; const pB = b.total > 0 ? b.score / b.total : 0;
     if(pB !== pA) return pB - pA;
     return (b.score||0) - (a.score||0);
   });
   
   const medals = ['🥇','🥈','🥉'];
   document.getElementById('res-sub').textContent = arr.length + ' оқушы';
-  
   document.getElementById('leaderboard').innerHTML = arr.map((s, i) => {
     const { name, level } = parseName(s.name);
     const score = s.score || 0, total = s.total || 0;
     const pct = total > 0 ? Math.round((score/total)*100) : 0;
     const col = pct>=70 ? 'var(--green)' : pct>=40 ? 'var(--amber)' : 'var(--red)';
     const tabSw = s.tabSwitches || 0, awaySec = s.awaySeconds || 0;
-    const warnStr = tabSw > 0 ? `<span class="tab-warn" style="margin-left:8px;">👀 ${tabSw}× · ${awaySec}с</span>` : '';
+    const warnStr = tabSw > 0 ? ` &nbsp; <span class="sc-warn">👀 ${tabSw}× · ${awaySec}с</span>` : '';
     
     return `
       <div class="lb-row">
         <div class="lb-rank">${medals[i] || (i+1)}</div>
         <div class="lb-av" style="background:${col}18;color:${col}">${esc(name.charAt(0).toUpperCase())}</div>
         <div class="lb-info">
-          <div class="lb-name">${esc(name)} ${warnStr}</div>
-          <div class="lb-stats">
-            <span>Деңгей: <b>${esc(level)}</b></span>
-            <span>Дұрыс: <b style="color:${col}">${score}/${total}</b> (${pct}%)</span>
-          </div>
+          <div class="lb-name">${esc(name)}${warnStr}</div>
+          <div class="lb-stats">${esc(level)} • ${score}/${total} дұрыс (${pct}%)</div>
         </div>
         <div class="lb-score" style="color:${col}">${score}</div>
       </div>
     `;
   }).join('');
-}
-
-function shootConfetti() {
-  for(let i=0; i<80; i++){
-    const c = document.createElement('div');
-    c.className = 'confetti';
-    c.style.left = Math.random() * 100 + 'vw';
-    c.style.backgroundColor = ['#4338ca','#059669','#dc2626','#d97706','#3b82f6'][Math.floor(Math.random()*5)];
-    c.style.animationDuration = (Math.random() * 2 + 2) + 's';
-    c.style.animationDelay = (Math.random() * 1) + 's';
-    document.body.appendChild(c);
-  }
 }
 </script>
 </body>
