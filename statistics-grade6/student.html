@@ -429,240 +429,268 @@ function wrongOpts(correct, count, minDelta, maxDelta) {
   return [...wrongs].slice(0, count);
 }
 
+// ── Helper: generate nums whose mean is a clean number ────
+function genCleanMean(count, meanVal) {
+  // Build (count-1) random nums, then set last to force exact mean
+  const nums = [];
+  const S = count * meanVal;
+  let remaining = S;
+  for (let i = 0; i < count - 1; i++) {
+    const v = randInt(meanVal - 6, meanVal + 6);
+    nums.push(v);
+    remaining -= v;
+  }
+  nums.push(remaining);
+  return shuffleArray(nums);
+}
+// ── Helper: generate nums whose median is clean (.0 or .5) ─
+function genCleanMedian(count) {
+  // Odd count → median is middle element (always integer)
+  // Even count → pick two middle values that sum to even → median is .0 or .5
+  const nums = [];
+  if (count % 2 === 1) {
+    const mid = randInt(5, 30);
+    const half = (count - 1) / 2;
+    for (let i = 0; i < half; i++) nums.push(randInt(mid - 10, mid - 1));
+    nums.push(mid);
+    for (let i = 0; i < half; i++) nums.push(randInt(mid + 1, mid + 10));
+  } else {
+    const half = count / 2;
+    const a = randInt(5, 25);
+    const b = a + pick([0, 1, 2, 3]); // keeps median as .0 or .5
+    for (let i = 0; i < half - 1; i++) nums.push(randInt(Math.min(a,b) - 8, Math.min(a,b) - 1));
+    nums.push(a); nums.push(b);
+    for (let i = 0; i < half - 1; i++) nums.push(randInt(Math.max(a,b) + 1, Math.max(a,b) + 8));
+  }
+  return shuffleArray(nums);
+}
+
+// Shared solution builder
+function solRange(nums, unit) {
+  const sorted = sortNum(nums);
+  const mx = Math.max(...nums), mn = Math.min(...nums), R = mx - mn;
+  const u = unit ? ' ' + unit : '';
+  return { correct: R, solution: `<div class="sol-title">📝 Шешуі</div>
+    <div class="sol-step">Реттелген қатар: $${sorted.join(';\\; ')}$</div>
+    <div class="sol-step">Ең үлкені: $${mx}$${u}, ең кішісі: $${mn}$${u}</div>
+    <div class="sol-step">Құлаш $= ${mx} - ${mn} = ${R}$${u}</div>
+    <div class="sol-result">Жауап: $${fmtNum(R)}$</div>` };
+}
+function solMode(nums, unit) {
+  const freq = {};
+  nums.forEach(x => freq[x] = (freq[x] || 0) + 1);
+  const maxF = Math.max(...Object.values(freq));
+  const m = Object.keys(freq).filter(k => freq[k] === maxF).map(Number)[0];
+  const freqStr = Object.entries(freq).sort((a,b) => b[1] - a[1]).map(([k,v]) => `$${fmtNum(Number(k))}$ → ${v} рет`).join(', ');
+  const u = unit ? ' ' + unit : '';
+  return { correct: m, solution: `<div class="sol-title">📝 Шешуі</div>
+    <div class="sol-step">Жиілік: ${freqStr}</div>
+    <div class="sol-step">Ең жиі кездесетін: $${fmtNum(m)}$${u}</div>
+    <div class="sol-result">Жауап: $${fmtNum(m)}$</div>` };
+}
+function solMedian(nums, unit) {
+  const sorted = sortNum(nums);
+  const n = sorted.length;
+  const med = median(nums);
+  const u = unit ? ' ' + unit : '';
+  let step;
+  if (n % 2 === 1) step = `${n} мүшенің ортаңғысы (${Math.ceil(n/2)}-ші): $${fmtNum(sorted[(n-1)/2])}$`;
+  else step = `Ортаңғы 2 мүше: $${fmtNum(sorted[n/2-1])}$ және $${fmtNum(sorted[n/2])}$. Медиана $= \\dfrac{${fmtNum(sorted[n/2-1])} + ${fmtNum(sorted[n/2])}}{2} = ${fmtNum(med)}$`;
+  return { correct: med, solution: `<div class="sol-title">📝 Шешуі</div>
+    <div class="sol-step">Реттелген қатар: $${sorted.map(fmtNum).join(';\\; ')}$ (${n} мүше)</div>
+    <div class="sol-step">${step}</div>
+    <div class="sol-result">Жауап: $${fmtNum(med)}$</div>` };
+}
+function solMean(nums, unit) {
+  const s = sum(nums), n = nums.length;
+  const m = Math.round(s / n * 100) / 100;
+  const u = unit ? ' ' + unit : '';
+  return { correct: m, solution: `<div class="sol-title">📝 Шешуі</div>
+    <div class="sol-step">Қосынды: $${nums.join(' + ')} = ${fmtNum(s)}$</div>
+    <div class="sol-step">Сандар саны: $${n}$</div>
+    <div class="sol-step">Орта $= \\dfrac{${fmtNum(s)}}{${n}} = ${fmtNum(m)}$</div>
+    <div class="sol-result">Жауап: $${fmtNum(m)}$</div>` };
+}
+
 // ── LEVEL 1: Simple integer sequences ─────────────────────
 function genLevel1() {
   const questions = [];
-  const topics = ['range', 'mode', 'median', 'mean'];
+  const topics = shuffleArray(['range','mode','median','mean','range','mode','median','mean','range','median']);
 
   for (let i = 0; i < 10; i++) {
-    const topic = topics[i % 4];
-    const len = randInt(5, 8);
+    const topic = topics[i];
     let nums;
 
-    if (topic === 'mode') {
-      // Ensure there's a clear mode
-      nums = [];
+    if (topic === 'mean') {
+      // Force clean mean: sum divisible by count
+      const count = pick([4, 5, 6]);
+      const targetMean = randInt(6, 25);
+      nums = genCleanMean(count, targetMean);
+    } else if (topic === 'median') {
+      nums = genCleanMedian(pick([5, 6, 7]));
+    } else if (topic === 'mode') {
       const modeVal = randInt(3, 30);
       const modeCount = randInt(2, 3);
-      for (let j = 0; j < modeCount; j++) nums.push(modeVal);
-      while (nums.length < len) {
+      nums = Array(modeCount).fill(modeVal);
+      const used = new Set([modeVal]);
+      while (nums.length < randInt(5, 7)) {
         const v = randInt(1, 35);
-        if (v !== modeVal) nums.push(v);
+        if (!used.has(v)) { used.add(v); nums.push(v); }
       }
       nums = shuffleArray(nums);
     } else {
-      nums = [];
-      for (let j = 0; j < len; j++) nums.push(randInt(2, 50));
+      nums = Array.from({length: randInt(5, 7)}, () => randInt(2, 45));
     }
 
-    const sorted = sortNum(nums);
-    const numsStr = nums.join('; ');
-    let correct, qText, solution;
-
+    const numsStr = nums.join(';\\; ');
+    let res;
     if (topic === 'range') {
-      correct = range(nums);
-      qText = `$${numsStr}$ сандар қатарының өзгеру құлашын табыңыз.`;
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Реттелген қатар: $${sorted.join('; ')}$</div>
-        <div class="sol-step">Ең үлкені: $${Math.max(...nums)}$, ең кішісі: $${Math.min(...nums)}$</div>
-        <div class="sol-step">Құлаш $= ${Math.max(...nums)} - ${Math.min(...nums)} = ${correct}$</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+      res = solRange(nums);
+      res.q = `$${numsStr}$ сандар қатарының өзгеру құлашын табыңыз.`;
     } else if (topic === 'mode') {
-      const m = mode(nums);
-      correct = m[0];
-      qText = `$${numsStr}$ сандар қатарының модасын анықтаңыз.`;
-      const freq = {};
-      nums.forEach(x => freq[x] = (freq[x] || 0) + 1);
-      const freqStr = Object.entries(freq).sort((a,b) => b[1] - a[1]).map(([k,v]) => `${k} → ${v} рет`).join(', ');
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Жиілік: ${freqStr}</div>
-        <div class="sol-step">Ең жиі кездесетін сан: $${correct}$</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+      res = solMode(nums);
+      res.q = `$${numsStr}$ сандар қатарының модасын анықтаңыз.`;
     } else if (topic === 'median') {
-      correct = median(nums);
-      qText = `$${numsStr}$ сандар қатарының медианасын табыңыз.`;
-      const n = sorted.length;
-      let medStep;
-      if (n % 2 === 1) {
-        medStep = `Қатардың ортаңғы мүшесі (${Math.ceil(n/2)}-ші): $${correct}$`;
-      } else {
-        medStep = `Ортаңғы 2 мүше: $${sorted[n/2-1]}$ және $${sorted[n/2]}$. Медиана $= \\dfrac{${sorted[n/2-1]} + ${sorted[n/2]}}{2} = ${fmtNum(correct)}$`;
-      }
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Реттелген қатар: $${sorted.join('; ')}$ (${n} мүше)</div>
-        <div class="sol-step">${medStep}</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+      res = solMedian(nums);
+      res.q = `$${numsStr}$ сандар қатарының медианасын табыңыз.`;
     } else {
-      correct = Math.round(mean(nums) * 100) / 100;
-      qText = `$${numsStr}$ сандарының арифметикалық ортасын табыңыз.`;
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Қосынды: $${nums.join(' + ')} = ${sum(nums)}$</div>
-        <div class="sol-step">Сандар саны: $${nums.length}$</div>
-        <div class="sol-step">Орта $= \\dfrac{${sum(nums)}}{${nums.length}} = ${fmtNum(correct)}$</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+      res = solMean(nums);
+      res.q = `$${numsStr}$ сандарының арифметикалық ортасын табыңыз.`;
     }
 
-    const wrongs = wrongOpts(correct, 3, 1, 5);
-    const opts = [fmtKatex(correct), ...wrongs.map(fmtKatex)];
-    questions.push({ q: qText, opts, solution });
+    const wrongs = wrongOpts(res.correct, 3, 1, 5);
+    questions.push({ q: res.q, opts: [fmtKatex(res.correct), ...wrongs.map(fmtKatex)], solution: res.solution });
   }
   return questions;
 }
 
-// ── LEVEL 2: Word problems with context ───────────────────
+// ── LEVEL 2: Rich story-based word problems ───────────────
 function genLevel2() {
   const questions = [];
-  const contexts = [
-    { pre: 'Оқушылар жарыста', unit: 'ұпай', gen: () => Array.from({length: randInt(5,7)}, () => randInt(8, 30)) },
-    { pre: 'Апта ішіндегі температура', unit: '°C', gen: () => Array.from({length: 7}, () => randInt(15, 35)) },
-    { pre: 'Кітапханадан алынған кітаптар саны', unit: 'кітап', gen: () => Array.from({length: 5}, () => randInt(4, 20)) },
-    { pre: 'Дүкендегі тауар бағасы', unit: 'тг', gen: () => Array.from({length: randInt(4,6)}, () => randInt(3, 15) * 100) },
-    { pre: 'Бес күндегі жүрілген қашықтық', unit: 'км', gen: () => Array.from({length: 5}, () => randInt(3, 20)) },
-    { pre: 'Оқушылардың бойы', unit: 'см', gen: () => Array.from({length: randInt(5,8)}, () => randInt(140, 175)) },
-    { pre: 'Алмалардың салмағы', unit: 'г', gen: () => Array.from({length: randInt(4,6)}, () => randInt(80, 200)) },
-    { pre: 'Футболшылардың жинаған голдары', unit: 'гол', gen: () => Array.from({length: randInt(5,7)}, () => randInt(0, 15)) },
-    { pre: 'Сынып оқушыларының бағалары', unit: 'балл', gen: () => Array.from({length: randInt(5,7)}, () => randInt(2, 5)) },
-    { pre: 'Автокөліктердің жылдамдығы', unit: 'км/сағ', gen: () => Array.from({length: randInt(4,6)}, () => randInt(40, 120)) }
-  ];
-  const topics = ['range', 'mode', 'median', 'mean'];
 
-  // Use one context for 2 questions (about different topics), cycling through
+  // Story generators: each returns { q, nums, unit }
+  const stories = {
+    range: [
+      () => { const n=randInt(5,7); const nums=Array.from({length:n},()=>randInt(10,35)); return { q:`Мектеп жарысында ${n} оқушы жүгірді. Олардың нәтижелері: $${nums.join(';\\; ')}$ секунд. Ең жылдам нәтиже мен ең баяу нәтиженің айырмасы (өзгеру құлашы) нешеге тең?`, nums, unit:'с' }; },
+      () => { const days=['дүйсенбі','сейсенбі','сәрсенбі','бейсенбі','жұма','сенбі','жексенбі']; const nums=Array.from({length:7},()=>randInt(12,38)); return { q:`Бір апта бойы Алматыдағы күндізгі температура мынадай болды: ${days.map((d,i)=>`${d} — $${nums[i]}°C$`).join(', ')}. Апта ішіндегі температураның өзгеру құлашын табыңыз.`, nums, unit:'°C' }; },
+      () => { const n=randInt(4,6); const nums=Array.from({length:n},()=>randInt(3,15)*100); return { q:`Базарда ${n} түрлі алма бар. Бағалары: $${nums.join(';\\; ')}$ тг/кг. Бағалардың өзгеру құлашын анықтаңыз.`, nums, unit:'тг' }; },
+    ],
+    mode: [
+      () => { const grade=pick([3,4,5,4,3,5,4,4,5,3,4,5]); const nums=[]; const g=randInt(3,5); for(let i=0;i<randInt(2,3);i++) nums.push(g); const used=new Set([g]); while(nums.length<randInt(6,8)){const v=randInt(2,5);if(v!==g||!used.has(v)){nums.push(v);used.add(v);}} nums.sort(()=>Math.random()-.5); return { q:`Мұғалім тоқсан соңында ${nums.length} оқушыға баға қойды: $${nums.join(';\\; ')}$. Қай баға ең жиі кездеседі? (Модасын табыңыз)`, nums, unit:'балл' }; },
+      () => { const shoe=randInt(36,42); const nums=[shoe,shoe]; const used=new Set([shoe]); while(nums.length<randInt(5,7)){const v=randInt(35,44);if(v!==shoe){nums.push(v);used.add(v);}} nums.sort(()=>Math.random()-.5); return { q:`Аяқ киім дүкенінде сатылған кроссовкалардың өлшемдері: $${nums.join(';\\; ')}$. Ең көп сұранысқа ие өлшемді (мода) анықтаңыз.`, nums, unit:'' }; },
+      () => { const fav=randInt(1,6); const nums=[fav,fav,fav]; while(nums.length<randInt(7,10)){nums.push(randInt(1,6));} nums.sort(()=>Math.random()-.5); return { q:`Сынып оқушылары сүйікті пәнін атады. Нәтижелер кодпен жазылды: $${nums.join(';\\; ')}$. Ең танымал пәннің коды (мода) неше?`, nums, unit:'' }; },
+    ],
+    median: [
+      () => { const nums=genCleanMedian(pick([5,7])); return { q:`Дене шынықтыру сабағында ${nums.length} оқушы секіріп биіктік алды. Нәтижелері (см): $${nums.join(';\\; ')}$. Нәтижелердің медианасын табыңыз.`, nums, unit:'см' }; },
+      () => { const nums=genCleanMedian(pick([5,7])); return { q:`Жәрмеңкеде ${nums.length} оқушы тоқаш сатты. Әрқайсысы тиісінше $${nums.join(';\\; ')}$ дана сатты. Сатылған тоқаш санының медианасын анықтаңыз.`, nums, unit:'дана' }; },
+      () => { const nums=genCleanMedian(6); return { q:`Сұхбатта 6 адамнан "Күніне қанша сағат ұйықтайсыз?" деп сұрады. Жауаптары: $${nums.join(';\\; ')}$ сағат. Жауаптардың медианасын табыңыз.`, nums, unit:'сағат' }; },
+    ],
+    mean: [
+      () => { const n=pick([4,5,6]); const M=randInt(8,18); const nums=genCleanMean(n,M); return { q:`Айгерім ${n} күн бойы кітап оқыды. Күн сайын $${nums.join(';\\; ')}$ бет оқыды. Бір күнде орта есеппен қанша бет оқыған?`, nums, unit:'бет' }; },
+      () => { const n=5; const M=randInt(60,90); const nums=genCleanMean(n,M); return { q:`Баскетболшы соңғы ${n} ойында $${nums.join(';\\; ')}$ ұпай жинады. Бір ойындағы орта ұпайды есептеңіз.`, nums, unit:'ұпай' }; },
+      () => { const n=pick([4,5]); const M=randInt(12,20)*100; const nums=genCleanMean(n,M); return { q:`Жанболат дүкеннен ${n} тауар сатып алды. Бағалары: $${nums.join(';\\; ')}$ тг. Бір тауардың орташа бағасы неше теңге?`, nums, unit:'тг' }; },
+      () => { const n=pick([5,6]); const M=randInt(140,170); const nums=genCleanMean(n,M); return { q:`Сыныптағы ${n} оқушының бойы: $${nums.join(';\\; ')}$ см. Оқушылардың орташа бойын табыңыз.`, nums, unit:'см' }; },
+    ]
+  };
+  const topicOrder = shuffleArray(['range','mode','median','mean','range','mode','median','mean','range','mean']);
   for (let i = 0; i < 10; i++) {
-    const ctx = contexts[i % contexts.length];
-    let nums = ctx.gen();
-    const topic = topics[i % 4];
-
-    // For mode questions, ensure a clear mode
-    if (topic === 'mode') {
-      const modeVal = pick(nums);
-      // Add one more copy to ensure mode
-      nums.push(modeVal);
-    }
-
-    const sorted = sortNum(nums);
-    const numsStr = nums.join('; ');
-    let correct, qText, solution;
-
-    if (topic === 'range') {
-      correct = range(nums);
-      qText = `${ctx.pre}: $${numsStr}$ ${ctx.unit}. Өзгеру құлашын табыңыз.`;
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Ең үлкен мән: $${Math.max(...nums)}$ ${ctx.unit}</div>
-        <div class="sol-step">Ең кіші мән: $${Math.min(...nums)}$ ${ctx.unit}</div>
-        <div class="sol-step">Құлаш $= ${Math.max(...nums)} - ${Math.min(...nums)} = ${correct}$ ${ctx.unit}</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
-    } else if (topic === 'mode') {
-      const m = mode(nums);
-      correct = m[0];
-      qText = `${ctx.pre}: $${numsStr}$ ${ctx.unit}. Модасын анықтаңыз.`;
-      const freq = {};
-      nums.forEach(x => freq[x] = (freq[x] || 0) + 1);
-      const freqStr = Object.entries(freq).sort((a,b) => b[1] - a[1]).map(([k,v]) => `${k} → ${v} рет`).join(', ');
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Жиілік: ${freqStr}</div>
-        <div class="sol-step">Ең жиі кездесетін: $${correct}$ ${ctx.unit}</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
-    } else if (topic === 'median') {
-      correct = median(nums);
-      qText = `${ctx.pre}: $${numsStr}$ ${ctx.unit}. Медианасын табыңыз.`;
-      const n = sorted.length;
-      let medStep;
-      if (n % 2 === 1) {
-        medStep = `Ортаңғы мүше (${Math.ceil(n/2)}-ші): $${sorted[(n-1)/2]}$`;
-      } else {
-        medStep = `Ортаңғы 2 мүше: $${sorted[n/2-1]}$ және $${sorted[n/2]}$. Медиана $= \\dfrac{${sorted[n/2-1]} + ${sorted[n/2]}}{2} = ${fmtNum(correct)}$`;
-      }
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Реттелген қатар: $${sorted.join('; ')}$</div>
-        <div class="sol-step">${medStep}</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
-    } else {
-      correct = Math.round(mean(nums) * 100) / 100;
-      qText = `${ctx.pre}: $${numsStr}$ ${ctx.unit}. Арифметикалық ортасын табыңыз.`;
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Қосынды: $${sum(nums)}$</div>
-        <div class="sol-step">Орта $= \\dfrac{${sum(nums)}}{${nums.length}} = ${fmtNum(correct)}$</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
-    }
-
-    const wrongs = wrongOpts(correct, 3, 1, Math.max(3, Math.round(correct * 0.15)));
-    const opts = [fmtKatex(correct), ...wrongs.map(fmtKatex)];
-    questions.push({ q: qText, opts, solution });
+    const topic = topicOrder[i];
+    const pool = stories[topic];
+    const { q, nums, unit } = pool[i % pool.length]();
+    let res;
+    if (topic === 'range') res = solRange(nums, unit);
+    else if (topic === 'mode') res = solMode(nums, unit);
+    else if (topic === 'median') res = solMedian(nums, unit);
+    else res = solMean(nums, unit);
+    res.q = q;
+    const wrongs = wrongOpts(res.correct, 3, 1, Math.max(3, Math.round(Math.abs(res.correct) * 0.12)));
+    questions.push({ q, opts: [fmtKatex(res.correct), ...wrongs.map(fmtKatex)], solution: res.solution });
   }
   return questions;
 }
 
-// ── LEVEL 3: Decimal numbers ──────────────────────────────
+// ── LEVEL 3: Decimals (clean: .1-.9, .25, .5, .75) ───────
 function genLevel3() {
   const questions = [];
-  const topics = ['range', 'mode', 'median', 'mean'];
+  // Use multiples of 0.5 or 0.25 to stay clean
+  function cleanDec() { return randInt(1, 19) * 0.5; } // 0.5 to 9.5
+  function cleanDec2() { return randInt(2, 38) * 0.25; } // 0.5 to 9.5 in .25 steps
+
+  // Word problem stories for decimal level
+  const decStories = [
+    (nums) => `Мұрат балық аулауға барып ${nums.length} балық ұстады. Балықтардың салмақтары: $${nums.map(fmtNum).join(';\\; ')}$ кг.`,
+    (nums) => `Химия зертханасында ${nums.length} сынақ жасалды. Ерітіндінің көлемдері: $${nums.map(fmtNum).join(';\\; ')}$ л.`,
+    (nums) => `Жүгірушілер ${nums.length} айналымды аяқтады. Уақыттары: $${nums.map(fmtNum).join(';\\; ')}$ мин.`,
+    (nums) => `Тәжірибеде өсімдіктің ${nums.length} күндегі өсуі: $${nums.map(fmtNum).join(';\\; ')}$ см.`,
+    (nums) => `Жәшіктегі ${nums.length} апельсиннің салмақтары: $${nums.map(fmtNum).join(';\\; ')}$ кг.`,
+  ];
+  const topicOrder = shuffleArray(['range','mode','median','mean','range','mode','median','mean','range','median']);
 
   for (let i = 0; i < 10; i++) {
-    const topic = topics[i % 4];
-    const len = randInt(5, 7);
+    const topic = topicOrder[i];
+    const useWord = i < 5; // first 5 word problems, last 5 plain sequences
     let nums;
 
     if (topic === 'mode') {
-      const modeVal = randInt(1, 50) / 10;
+      const modeVal = cleanDec();
       nums = [modeVal, modeVal];
-      while (nums.length < len) {
-        const v = randInt(1, 80) / 10;
-        if (v !== modeVal) nums.push(v);
+      const used = new Set([modeVal]);
+      while (nums.length < randInt(5, 6)) {
+        const v = cleanDec();
+        if (!used.has(v)) { used.add(v); nums.push(v); }
       }
       nums = shuffleArray(nums);
-    } else {
-      nums = Array.from({length: len}, () => randInt(5, 95) / 10);
-    }
-
-    const sorted = sortNum(nums);
-    const numsStr = nums.map(n => fmtNum(n)).join(';\\; ');
-    let correct, qText, solution;
-
-    if (topic === 'range') {
-      correct = Math.round(range(nums) * 100) / 100;
-      qText = `$${numsStr}$ сандар қатарының өзгеру құлашын табыңыз.`;
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Ең үлкен: $${fmtNum(Math.max(...nums))}$, ең кіші: $${fmtNum(Math.min(...nums))}$</div>
-        <div class="sol-step">Құлаш $= ${fmtNum(Math.max(...nums))} - ${fmtNum(Math.min(...nums))} = ${fmtNum(correct)}$</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
-    } else if (topic === 'mode') {
-      const m = mode(nums);
-      correct = m[0];
-      qText = `$${numsStr}$ сандар қатарының модасын табыңыз.`;
-      const freq = {};
-      nums.forEach(x => freq[x] = (freq[x] || 0) + 1);
-      const freqStr = Object.entries(freq).sort((a,b) => b[1] - a[1]).map(([k,v]) => `${fmtNum(Number(k))} → ${v} рет`).join(', ');
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Жиілік: ${freqStr}</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
-    } else if (topic === 'median') {
-      correct = median(nums);
-      correct = Math.round(correct * 100) / 100;
-      qText = `$${numsStr}$ сандар қатарының медианасын табыңыз.`;
-      const n = sorted.length;
-      let medStep;
-      if (n % 2 === 1) {
-        medStep = `Ортаңғы мүше: $${fmtNum(sorted[(n-1)/2])}$`;
-      } else {
-        medStep = `Ортаңғы 2 мүше: $${fmtNum(sorted[n/2-1])}$ және $${fmtNum(sorted[n/2])}$. Медиана $= ${fmtNum(correct)}$`;
+    } else if (topic === 'mean') {
+      // Force clean decimal mean
+      const count = pick([4, 5]);
+      const targetMean = cleanDec();
+      const S = targetMean * count;
+      nums = [];
+      let rem = S;
+      for (let j = 0; j < count - 1; j++) {
+        const v = cleanDec();
+        nums.push(v);
+        rem -= v;
       }
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Реттелген қатар: $${sorted.map(fmtNum).join(';\\; ')}$</div>
-        <div class="sol-step">${medStep}</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+      // Round rem to nearest 0.5
+      rem = Math.round(rem * 2) / 2;
+      nums.push(rem);
+      nums = shuffleArray(nums);
+    } else if (topic === 'median') {
+      // Use odd count for integer median, or even count with same-parity pair
+      const count = pick([5, 7]);
+      nums = [];
+      const mid = cleanDec();
+      const half = (count - 1) / 2;
+      for (let j = 0; j < half; j++) nums.push(Math.round((mid - randInt(1,4) * 0.5) * 10) / 10);
+      nums.push(mid);
+      for (let j = 0; j < half; j++) nums.push(Math.round((mid + randInt(1,4) * 0.5) * 10) / 10);
+      nums = shuffleArray(nums);
     } else {
-      correct = Math.round(mean(nums) * 100) / 100;
-      qText = `$${numsStr}$ сандарының арифметикалық ортасын табыңыз.`;
-      const s = Math.round(sum(nums) * 100) / 100;
-      solution = `<div class="sol-title">📝 Шешуі</div>
-        <div class="sol-step">Қосынды: $${fmtNum(s)}$</div>
-        <div class="sol-step">Орта $= \\dfrac{${fmtNum(s)}}{${nums.length}} = ${fmtNum(correct)}$</div>
-        <div class="sol-result">Жауап: $${fmtNum(correct)}$</div>`;
+      nums = Array.from({length: randInt(5, 6)}, cleanDec);
     }
 
-    const wrongs = wrongOpts(correct, 3, 0.1, 1.5);
-    const opts = [fmtKatex(correct), ...wrongs.map(w => fmtKatex(Math.round(w*100)/100))];
-    questions.push({ q: qText, opts, solution });
+    // Ensure all nums positive
+    nums = nums.map(n => Math.abs(n) < 0.1 ? 0.5 : Math.round(Math.abs(n) * 10) / 10);
+
+    let res, qText;
+    if (topic === 'range') res = solRange(nums);
+    else if (topic === 'mode') res = solMode(nums);
+    else if (topic === 'median') res = solMedian(nums);
+    else res = solMean(nums);
+
+    if (useWord) {
+      const story = decStories[i % decStories.length](nums);
+      const askMap = { range:'Өзгеру құлашын табыңыз.', mode:'Модасын анықтаңыз.', median:'Медианасын табыңыз.', mean:'Орташа мәнін есептеңіз.' };
+      qText = story + ' ' + askMap[topic];
+    } else {
+      const askMap = { range:'өзгеру құлашын табыңыз', mode:'модасын табыңыз', median:'медианасын табыңыз', mean:'арифметикалық ортасын табыңыз' };
+      qText = `$${nums.map(fmtNum).join(';\\; ')}$ сандар қатарының ${askMap[topic]}.`;
+    }
+
+    const wrongs = wrongOpts(res.correct, 3, 0.5, 2);
+    const cleanWrongs = wrongs.map(w => Math.round(w * 10) / 10);
+    questions.push({ q: qText, opts: [fmtKatex(res.correct), ...cleanWrongs.map(fmtKatex)], solution: res.solution });
   }
   return questions;
 }
@@ -671,125 +699,89 @@ function genLevel3() {
 function genLevel4() {
   const questions = [];
   const types = [
-    // Type 0: Range = R, min = a, max = x → x = a + R
+    // Type 0: Range = R, min known, find max (x)
     () => {
       const a = randInt(3, 15);
       const R = randInt(5, 20);
       const x = a + R;
-      const others = [a, ...Array.from({length: randInt(2,3)}, () => randInt(a, a + R - 1))];
-      const nums = shuffleArray([...others, 'x']);
-      const numsStr = nums.map(n => n === 'x' ? 'x' : n).join(';\\; ');
-      return {
-        q: `$${numsStr}$ қатарының өзгеру құлашы $${R}$ болса, $x$-тің мәнін табыңыз (ең үлкен сан $x$).`,
-        correct: x,
-        solution: `<div class="sol-title">📝 Шешуі</div>
-          <div class="sol-step">Құлаш $= x_{\\max} - x_{\\min} = ${R}$</div>
-          <div class="sol-step">Ең кіші мән: $${a}$</div>
+      const others = [a, randInt(a+1, a+R-1), randInt(a+1, a+R-1)];
+      return { q: `$${shuffleArray([...others,'x']).join(';\\; ')}$ қатарының өзгеру құлашы $${R}$. Ең үлкен сан $x$ болса, $x$ неге тең?`,
+        correct: x, solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Құлаш $= x - x_{\\min}$, яғни $${R} = x - ${a}$</div>
           <div class="sol-step">$x = ${a} + ${R} = ${x}$</div>
-          <div class="sol-result">Жауап: $${x}$</div>`
-      };
+          <div class="sol-result">Жауап: $${x}$</div>` };
     },
-    // Type 1: Median = M with x in sorted position
+    // Type 1: Median = M, x in middle of sorted 5
     () => {
-      const n = 5;
       const M = randInt(8, 25);
-      const a = randInt(M - 6, M - 1);
-      const b = randInt(M - 4, M - 1);
-      const sorted = sortNum([a, b]);
-      const d = randInt(M + 1, M + 5);
-      const e = randInt(M + 2, M + 7);
-      const allNums = [...sorted, M, ...sortNum([d, e])];
-      // x is at median position
-      return {
-        q: `$${a};\\; ${sortNum([a,b])[1]};\\; x;\\; ${sortNum([d,e])[0]};\\; ${sortNum([d,e])[1]}$ қатарының медианасы $${M}$ болса, $x$ неге тең?`,
-        correct: M,
-        solution: `<div class="sol-title">📝 Шешуі</div>
+      const ab = sortNum([randInt(M-6,M-1), randInt(M-4,M-1)]);
+      const de = sortNum([randInt(M+1,M+5), randInt(M+2,M+7)]);
+      return { q: `$${ab[0]};\\; ${ab[1]};\\; x;\\; ${de[0]};\\; ${de[1]}$ реттелген қатарының медианасы $${M}$ болса, $x$ неге тең?`,
+        correct: M, solution: `<div class="sol-title">📝 Шешуі</div>
           <div class="sol-step">5 мүшелі реттелген қатардың медианасы — 3-ші мүше</div>
-          <div class="sol-step">3-ші мүше $= x = ${M}$</div>
-          <div class="sol-result">Жауап: $${M}$</div>`
-      };
+          <div class="sol-step">$x = ${M}$</div>
+          <div class="sol-result">Жауап: $${M}$</div>` };
     },
-    // Type 2: Mean = M, find sum or missing number
+    // Type 2: Mean = M, find missing x
     () => {
       const n = randInt(3, 5);
       const M = randInt(8, 20);
       const S = n * M;
       const known = [];
-      let remaining = S;
-      for (let i = 0; i < n - 1; i++) {
-        const v = randInt(M - 5, M + 5);
-        known.push(v);
-        remaining -= v;
-      }
-      const x = remaining;
-      const numsStr = [...known, 'x'].join(';\\; ');
-      return {
-        q: `$${numsStr}$ сандарының арифметикалық ортасы $${M}$-ге тең. $x$ неге тең?`,
-        correct: x,
-        solution: `<div class="sol-title">📝 Шешуі</div>
-          <div class="sol-step">Орта $= \\dfrac{\\text{қосынды}}{${n}} = ${M}$</div>
+      let rem = S;
+      for (let i = 0; i < n-1; i++) { const v = randInt(M-5,M+5); known.push(v); rem -= v; }
+      return { q: `$${[...known,'x'].join(';\\; ')}$ сандарының арифметикалық ортасы $${M}$. $x$ нешеге тең?`,
+        correct: rem, solution: `<div class="sol-title">📝 Шешуі</div>
           <div class="sol-step">Қосынды $= ${n} \\times ${M} = ${S}$</div>
-          <div class="sol-step">$x = ${S} - (${known.join(' + ')}) = ${S} - ${sum(known)} = ${x}$</div>
-          <div class="sol-result">Жауап: $${x}$</div>`
-      };
+          <div class="sol-step">$x = ${S} - (${known.join(' + ')}) = ${S} - ${sum(known)} = ${rem}$</div>
+          <div class="sol-result">Жауап: $${rem}$</div>` };
     },
-    // Type 3: n numbers have mean M. Add a number, new mean = ?
+    // Type 3: n nums mean M, add number → new mean (CLEAN: force divisible)
     () => {
-      const n = randInt(3, 5);
+      const n = pick([3, 4, 5]);
       const M = randInt(8, 18);
       const S = n * M;
-      const newNum = randInt(M + 3, M + 15);
-      const newMean = Math.round((S + newNum) / (n + 1) * 100) / 100;
-      return {
-        q: `$${n}$ санның арифметикалық ортасы $${M}$-ге тең. Оларға $${newNum}$ санын қоссақ, жаңа орта неге тең?`,
-        correct: newMean,
-        solution: `<div class="sol-title">📝 Шешуі</div>
+      // Pick newNum so (S + newNum) divisible by (n+1)
+      const d = n + 1;
+      let newNum = d * randInt(M, M + 4) - S;
+      if (newNum < 1) newNum += d;
+      const newMean = (S + newNum) / d;
+      return { q: `$${n}$ санның орташа мәні $${M}$. Оларға $${newNum}$ қоссақ, $${d}$ санның жаңа ортасы қандай?`,
+        correct: newMean, solution: `<div class="sol-title">📝 Шешуі</div>
           <div class="sol-step">Бастапқы қосынды $= ${n} \\times ${M} = ${S}$</div>
           <div class="sol-step">Жаңа қосынды $= ${S} + ${newNum} = ${S + newNum}$</div>
-          <div class="sol-step">Жаңа орта $= \\dfrac{${S + newNum}}{${n + 1}} = ${fmtNum(newMean)}$</div>
-          <div class="sol-result">Жауап: $${fmtNum(newMean)}$</div>`
-      };
+          <div class="sol-step">Жаңа орта $= \\dfrac{${S + newNum}}{${d}} = ${newMean}$</div>
+          <div class="sol-result">Жауап: $${newMean}$</div>` };
     },
-    // Type 4: All numbers increased by k, what happens to range?
+    // Type 4: Add k to all → range unchanged
     () => {
-      const nums = Array.from({length: 5}, () => randInt(5, 30));
+      const nums = Array.from({length:5}, ()=>randInt(5,30));
       const k = randInt(2, 8);
       const R = range(nums);
-      return {
-        q: `$${nums.join(';\\; ')}$ қатарының әр мүшесін $${k}$-ге арттырса, өзгеру құлашы неге тең болады?`,
-        correct: R,
-        solution: `<div class="sol-title">📝 Шешуі</div>
+      return { q: `$${nums.join(';\\; ')}$ қатарының әр мүшесіне $${k}$ қоссақ, жаңа қатардың өзгеру құлашы нешеге тең?`,
+        correct: R, solution: `<div class="sol-title">📝 Шешуі</div>
           <div class="sol-step">Бастапқы құлаш $= ${Math.max(...nums)} - ${Math.min(...nums)} = ${R}$</div>
-          <div class="sol-step">Әр мүшеге бірдей сан қосқанда құлаш өзгермейді!</div>
-          <div class="sol-step">Себебі: $(x_{\\max} + ${k}) - (x_{\\min} + ${k}) = x_{\\max} - x_{\\min}$</div>
-          <div class="sol-result">Жауап: $${R}$</div>`
-      };
+          <div class="sol-step">Бірдей сан қосқанда құлаш өзгермейді: $(x_{\\max}+${k})-(x_{\\min}+${k})=x_{\\max}-x_{\\min}$</div>
+          <div class="sol-result">Жауап: $${R}$</div>` };
     },
-    // Type 5: Find mode given constraint
+    // Type 5: Find mode by setting x
     () => {
-      const modeVal = randInt(4, 15);
-      const a = randInt(1, modeVal - 1);
-      const b = randInt(modeVal + 1, modeVal + 8);
-      return {
-        q: `$${a};\\; ${modeVal};\\; ${b};\\; x;\\; ${modeVal + randInt(1,4)}$ қатарының модасы $${modeVal}$ болса, $x$ неге тең?`,
-        correct: modeVal,
-        solution: `<div class="sol-title">📝 Шешуі</div>
+      const m = randInt(4, 15);
+      const a = randInt(1, m-1);
+      const c = m + randInt(1,5);
+      return { q: `$${a};\\; ${m};\\; ${c};\\; x;\\; ${c+randInt(1,3)}$ қатарының модасы $${m}$ болуы үшін $x$ неге тең?`,
+        correct: m, solution: `<div class="sol-title">📝 Шешуі</div>
           <div class="sol-step">Мода — ең жиі кездесетін сан</div>
-          <div class="sol-step">$${modeVal}$ бір рет кездескен. Мода болуы үшін тағы бір рет кездесуі керек.</div>
-          <div class="sol-step">Сондықтан $x = ${modeVal}$</div>
-          <div class="sol-result">Жауап: $${modeVal}$</div>`
-      };
+          <div class="sol-step">$${m}$ бір рет бар, мода болу үшін тағы бір рет кездесуі керек</div>
+          <div class="sol-step">$x = ${m}$</div>
+          <div class="sol-result">Жауап: $${m}$</div>` };
     }
   ];
-
-  // Generate 10 questions using different types
-  const typeOrder = shuffleArray([0,1,2,3,4,5,0,1,2,3]);
+  const order = shuffleArray([0,1,2,3,4,5,0,1,2,3]);
   for (let i = 0; i < 10; i++) {
-    const gen = types[typeOrder[i]];
-    const { q, correct, solution } = gen();
-    const wrongs = wrongOpts(correct, 3, 1, Math.max(3, Math.round(Math.abs(correct) * 0.2)));
-    const opts = [fmtKatex(correct), ...wrongs.map(fmtKatex)];
-    questions.push({ q, opts, solution });
+    const { q, correct, solution } = types[order[i]]();
+    const wrongs = wrongOpts(correct, 3, 1, Math.max(3, Math.round(Math.abs(correct)*0.2)));
+    questions.push({ q, opts: [fmtKatex(correct), ...wrongs.map(fmtKatex)], solution });
   }
   return questions;
 }
@@ -798,158 +790,132 @@ function genLevel4() {
 function genLevel5() {
   const questions = [];
   const types = [
-    // Type 0: Multiply all by k, what happens to mean?
+    // Type 0: Multiply all by k → mean * k (force clean)
     () => {
-      const nums = Array.from({length: 5}, () => randInt(3, 15));
+      const n = pick([4, 5]);
+      const M = randInt(6, 15);
+      const nums = genCleanMean(n, M);
       const k = randInt(2, 4);
-      const M = Math.round(mean(nums) * 100) / 100;
-      const newM = Math.round(M * k * 100) / 100;
-      return {
-        q: `$${nums.join(';\\; ')}$ сандарының арифметикалық ортасы $${fmtNum(M)}$. Барлығын $${k}$-ге көбейтсе, жаңа орта?`,
-        correct: newM,
-        solution: `<div class="sol-title">📝 Шешуі</div>
-          <div class="sol-step">Бастапқы орта: $${fmtNum(M)}$</div>
+      const newM = M * k;
+      return { q: `$${nums.join(';\\; ')}$ сандарының арифметикалық ортасы $${M}$. Барлығын $${k}$-ге көбейтсе, жаңа орта нешеге тең?`,
+        correct: newM, solution: `<div class="sol-title">📝 Шешуі</div>
           <div class="sol-step">Барлығын $${k}$-ге көбейтсе, орта да $${k}$-ге көбейеді</div>
-          <div class="sol-step">Жаңа орта $= ${fmtNum(M)} \\times ${k} = ${fmtNum(newM)}$</div>
-          <div class="sol-result">Жауап: $${fmtNum(newM)}$</div>`
-      };
+          <div class="sol-step">Жаңа орта $= ${M} \\times ${k} = ${newM}$</div>
+          <div class="sol-result">Жауап: $${newM}$</div>` };
     },
-    // Type 1: Weighted mean — two groups
+    // Type 1: Weighted mean — two classes (force clean division)
     () => {
-      const n1 = randInt(15, 30);
+      const n1 = pick([10, 15, 20, 25]);
+      const n2 = pick([10, 15, 20, 25]);
+      const tot = n1 + n2;
       const m1 = randInt(60, 80);
-      const n2 = randInt(10, 25);
-      const m2 = randInt(70, 95);
-      const wm = Math.round((n1 * m1 + n2 * m2) / (n1 + n2) * 100) / 100;
-      return {
-        q: `А сыныбы: $${n1}$ оқушы, орт балл $${m1}$. Б сыныбы: $${n2}$ оқушы, орт балл $${m2}$. Жалпы орт балл?`,
-        correct: wm,
-        solution: `<div class="sol-title">📝 Шешуі</div>
-          <div class="sol-step">А жалпы балл $= ${n1} \\times ${m1} = ${n1*m1}$</div>
-          <div class="sol-step">Б жалпы балл $= ${n2} \\times ${m2} = ${n2*m2}$</div>
-          <div class="sol-step">Жалпы орта $= \\dfrac{${n1*m1} + ${n2*m2}}{${n1} + ${n2}} = \\dfrac{${n1*m1+n2*m2}}{${n1+n2}} = ${fmtNum(wm)}$</div>
-          <div class="sol-result">Жауап: $${fmtNum(wm)}$</div>`
-      };
+      // Pick m2 so weighted sum divisible by total
+      const target = randInt(m1, m1 + 15);
+      const m2Raw = (target * tot - n1 * m1) / n2;
+      const m2 = Math.round(m2Raw);
+      const wm = Math.round((n1 * m1 + n2 * m2) / tot * 10) / 10;
+      // Only use if clean
+      const wmClean = (n1 * m1 + n2 * m2) % tot === 0 ? (n1 * m1 + n2 * m2) / tot : wm;
+      return { q: `Мектеп олимпиадасында А сыныбынан $${n1}$ оқушы (орт балл $${m1}$) және Б сыныбынан $${n2}$ оқушы (орт балл $${m2}$) қатысты. Жалпы орташа балл нешеге тең?`,
+        correct: wmClean, solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">А жалпы $= ${n1} \\times ${m1} = ${n1*m1}$</div>
+          <div class="sol-step">Б жалпы $= ${n2} \\times ${m2} = ${n2*m2}$</div>
+          <div class="sol-step">Жалпы орта $= \\dfrac{${n1*m1+n2*m2}}{${tot}} = ${fmtNum(wmClean)}$</div>
+          <div class="sol-result">Жауап: $${fmtNum(wmClean)}$</div>` };
     },
-    // Type 2: Remove one person, what's new mean?
+    // Type 2: Remove one → new mean (force clean)
     () => {
-      const n = randInt(6, 10);
+      const n = pick([5, 6, 8, 10]);
       const M = randInt(15, 30);
       const S = n * M;
-      const removed = randInt(M + 5, M + 15);
-      const newM = Math.round((S - removed) / (n - 1) * 100) / 100;
-      return {
-        q: `$${n}$ адамның орташа жасы $${M}$. Бір адам ($${removed}$ жас) кетсе, қалғандардың орташа жасы?`,
-        correct: newM,
-        solution: `<div class="sol-title">📝 Шешуі</div>
+      // Pick removed so (S - removed) divisible by (n-1)
+      const d = n - 1;
+      const newMTarget = randInt(M - 3, M + 3);
+      const removed = S - d * newMTarget;
+      const newM = newMTarget;
+      return { q: `Футбол командасында $${n}$ ойыншының орташа жасы $${M}$. Ең үлкен жастағы ойыншы ($${removed}$ жас) ауысса, қалғандардың орташа жасы қандай болады?`,
+        correct: newM, solution: `<div class="sol-title">📝 Шешуі</div>
           <div class="sol-step">Жалпы жас $= ${n} \\times ${M} = ${S}$</div>
-          <div class="sol-step">Кеткеннен кейін: $${S} - ${removed} = ${S - removed}$</div>
-          <div class="sol-step">Жаңа орта $= \\dfrac{${S - removed}}{${n - 1}} = ${fmtNum(newM)}$</div>
-          <div class="sol-result">Жауап: $${fmtNum(newM)}$</div>`
-      };
+          <div class="sol-step">Кеткеннен кейін: $${S} - ${removed} = ${S-removed}$</div>
+          <div class="sol-step">Жаңа орта $= \\dfrac{${S-removed}}{${d}} = ${newM}$</div>
+          <div class="sol-result">Жауап: $${newM}$</div>` };
     },
-    // Type 3: Multiply all by k, range?
+    // Type 3: Multiply all by k → range * k
     () => {
-      const nums = Array.from({length: 5}, () => randInt(3, 20));
+      const nums = Array.from({length:5}, ()=>randInt(3,20));
       const k = randInt(2, 5);
       const R = range(nums);
-      const newR = R * k;
-      return {
-        q: `$${nums.join(';\\; ')}$ қатарының әр мүшесін $${k}$-ге көбейтсе, өзгеру құлашы неге тең болады?`,
-        correct: newR,
-        solution: `<div class="sol-title">📝 Шешуі</div>
-          <div class="sol-step">Бастапқы құлаш $= ${Math.max(...nums)} - ${Math.min(...nums)} = ${R}$</div>
-          <div class="sol-step">Көбейтсе, құлаш та $${k}$-ге көбейеді</div>
-          <div class="sol-step">Жаңа құлаш $= ${R} \\times ${k} = ${newR}$</div>
-          <div class="sol-result">Жауап: $${newR}$</div>`
-      };
+      return { q: `$${nums.join(';\\; ')}$ қатарын $${k}$-ге көбейтсе, жаңа қатардың өзгеру құлашы неше?`,
+        correct: R * k, solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Құлаш $= ${Math.max(...nums)} - ${Math.min(...nums)} = ${R}$</div>
+          <div class="sol-step">$${k}$-ге көбейтсе: құлаш та $${k}$-ге көбейеді</div>
+          <div class="sol-step">Жаңа құлаш $= ${R} \\times ${k} = ${R*k}$</div>
+          <div class="sol-result">Жауап: $${R*k}$</div>` };
     },
-    // Type 4: Mean speed problem
+    // Type 4: Average speed (force clean)
     () => {
-      const d1 = randInt(30, 100);
-      const t1 = randInt(1, 3);
-      const d2 = randInt(30, 100);
-      const t2 = randInt(1, 4);
-      const avgSpeed = Math.round((d1 + d2) / (t1 + t2) * 100) / 100;
-      return {
-        q: `Автокөлік $${d1}$ км-ді $${t1}$ сағатта, $${d2}$ км-ді $${t2}$ сағатта жүрді. Бүкіл жолдағы орта жылдамдық?`,
-        correct: avgSpeed,
-        solution: `<div class="sol-title">📝 Шешуі</div>
-          <div class="sol-step">Жалпы жол $= ${d1} + ${d2} = ${d1 + d2}$ км</div>
-          <div class="sol-step">Жалпы уақыт $= ${t1} + ${t2} = ${t1 + t2}$ сағат</div>
-          <div class="sol-step">Орта жылдамдық $= \\dfrac{${d1 + d2}}{${t1 + t2}} = ${fmtNum(avgSpeed)}$ км/сағ</div>
-          <div class="sol-result">Жауап: $${fmtNum(avgSpeed)}$</div>`
-      };
+      const t1 = randInt(1,3), t2 = randInt(1,3);
+      const tTotal = t1 + t2;
+      const avgTarget = randInt(40, 80);
+      const dTotal = avgTarget * tTotal;
+      const d1 = randInt(Math.round(dTotal*0.3), Math.round(dTotal*0.7));
+      const d2 = dTotal - d1;
+      return { q: `Велосипедші бірінші $${t1}$ сағатта $${d1}$ км, кейінгі $${t2}$ сағатта $${d2}$ км жол жүрді. Бүкіл жолдағы орта жылдамдығы нешеге тең?`,
+        correct: avgTarget, solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Жалпы жол $= ${d1} + ${d2} = ${dTotal}$ км</div>
+          <div class="sol-step">Жалпы уақыт $= ${t1} + ${t2} = ${tTotal}$ сағ</div>
+          <div class="sol-step">Орта жылдамдық $= \\dfrac{${dTotal}}{${tTotal}} = ${avgTarget}$ км/сағ</div>
+          <div class="sol-result">Жауап: $${avgTarget}$</div>` };
     },
-    // Type 5: Subtract k from all, new mean = ?
+    // Type 5: Subtract k → find original mean
     () => {
-      const n = randInt(4, 6);
       const k = randInt(2, 7);
       const newM = randInt(10, 25);
-      const oldM = newM + k;
-      return {
-        q: `$${n}$ санды барлығын $${k}$-ге азайтса, жаңа орта $${newM}$ болды. Бастапқы орта?`,
-        correct: oldM,
-        solution: `<div class="sol-title">📝 Шешуі</div>
-          <div class="sol-step">Барлығын $${k}$-ге азайтса, орта да $${k}$-ге азаяды</div>
-          <div class="sol-step">Бастапқы орта $= ${newM} + ${k} = ${oldM}$</div>
-          <div class="sol-result">Жауап: $${oldM}$</div>`
-      };
+      const n = randInt(4, 6);
+      return { q: `$${n}$ санның әрқайсысын $${k}$-ге азайтқанда жаңа орта $${newM}$ болды. Бастапқы арифметикалық ортаны табыңыз.`,
+        correct: newM + k, solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Әр санды $${k}$-ге азайтса, орта да $${k}$-ге азаяды</div>
+          <div class="sol-step">Бастапқы орта $= ${newM} + ${k} = ${newM+k}$</div>
+          <div class="sol-result">Жауап: $${newM+k}$</div>` };
     },
-    // Type 6: Biggest removed, find it from mean difference
+    // Type 6: Remove biggest, find it
     () => {
       const n = randInt(4, 6);
       const M = randInt(12, 22);
       const S = n * M;
-      const smallM = randInt(M - 4, M - 1);
-      const removed = S - (n - 1) * smallM;
-      return {
-        q: `$${n}$ санның ортасы $${M}$. Ең үлкенін алып тастаса, $${n-1}$-еуінің ортасы $${smallM}$. Ең үлкен сан?`,
-        correct: removed,
-        solution: `<div class="sol-title">📝 Шешуі</div>
+      const smallM = randInt(M-4, M-1);
+      const removed = S - (n-1) * smallM;
+      return { q: `$${n}$ оқушының орташа бағасы $${M}$. Ең жоғары балл алған оқушы кетсе, $${n-1}$ оқушының ортасы $${smallM}$ болды. Кеткен оқушының бағасы неше?`,
+        correct: removed, solution: `<div class="sol-title">📝 Шешуі</div>
           <div class="sol-step">Жалпы қосынды $= ${n} \\times ${M} = ${S}$</div>
-          <div class="sol-step">Қалғандардың қосындысы $= ${n-1} \\times ${smallM} = ${(n-1)*smallM}$</div>
-          <div class="sol-step">Ең үлкен $= ${S} - ${(n-1)*smallM} = ${removed}$</div>
-          <div class="sol-result">Жауап: $${removed}$</div>`
-      };
+          <div class="sol-step">Қалғандар $= ${n-1} \\times ${smallM} = ${(n-1)*smallM}$</div>
+          <div class="sol-step">Кеткен оқушы $= ${S} - ${(n-1)*smallM} = ${removed}$</div>
+          <div class="sol-result">Жауап: $${removed}$</div>` };
     },
-    // Type 7: Range is 0, what's the mode?
+    // Type 7: Range = 0 means all equal → mode is that number
     () => {
       const v = randInt(3, 20);
       const n = randInt(4, 7);
-      return {
-        q: `$${n}$ санның өзгеру құлашы $0$ болса, олардың модасы неге тең?`,
-        correct: v,
-        solution: `<div class="sol-title">📝 Шешуі</div>
-          <div class="sol-step">Құлаш $= 0$ болса, барлық сандар бірдей</div>
-          <div class="sol-step">Бірдей сандар бір ғана мәнге ие</div>
-          <div class="sol-step">Мода — сол сандың өзі (кез келген мән болуы мүмкін)</div>
-          <div class="sol-result">Жауап: Сандардың өзіне тең (кез келген бүтін сан дұрыс)</div>`,
-        special: true,
-        correctText: 'Сандардың өзі'
-      };
+      return { q: `$${n}$ санның өзгеру құлашы $0$. Бұл сандардың модасы неге тең?`,
+        correct: v, solution: `<div class="sol-title">📝 Шешуі</div>
+          <div class="sol-step">Құлаш $= 0$ дегеніміз — барлық сандар бірдей</div>
+          <div class="sol-step">Бірдей сандардың модасы — сол сандың өзі</div>
+          <div class="sol-result">Жауап: сандардың өзіне тең</div>`,
+        special: true };
     }
   ];
 
-  // Type 7 (special) only once; rest cycle
   const order = shuffleArray([0,1,2,3,4,5,6,0,1,2]);
   for (let i = 0; i < 10; i++) {
-    const gen = types[order[i]];
-    const result = gen();
-
+    const result = types[order[i]]();
     if (result.special) {
-      // Special question with text answer
       const v = randInt(3, 20);
-      questions.push({
-        q: result.q,
-        opts: [`$${v}$`, `$0$`, `$${v * 2}$`, 'Анықтау мүмкін емес'],
-        solution: result.solution,
-        correctOverride: 0
-      });
+      questions.push({ q: result.q,
+        opts: [`$${v}$`, `$0$`, `$${v*2}$`, 'Анықтау мүмкін емес'],
+        solution: result.solution, correctOverride: 0 });
     } else {
-      const wrongs = wrongOpts(result.correct, 3, 1, Math.max(3, Math.round(Math.abs(result.correct) * 0.15)));
-      const opts = [fmtKatex(result.correct), ...wrongs.map(fmtKatex)];
-      questions.push({ q: result.q, opts, solution: result.solution });
+      const wrongs = wrongOpts(result.correct, 3, 1, Math.max(3, Math.round(Math.abs(result.correct)*0.15)));
+      questions.push({ q: result.q, opts: [fmtKatex(result.correct), ...wrongs.map(fmtKatex)], solution: result.solution });
     }
   }
   return questions;
