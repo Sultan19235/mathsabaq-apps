@@ -218,6 +218,12 @@ const tex = s => {
 const urlParams = new URLSearchParams(location.search);
 const urlCode = (urlParams.get('code') || '').toUpperCase();
 
+// ── Auto-fill code from QR URL ──────────────────────────
+if (urlCode) {
+  document.getElementById('scode').value = urlCode;
+  document.getElementById('code-wrap').style.display = 'none';
+}
+
 // ── State ───────────────────────────────────────────────
 let sessionCode = '';
 let studentId = '';
