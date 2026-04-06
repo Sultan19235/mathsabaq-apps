@@ -24,25 +24,17 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent;overflow:hidden}
-
 .screen{display:none;position:fixed;inset:0;flex-direction:column;overflow:hidden;animation:fadeUp .3s ease}
 .screen.active{display:flex}
 .si{flex:1;display:flex;flex-direction:column;align-items:center;padding:14px;overflow:hidden}
 .si.center{justify-content:center}
 .si.top{justify-content:flex-start}
-
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
 @keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(5,150,105,.4)}50%{box-shadow:0 0 0 5px rgba(5,150,105,0)}}
-
-.logo{font-size:1.5rem;font-weight:800;letter-spacing:-.5px}
-.logo b{color:var(--primary)}
-.logo-sub{color:var(--muted);font-size:.78rem;margin-top:2px}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm)}
-.card-title{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;touch-action:manipulation;min-height:48px}
 .btn:active{transform:scale(.97)}
 .btn-block{width:100%}
@@ -57,12 +49,40 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .dots{display:flex;gap:5px;align-items:center}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
 .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm)}
+.card-title{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
 .err.on{display:block}
+.hidden{display:none!important}
+
+/* ── SETUP ── */
+.setup-center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;padding:24px}
+.setup-card{background:var(--bg2);border:1px solid var(--border);border-radius:24px;padding:32px 28px;width:100%;max-width:480px;box-shadow:var(--shadow-lg);text-align:center}
+.setup-icon{font-size:2.8rem;margin-bottom:8px}
+.setup-title{font-size:1.4rem;font-weight:800;margin-bottom:4px}
+.setup-title b{color:var(--primary)}
+.setup-sub{color:var(--muted);font-size:.84rem;margin-bottom:24px}
+.info-list{text-align:left;margin-bottom:24px}
+.info-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--bg3)}
+.info-row:last-child{border-bottom:none}
+.info-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.info-dot.green{background:#059669}
+.info-dot.yellow{background:#d97706}
+.info-dot.orange{background:#f97316}
+.info-dot.red{background:#dc2626}
+.info-dot.purple{background:#7c3aed}
+.info-dot.blue{background:#0891b2}
+.info-dot.pink{background:#ec4899}
+.info-icon{font-size:1.1rem;flex-shrink:0}
+.info-text{flex:1;font-weight:600;font-size:.88rem}
+.info-val{font-weight:800;color:var(--primary);font-size:.88rem}
 
 /* ── LOBBY ── */
 .lobby-wrap{width:100%;max-width:860px;height:100%;display:flex;flex-direction:column}
 .lobby-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;flex-shrink:0}
+.logo{font-size:1.5rem;font-weight:800;letter-spacing:-.5px}
+.logo b{color:var(--primary)}
+.logo-sub{color:var(--muted);font-size:.78rem;margin-top:2px}
 .code-panel{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px 22px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;box-shadow:var(--shadow);flex-shrink:0;margin-bottom:8px}
 .code-left{flex:1;min-width:180px}
 .code-lbl{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
@@ -92,8 +112,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 @media(max-width:960px){.cards-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.cards-grid{grid-template-columns:repeat(2,1fr);gap:7px}}
-
-/* ── Student card ── */
 .s-card{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:14px;position:relative;overflow:hidden;transition:border-color .4s,background .4s,box-shadow .4s}
 .s-card.new-card{animation:pop .35s ease}
 .s-card.flash-ok{border-color:var(--green)!important;background:var(--green-light)!important;box-shadow:0 0 16px rgba(5,150,105,.15)}
@@ -101,7 +119,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .s-card[data-rank="1"]{border-color:#fbbf24;background:linear-gradient(135deg,#fffdf0,#fef9e7);box-shadow:0 2px 12px rgba(251,191,36,.12)}
 .s-card[data-rank="2"]{border-color:#d1d5de;background:linear-gradient(135deg,#fafbfc,#f4f5f7)}
 .s-card[data-rank="3"]{border-color:#fdba74;background:linear-gradient(135deg,#fffaf5,#fef3e2)}
-.s-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.s-card-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .s-card-rank{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:800;width:24px;text-align:center;flex-shrink:0}
 .s-card-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.76rem;flex-shrink:0;border:2px solid rgba(67,56,202,.12)}
 .s-card-name{font-weight:700;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
@@ -137,13 +155,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .lb-detail{font-size:.7rem;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace}
 .lb-pct{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:800;flex-shrink:0}
 
-/* QR overlay */
 .qr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:none;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)}
 .qr-overlay.on{display:flex}
 .qr-modal{background:#fff;border-radius:24px;padding:36px;text-align:center;box-shadow:var(--shadow-lg);cursor:default;max-width:90vw}
 .qr-modal-code{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:700;color:var(--primary);letter-spacing:12px;margin-top:16px}
 .qr-modal-hint{color:var(--muted);font-size:.84rem;margin-top:8px}
-
 #toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-70px);background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:10px 22px;font-size:.84rem;font-weight:600;z-index:9999;transition:transform .28s ease;white-space:nowrap;box-shadow:var(--shadow-lg)}
 #toast.on{transform:translateX(-50%) translateY(0)}
 #toast.ok{border-color:var(--green-border);color:var(--green)}
@@ -156,8 +172,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 <body>
 <div id="toast"></div>
 <div class="cfw" id="confetti"></div>
-
-<!-- QR overlay -->
 <div class="qr-overlay" id="qr-overlay" onclick="closeQR(event)">
   <div class="qr-modal" onclick="event.stopPropagation()">
     <div id="qr-big"></div>
@@ -166,21 +180,44 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
   </div>
 </div>
 
+<!-- ════ SETUP ════ -->
+<div class="screen active" id="s-setup">
+  <div class="si center">
+    <div class="setup-center">
+      <div class="setup-card">
+        <div class="setup-icon">🧮</div>
+        <div class="setup-title">Арифметикалық орта, Мода, <b>Медиана</b></div>
+        <div class="setup-sub">Комбинаторика · 6-сынып · 7 деңгейлі тест</div>
+        <div class="info-list">
+          <div class="info-row"><div class="info-dot green"></div><div class="info-text">1-деңгей — Тікелей есептеу</div><div class="info-val">10 сұрақ</div></div>
+          <div class="info-row"><div class="info-dot green"></div><div class="info-text">2-деңгей — Ондық бөлшектер</div><div class="info-val">10 сұрақ</div></div>
+          <div class="info-row"><div class="info-dot yellow"></div><div class="info-text">3-деңгей — Кері есептер</div><div class="info-val">10 сұрақ</div></div>
+          <div class="info-row"><div class="info-dot orange"></div><div class="info-text">4-деңгей — Қолданбалы есептер</div><div class="info-val">10 сұрақ</div></div>
+          <div class="info-row"><div class="info-dot red"></div><div class="info-text">5-деңгей — Қиын есептер</div><div class="info-val">10 сұрақ</div></div>
+          <div class="info-row"><div class="info-dot purple"></div><div class="info-text">6-деңгей — Логика</div><div class="info-val">10 сұрақ</div></div>
+          <div class="info-row"><div class="info-dot pink"></div><div class="info-text">7-деңгей — Олимпиадалық</div><div class="info-val">10 сұрақ</div></div>
+          <div class="info-row"><div class="info-icon">🎯</div><div class="info-text">Деңгей өту шегі</div><div class="info-val">70%</div></div>
+          <div class="info-row"><div class="info-icon">⏱</div><div class="info-text">Уақыт шегі</div><div class="info-val">45 мин</div></div>
+        </div>
+        <div class="err" id="setup-err"></div>
+        <button class="btn btn-green btn-block" id="create-btn" onclick="createRoom()" style="padding:14px;font-size:.94rem">🚀 Бөлме құру</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ════ LOBBY ════ -->
-<div class="screen active" id="s-lobby">
+<div class="screen" id="s-lobby">
   <div class="si top">
     <div class="lobby-wrap">
       <div class="lobby-top">
         <div>
-          <div class="logo">🧮 Арифметикалық орта, Мода, <b>Медиана</b></div>
+          <div class="logo">🧮 Ар.орта, Мода, <b>Медиана</b></div>
           <div class="logo-sub">Комбинаторика · 6-сынып · 7 деңгей</div>
         </div>
-        <div style="display:flex;gap:6px;align-items:center">
-          <span class="chip chip-p">7 деңгей · 45 мин</span>
-        </div>
+        <span class="chip chip-p">10 сұрақ · 7 деңгей · 45 мин</span>
       </div>
-      <div class="err" id="lobby-err"></div>
-      <div class="code-panel" id="code-panel" style="display:none">
+      <div class="code-panel">
         <div class="code-left">
           <div class="code-lbl">Бөлме коды</div>
           <div class="code-val" id="room-code">------</div>
@@ -207,14 +244,12 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
             2. Оқушылар QR кодты сканерлейді<br>
             3. Атын жазып кіреді<br>
             4. <b style="color:var(--green)">Бастау</b> батырмасын басыңыз<br>
-            <em>⏱ Сабақ 45 минутқа шектелген</em><br>
-            <em>📊 7 деңгей · 70% өту шарты</em>
+            <em>⏱ 45 мин · 📊 7 деңгей · 🎯 70% өту шарты</em>
           </div>
         </div>
       </div>
-      <div style="flex-shrink:0;margin-top:8px;display:flex;gap:8px">
-        <button class="btn btn-green btn-block" id="create-btn" onclick="createRoom()" style="padding:14px;font-size:.94rem">🚀 Бөлме құру</button>
-        <button class="btn btn-green btn-block hidden" id="start-btn" onclick="startQuiz()" style="padding:14px;font-size:.94rem" disabled>▶ Бастау</button>
+      <div style="flex-shrink:0;margin-top:8px">
+        <button class="btn btn-green btn-block" id="start-btn" onclick="startQuiz()" style="padding:14px;font-size:.94rem" disabled>▶ Бастау (оқушылар күтілуде…)</button>
       </div>
     </div>
   </div>
@@ -226,7 +261,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     <div class="live-wrap">
       <div class="live-top">
         <div>
-          <div class="live-title">🧮 Арифметикалық орта, Мода, Медиана</div>
+          <div class="live-title">🧮 Ар.орта, Мода, Медиана</div>
           <div class="live-meta" id="live-meta">Тікелей · 7 деңгей</div>
         </div>
         <div class="live-controls">
@@ -238,9 +273,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
           <button class="btn btn-red btn-sm" onclick="endQuiz()">⏹ Аяқтау</button>
         </div>
       </div>
-      <div class="cards-wrap">
-        <div class="cards-grid" id="cards-grid"></div>
-      </div>
+      <div class="cards-wrap"><div class="cards-grid" id="cards-grid"></div></div>
     </div>
   </div>
 </div>
@@ -255,10 +288,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
         <div style="color:var(--muted);font-size:.82rem" id="res-sub"></div>
       </div>
       <div class="results-body">
-        <div class="card" style="margin-bottom:12px">
-          <div class="card-title">🏅 Рейтинг</div>
-          <div id="leaderboard"></div>
-        </div>
+        <div class="card" style="margin-bottom:12px"><div class="card-title">🏅 Рейтинг</div><div id="leaderboard"></div></div>
         <button class="btn btn-primary btn-block" onclick="newSession()" style="padding:14px">← Жаңа сабақ</button>
       </div>
     </div>
@@ -266,589 +296,219 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
 const BACKEND = 'https://mathsabaq.online';
 const STUDENT_URL = 'https://sultan19235.github.io/mathsabaq-apps/math-mixed-grade6/student.html';
-// ═══════════════════════════════════════════════════════════════
 
-let sessionCode = null;
-let sseSource = null;
+let sessionCode = null, sseSource = null, timerInterval = null, timeLeftSec = 45*60, quizEnded = false;
 const students = new Map();
-let timerInterval = null;
-let timeLeftSec = 45 * 60;
-let quizEnded = false;
-// Track previous totals for flash detection
-const prevTotals = new Map();
-
-function tex(s) { return katex.renderToString(s, { throwOnError: false }); }
-
-// ── Decode level from encoded total ─────────────────────
-function decodeLevel(encodedTotal) {
-  return Math.floor((encodedTotal || 0) / 1000) + 1;
-}
-function decodeTotal(encodedTotal) {
-  return (encodedTotal || 0) % 1000;
-}
-
-// ── Helpers ──────────────────────────────────────────────
-function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function toast(msg, type) { const el = document.getElementById('toast'); el.textContent = msg; el.className = 'on ' + (type || ''); setTimeout(() => el.classList.remove('on'), 3000); }
-function fmtTime(sec) { const m = Math.floor(sec / 60); const s = sec % 60; return `${m}:${s < 10 ? '0' : ''}${s}`; }
-
-function copyCode() {
-  navigator.clipboard?.writeText(sessionCode).then(() => toast('✅ Көшірілді!', 'ok')).catch(fb) || fb();
-  function fb() { const t = document.createElement('textarea'); t.value = sessionCode; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); toast('✅ Көшірілді!', 'ok'); }
-}
-function buildStudentUrl() { return `${STUDENT_URL}?code=${sessionCode}`; }
-function openQR() {
-  document.getElementById('qr-code-big').textContent = sessionCode;
-  document.getElementById('qr-hint').textContent = 'QR кодты сканерлеп кіріңіз';
-  const b = document.getElementById('qr-big'); b.innerHTML = '';
-  try { new QRCode(b, { text: buildStudentUrl(), width: 280, height: 280, colorDark: '#141826', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
-  document.getElementById('qr-overlay').classList.add('on');
-}
-function closeQR(e) { if (e.target === document.getElementById('qr-overlay')) document.getElementById('qr-overlay').classList.remove('on'); }
-function spawnConfetti() { const w = document.getElementById('confetti'); w.innerHTML = ''; const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626','#0891b2','#7c3aed']; for (let i = 0; i < 72; i++) { const e = document.createElement('div'); e.className = 'cfp'; const s = 5 + Math.random() * 9; e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`; w.appendChild(e); } setTimeout(() => w.innerHTML = '', 6000); }
-
+const prevTotals = new Map(), prevScores = new Map();
 const AV_COLORS = ['#4338ca','#059669','#d97706','#dc2626','#0891b2','#7c3aed','#ec4899','#f97316'];
 
-// ══════════════════════════════════════════════════════════
-//  CREATE ROOM
-// ══════════════════════════════════════════════════════════
-async function createRoom() {
-  const btn = document.getElementById('create-btn');
-  const errEl = document.getElementById('lobby-err');
-  errEl.classList.remove('on');
-  btn.disabled = true; btn.textContent = '⏳ Бөлме құрылуда...';
-  try {
-    const res = await fetch(`${BACKEND}/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'Ар.орта, Мода, Медиана, Комбинаторика' }) });
-    const data = await res.json();
-    sessionCode = data.code;
-    btn.disabled = false; btn.textContent = '🚀 Бөлме құру';
+function decodeLevel(t){ return Math.floor((t||0)/1000)+1; }
+function decodeTotal(t){ return (t||0)%1000; }
+
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function toast(msg,type){ const el=document.getElementById('toast'); el.textContent=msg; el.className='on '+(type||''); setTimeout(()=>el.classList.remove('on'),3000); }
+function fmtTime(sec){ const m=Math.floor(sec/60),s=sec%60; return `${m}:${s<10?'0':''}${s}`; }
+function copyCode(){ navigator.clipboard?.writeText(sessionCode).then(()=>toast('✅ Көшірілді!','ok')).catch(fb)||fb(); function fb(){const t=document.createElement('textarea');t.value=sessionCode;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);toast('✅ Көшірілді!','ok');} }
+function buildStudentUrl(){ return `${STUDENT_URL}?code=${sessionCode}`; }
+function openQR(){ document.getElementById('qr-code-big').textContent=sessionCode; document.getElementById('qr-hint').textContent='QR кодты сканерлеп кіріңіз'; const b=document.getElementById('qr-big');b.innerHTML=''; try{new QRCode(b,{text:buildStudentUrl(),width:280,height:280,colorDark:'#141826',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M})}catch(e){} document.getElementById('qr-overlay').classList.add('on'); }
+function closeQR(e){ if(e.target===document.getElementById('qr-overlay')) document.getElementById('qr-overlay').classList.remove('on'); }
+function spawnConfetti(){ const w=document.getElementById('confetti');w.innerHTML=''; const cols=['#4338ca','#2563eb','#d97706','#059669','#dc2626','#0891b2','#7c3aed']; for(let i=0;i<72;i++){const e=document.createElement('div');e.className='cfp';const s=5+Math.random()*9;e.style.cssText=`left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`;w.appendChild(e)} setTimeout(()=>w.innerHTML='',6000); }
+
+// ── CREATE ROOM ─────────────────────────────────────────
+async function createRoom(){
+  const btn=document.getElementById('create-btn'), errEl=document.getElementById('setup-err');
+  errEl.classList.remove('on'); btn.disabled=true; btn.textContent='⏳ Бөлме құрылуда...';
+  try{
+    const res=await fetch(`${BACKEND}/session`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:'Ар.орта, Мода, Медиана, Комбинаторика'})});
+    const data=await res.json();
+    sessionCode=data.code;
+    btn.disabled=false; btn.textContent='🚀 Бөлме құру';
     showLobby();
-  } catch (e) {
-    btn.disabled = false; btn.textContent = '🚀 Бөлме құру';
-    errEl.textContent = '❌ Серверге қосылу мүмкін болмады'; errEl.classList.add('on');
+  }catch(e){
+    btn.disabled=false; btn.textContent='🚀 Бөлме құру';
+    errEl.textContent='❌ Серверге қосылу мүмкін болмады'; errEl.classList.add('on');
   }
 }
 
-// ══════════════════════════════════════════════════════════
-//  LOBBY
-// ══════════════════════════════════════════════════════════
-function showLobby() {
-  quizEnded = false;
-  document.getElementById('room-code').textContent = sessionCode;
-  document.getElementById('live-code').textContent = sessionCode;
-  document.getElementById('code-panel').style.display = '';
-  document.getElementById('create-btn').classList.add('hidden');
-  document.getElementById('start-btn').classList.remove('hidden');
-  const qb = document.getElementById('qr-box'); qb.innerHTML = '';
-  try { new QRCode(qb, { text: buildStudentUrl(), width: 90, height: 90, colorDark: '#141826', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
+function showLobby(){
+  quizEnded=false;
+  document.getElementById('room-code').textContent=sessionCode;
+  document.getElementById('live-code').textContent=sessionCode;
+  const qb=document.getElementById('qr-box');qb.innerHTML='';
+  try{new QRCode(qb,{text:buildStudentUrl(),width:90,height:90,colorDark:'#141826',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M})}catch(e){}
   updateLobby();
+  show('s-lobby');
   connectSSE();
 }
 
-// ══════════════════════════════════════════════════════════
-//  START QUIZ
-// ══════════════════════════════════════════════════════════
-async function startQuiz() {
-  if (!students.size) { toast('Оқушылар жоқ!', 'er'); return; }
-  try {
-    await fetch(`${BACKEND}/start`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: sessionCode }) });
-    timeLeftSec = 45 * 60;
-    startTimer();
-    show('s-live');
-    renderAllCards();
-  } catch (e) {
-    toast('❌ Серверге қосылу қатесі', 'er');
-  }
+async function startQuiz(){
+  if(!students.size){toast('Оқушылар жоқ!','er');return;}
+  try{
+    await fetch(`${BACKEND}/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:sessionCode})});
+    timeLeftSec=45*60; startTimer(); show('s-live'); renderAllCards();
+  }catch(e){toast('❌ Қате','er');}
 }
 
-// ══════════════════════════════════════════════════════════
-//  END QUIZ
-// ══════════════════════════════════════════════════════════
-async function endQuiz() {
-  if (!confirm('Сабақты аяқтайсыз ба?')) return;
-  try {
-    await fetch(`${BACKEND}/end`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: sessionCode }) });
-  } catch (_) {}
+async function endQuiz(){
+  if(!confirm('Сабақты аяқтайсыз ба?'))return;
+  try{await fetch(`${BACKEND}/end`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:sessionCode})})}catch(_){}
   showResults();
 }
 
-// ══════════════════════════════════════════════════════════
-//  TIMER
-// ══════════════════════════════════════════════════════════
-function startTimer() {
-  if (timerInterval) clearInterval(timerInterval);
+function startTimer(){
+  if(timerInterval)clearInterval(timerInterval);
   updateTimerDisplay();
-  timerInterval = setInterval(() => {
-    timeLeftSec--;
-    updateTimerDisplay();
-    if (timeLeftSec <= 0) {
-      clearInterval(timerInterval); timerInterval = null;
-      showResults();
-    }
-  }, 1000);
+  timerInterval=setInterval(()=>{timeLeftSec--;updateTimerDisplay();if(timeLeftSec<=0){clearInterval(timerInterval);timerInterval=null;showResults();}},1000);
 }
-function updateTimerDisplay() {
-  const pill = document.getElementById('timer-pill');
-  pill.textContent = '⏱ ' + fmtTime(Math.max(0, timeLeftSec));
-  if (timeLeftSec <= 300) pill.classList.add('warn');
-  else pill.classList.remove('warn');
+function updateTimerDisplay(){
+  const pill=document.getElementById('timer-pill');
+  pill.textContent='⏱ '+fmtTime(Math.max(0,timeLeftSec));
+  if(timeLeftSec<=300)pill.classList.add('warn');else pill.classList.remove('warn');
 }
 
-// ══════════════════════════════════════════════════════════
-//  SSE
-// ══════════════════════════════════════════════════════════
-function connectSSE() {
-  if (sseSource) sseSource.close();
-  sseSource = new EventSource(`${BACKEND}/live?code=${sessionCode}`);
-
-  sseSource.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-
-    if (data.type === 'snapshot') {
-      // Store previous totals before updating
-      data.students.forEach(s => {
-        const prev = students.get(s.studentId);
-        if (prev) prevTotals.set(s.studentId, prev.total || 0);
-        students.set(s.studentId, s);
+// ── SSE ─────────────────────────────────────────────────
+function connectSSE(){
+  if(sseSource)sseSource.close();
+  sseSource=new EventSource(`${BACKEND}/live?code=${sessionCode}`);
+  sseSource.onmessage=(e)=>{
+    const data=JSON.parse(e.data);
+    if(data.type==='snapshot'){
+      data.students.forEach(s=>{
+        prevTotals.set(s.studentId,students.get(s.studentId)?.total||0);
+        prevScores.set(s.studentId,students.get(s.studentId)?.score||0);
+        students.set(s.studentId,s);
       });
-      if (data.status === 'active' && data.timeLeft != null) {
-        timeLeftSec = data.timeLeft;
-      }
+      if(data.status==='active'&&data.timeLeft!=null)timeLeftSec=data.timeLeft;
+      updateLobby(); renderAllCards(); updateLiveStats();
+    }else if(data.type==='update'){
+      const prev=students.get(data.studentId);
+      prevTotals.set(data.studentId,prev?(prev.total||0):0);
+      prevScores.set(data.studentId,prev?(prev.score||0):0);
+      students.set(data.studentId,data);
       updateLobby();
-      renderAllCards();
-      updateLiveStats();
-    } else if (data.type === 'update') {
-      const prev = students.get(data.studentId);
-      const prevTotal = prev ? (prev.total || 0) : 0;
-      students.set(data.studentId, data);
-      updateLobby();
-      // Use updateCardInPlace for updates — no full rebuild!
-      updateCardInPlace(data.studentId, prevTotal);
-      updateLiveStats();
-    } else if (data.type === 'ended') {
-      if (!quizEnded) showResults();
-      return;
-    } else if (data.type === 'started') {
-      // Another tab started the quiz
-      if (!document.getElementById('s-live').classList.contains('active')) {
-        timeLeftSec = 45 * 60;
-        startTimer();
-        show('s-live');
-        renderAllCards();
+      const card=document.getElementById('card-'+data.studentId);
+      if(!card){renderAllCards();}else{
+        const sorted=getSortedStudents();
+        const newRank=sorted.findIndex(st=>st.studentId===data.studentId)+1;
+        const oldRank=parseInt(card.dataset.rank||'0');
+        if(newRank!==oldRank||sorted.length!==document.querySelectorAll('.s-card').length) renderAllCards();
+        else updateCardValues(data.studentId);
+        flashCard(data.studentId);
       }
-    }
+      updateLiveStats();
+    }else if(data.type==='ended'){if(!quizEnded)showResults();}
+    else if(data.type==='started'){if(!document.getElementById('s-live').classList.contains('active')){timeLeftSec=45*60;startTimer();show('s-live');renderAllCards();}}
   };
-
-  sseSource.onerror = () => {
-    setTimeout(connectSSE, 3000);
-  };
+  sseSource.onerror=()=>{setTimeout(connectSSE,3000);};
 }
 
-// ══════════════════════════════════════════════════════════
-//  UPDATE CARD IN PLACE (no blinking!)
-// ══════════════════════════════════════════════════════════
-function updateCardInPlace(studentId, prevTotal) {
-  const s = students.get(studentId);
-  if (!s) return;
-
-  const card = document.getElementById('card-' + studentId);
-  if (!card) {
-    // New student — need full rebuild to add them
-    renderAllCards();
-    return;
-  }
-
-  // Check if sort order changed — if so, full rebuild needed
-  const sorted = getSortedStudents();
-  const currentRank = sorted.findIndex(st => st.studentId === studentId) + 1;
-  const cardRank = parseInt(card.dataset.rank || '0');
-
-  // If rank changed significantly (student moved position), rebuild all
-  if (currentRank !== cardRank) {
-    renderAllCards();
-    // Flash after rebuild if total changed
-    const curr = s;
-    const currTotal = decodeTotal(curr.total);
-    if (currTotal !== prevTotal % 1000 && prevTotal > 0) {
-      setTimeout(() => {
-        const newCard = document.getElementById('card-' + studentId);
-        if (!newCard) return;
-        const wasCorrect = (curr.score || 0) > (prevTotal > 0 ? (students.get(studentId)?.score || 0) - 1 : 0);
-        // Better: compare score change
-        const cls = curr.score > (prevTotal > 0 ? curr.score - 1 : 0) ? 'flash-ok' : 'flash-err';
-        newCard.classList.add(cls);
-        setTimeout(() => newCard.classList.remove(cls), 800);
-      }, 50);
-    }
-    return;
-  }
-
-  // Update values in place without destroying DOM
-  const encodedTotal = s.total || 0;
-  const level = decodeLevel(encodedTotal);
-  const total = decodeTotal(encodedTotal);
-  const score = s.score || 0;
-  const wrong = total - score;
-  const pct = total > 0 ? Math.round(score / total * 100) : 0;
-  const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
-  const barBg = pct >= 70 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
-
-  // Update text nodes
-  const pctEl = card.querySelector('.s-card-pct');
-  if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = col; }
-
-  const levelEl = card.querySelector('.s-card-level');
-  if (levelEl) levelEl.textContent = '🏆 Деңгей ' + level;
-
-  const statVals = card.querySelectorAll('.s-stat-val');
-  if (statVals[0]) statVals[0].textContent = score;
-  if (statVals[1]) statVals[1].textContent = wrong;
-  if (statVals[2]) statVals[2].textContent = total;
-
-  const barFill = card.querySelector('.s-bar-fill');
-  if (barFill) { barFill.style.width = pct + '%'; barFill.style.background = barBg; }
-
-  // Update focus status
-  const isFocused = s.focused !== false;
-  const focusDot = card.querySelector('.s-focus-dot');
-  const focusText = card.querySelector('.s-focus-text');
-  if (focusDot) {
-    focusDot.className = 's-focus-dot ' + (isFocused ? 'on' : 'off');
-  }
-  if (focusText) {
-    focusText.className = 's-focus-text' + (isFocused ? '' : ' away');
-    focusText.textContent = isFocused ? 'Экранда' : 'Сыртта';
-  }
-
-  // Update tab-switch badge
-  const tabSw = s.tabSwitches || 0;
-  const awaySec = s.awaySeconds || 0;
-  const warnEl = card.querySelector('.tab-warn');
-  if (tabSw > 0) {
-    if (warnEl) {
-      warnEl.innerHTML = `👀 ${tabSw}× · ${awaySec}с`;
-    } else {
-      const footer = card.querySelector('.s-card-footer');
-      if (footer) {
-        const span = document.createElement('span');
-        span.className = 'tab-warn';
-        span.innerHTML = `👀 ${tabSw}× · ${awaySec}с`;
-        footer.appendChild(span);
-      }
-    }
-  } else if (warnEl) {
-    warnEl.remove();
-  }
-
-  // Flash if total changed (new answer submitted)
-  const decodedPrevTotal = prevTotal % 1000;
-  if (total !== decodedPrevTotal && decodedPrevTotal >= 0) {
-    const wasCorrect = score > (total - 1 >= 0 ? score - (total > decodedPrevTotal && score > 0 ? 0 : 1) : 0);
-    // Simple check: did score increase?
-    const prevScore = score - (total - decodedPrevTotal > 0 ? (pct > 0 ? 1 : 0) : 0);
-    const cls = (score * 1000 + encodedTotal) > (prevScore * 1000 + prevTotal) && score > 0 ? 'flash-ok' : 'flash-err';
-
-    // Better approach: check actual total change direction
-    const oldStudentData = { total: prevTotal, score: prevTotal > 0 ? Math.round(prevTotal * (pct/100)) : 0 };
-    const scoreIncreased = score > (students.size > 0 ? score - 1 : 0);
-
-    card.classList.add(total > decodedPrevTotal && score >= Math.ceil(decodedPrevTotal * PASS_PCT_DUMMY) ? 'flash-ok' : 'flash-err');
-    // Actually, simplest: compare with stored prev
-    card.classList.remove('flash-ok', 'flash-err');
-    // The cleanest way: we saved prevTotal, current total increased. Did score also increase?
-    // We need the previous score too. Let's store it.
-  }
-}
-
-// Better flash detection: store previous score AND total
-const prevScores = new Map();
-
-function flashCardIfNeeded(studentId) {
-  const s = students.get(studentId);
-  if (!s) return;
-  const card = document.getElementById('card-' + studentId);
-  if (!card) return;
-
-  const currentTotal = decodeTotal(s.total);
-  const currentScore = s.score || 0;
-  const pTotal = prevTotals.get(studentId);
-  const pScore = prevScores.get(studentId);
-
-  if (pTotal !== undefined && currentTotal !== (pTotal % 1000)) {
-    const cls = currentScore > (pScore || 0) ? 'flash-ok' : 'flash-err';
+function flashCard(studentId){
+  const s=students.get(studentId);if(!s)return;
+  const card=document.getElementById('card-'+studentId);if(!card)return;
+  const ct=decodeTotal(s.total), pt=decodeTotal(prevTotals.get(studentId)||0);
+  if(ct!==pt){
+    const cls=(s.score||0)>(prevScores.get(studentId)||0)?'flash-ok':'flash-err';
     card.classList.add(cls);
-    setTimeout(() => card.classList.remove(cls), 800);
+    setTimeout(()=>card.classList.remove(cls),800);
   }
-
-  prevTotals.set(studentId, s.total || 0);
-  prevScores.set(studentId, currentScore);
+  prevTotals.set(studentId,s.total||0);
+  prevScores.set(studentId,s.score||0);
 }
 
-// Override the updateCardInPlace flash section to use the cleaner approach
-// (The flash logic in updateCardInPlace above is replaced by calling flashCardIfNeeded)
+function updateCardValues(sid){
+  const s=students.get(sid);if(!s)return;
+  const card=document.getElementById('card-'+sid);if(!card)return;
+  const et=s.total||0,level=decodeLevel(et),total=decodeTotal(et),score=s.score||0,wrong=total-score;
+  const pct=total>0?Math.round(score/total*100):0;
+  const col=pct>=70?'var(--green)':pct>=40?'var(--amber)':'var(--red)';
+  const barBg=pct>=70?'#059669':pct>=40?'#d97706':'#dc2626';
 
-// ── Lobby list ──────────────────────────────────────────
-function updateLobby() {
-  const arr = Array.from(students.values());
-  document.getElementById('lobby-count').textContent = arr.length;
-  const btn = document.getElementById('start-btn');
-  btn.disabled = arr.length === 0;
-  btn.textContent = arr.length ? `▶ Бастау (${arr.length} оқушы)` : '▶ Бастау (оқушылар күтілуде…)';
-  document.getElementById('lobby-list').innerHTML = arr.map(s =>
-    `<div class="s-join"><div class="s-join-av" style="background:#4338ca18;color:#4338ca">${esc(s.name)[0].toUpperCase()}</div><div><div class="s-join-name">${esc(s.name)}</div><div class="s-join-sub">✅ Қосылды</div></div></div>`
-  ).join('') || '<div class="dots" style="padding:8px 0"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="color:var(--muted);font-size:.78rem;margin-left:6px">Күтілуде…</span></div>';
+  const pe=card.querySelector('.s-card-pct');if(pe){pe.textContent=pct+'%';pe.style.color=col;}
+  const le=card.querySelector('.s-card-level');if(le)le.textContent='🏆 Д'+level;
+  const sv=card.querySelectorAll('.s-stat-val');
+  if(sv[0])sv[0].textContent=score;if(sv[1])sv[1].textContent=wrong;if(sv[2])sv[2].textContent=total;
+  const bf=card.querySelector('.s-bar-fill');if(bf){bf.style.width=pct+'%';bf.style.background=barBg;}
+  const isFocused=s.focused!==false;
+  const fd=card.querySelector('.s-focus-dot');if(fd)fd.className='s-focus-dot '+(isFocused?'on':'off');
+  const ft=card.querySelector('.s-focus-text');if(ft){ft.className='s-focus-text'+(isFocused?'':' away');ft.textContent=isFocused?'Экранда':'Сыртта';}
+  const tabSw=s.tabSwitches||0,awaySec=s.awaySeconds||0;
+  let we=card.querySelector('.tab-warn');
+  if(tabSw>0){if(we)we.innerHTML=`👀 ${tabSw}× · ${awaySec}с`;else{const footer=card.querySelector('.s-card-footer');if(footer){const sp=document.createElement('span');sp.className='tab-warn';sp.innerHTML=`👀 ${tabSw}× · ${awaySec}с`;footer.appendChild(sp);}}}
+  else if(we)we.remove();
 }
 
-// ── Sort students ───────────────────────────────────────
-function getSortedStudents() {
-  return Array.from(students.values()).sort((a, b) => {
-    const tA = decodeTotal(a.total), tB = decodeTotal(b.total);
-    const pA = tA > 0 ? (a.score || 0) / tA : 0;
-    const pB = tB > 0 ? (b.score || 0) / tB : 0;
-    if (pB !== pA) return pB - pA;
-    return (b.score || 0) - (a.score || 0);
+function updateLobby(){
+  const arr=Array.from(students.values());
+  document.getElementById('lobby-count').textContent=arr.length;
+  const btn=document.getElementById('start-btn');
+  btn.disabled=arr.length===0;
+  btn.textContent=arr.length?`▶ Бастау (${arr.length} оқушы)`:'▶ Бастау (оқушылар күтілуде…)';
+  document.getElementById('lobby-list').innerHTML=arr.map(s=>`<div class="s-join"><div class="s-join-av" style="background:#4338ca18;color:#4338ca">${esc(s.name)[0].toUpperCase()}</div><div><div class="s-join-name">${esc(s.name)}</div><div class="s-join-sub">✅ Қосылды</div></div></div>`).join('')||'<div class="dots" style="padding:8px 0"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="color:var(--muted);font-size:.78rem;margin-left:6px">Күтілуде…</span></div>';
+}
+
+function getSortedStudents(){
+  return Array.from(students.values()).sort((a,b)=>{
+    const tA=decodeTotal(a.total),tB=decodeTotal(b.total);
+    const pA=tA>0?(a.score||0)/tA:0,pB=tB>0?(b.score||0)/tB:0;
+    if(pB!==pA)return pB-pA;return(b.score||0)-(a.score||0);
   });
 }
 
-// ── Full render (only on snapshot or structural changes) ─
-function renderAllCards() {
-  const sorted = getSortedStudents();
-  const medals = ['🥇','🥈','🥉'];
-  const grid = document.getElementById('cards-grid');
-  grid.innerHTML = sorted.map((s, i) => buildCardHTML(s, i, medals)).join('');
-  // Store prev values
-  sorted.forEach(s => {
-    prevTotals.set(s.studentId, s.total || 0);
-    prevScores.set(s.studentId, s.score || 0);
-  });
-}
-
-function buildCardHTML(s, i, medals) {
-  const encodedTotal = s.total || 0;
-  const level = decodeLevel(encodedTotal);
-  const total = decodeTotal(encodedTotal);
-  const score = s.score || 0;
-  const wrong = total - score;
-  const pct = total > 0 ? Math.round(score / total * 100) : 0;
-  const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
-  const barBg = pct >= 70 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
-  const ac = AV_COLORS[i % AV_COLORS.length];
-
-  const isFocused = s.focused !== false;
-  const tabSw = s.tabSwitches || 0;
-  const awaySec = s.awaySeconds || 0;
-  const warn = tabSw > 0 ? `<span class="tab-warn">👀 ${tabSw}× · ${awaySec}с</span>` : '';
-
-  return `<div class="s-card new-card" id="card-${s.studentId}" data-rank="${i+1}">
-    <div class="s-card-header">
-      <span class="s-card-rank">${medals[i] || (i+1)}</span>
-      <div class="s-card-av" style="background:${ac}18;color:${ac};border-color:${ac}30">${esc(s.name)[0].toUpperCase()}</div>
-      <span class="s-card-name">${esc(s.name)}</span>
-      <span class="s-card-pct" style="color:${col}">${pct}%</span>
-    </div>
-    <div class="s-card-level">🏆 Деңгей ${level}</div>
-    <div class="s-card-stats-row">
-      <div class="s-stat-box"><div class="s-stat-val g">${score}</div><div class="s-stat-lbl">Дұрыс</div></div>
-      <div class="s-stat-box"><div class="s-stat-val r">${wrong}</div><div class="s-stat-lbl">Қате</div></div>
-      <div class="s-stat-box"><div class="s-stat-val a">${total}</div><div class="s-stat-lbl">Барлығы</div></div>
-    </div>
-    <div class="s-bar"><div class="s-bar-fill" style="width:${pct}%;background:${barBg}"></div></div>
-    <div class="s-card-footer">
-      <div class="s-focus"><span class="s-focus-dot ${isFocused ? 'on' : 'off'}"></span><span class="s-focus-text${isFocused ? '' : ' away'}">${isFocused ? 'Экранда' : 'Сыртта'}</span></div>
-      ${warn}
-    </div>
-  </div>`;
-}
-
-// Refined SSE handler with proper in-place updates
-const originalOnMessage = null;
-// Re-wire SSE to use better flash detection
-function connectSSE2() {
-  if (sseSource) sseSource.close();
-  sseSource = new EventSource(`${BACKEND}/live?code=${sessionCode}`);
-
-  sseSource.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-
-    if (data.type === 'snapshot') {
-      data.students.forEach(s => {
-        prevTotals.set(s.studentId, students.get(s.studentId)?.total || 0);
-        prevScores.set(s.studentId, students.get(s.studentId)?.score || 0);
-        students.set(s.studentId, s);
-      });
-      if (data.status === 'active' && data.timeLeft != null) {
-        timeLeftSec = data.timeLeft;
-      }
-      updateLobby();
-      renderAllCards();
-      updateLiveStats();
-    } else if (data.type === 'update') {
-      // Save previous values BEFORE updating
-      const prev = students.get(data.studentId);
-      prevTotals.set(data.studentId, prev ? (prev.total || 0) : 0);
-      prevScores.set(data.studentId, prev ? (prev.score || 0) : 0);
-
-      students.set(data.studentId, data);
-
-      const card = document.getElementById('card-' + data.studentId);
-      if (!card) {
-        // New student — full rebuild
-        renderAllCards();
-      } else {
-        // Check if rank order changed
-        const sorted = getSortedStudents();
-        const newRank = sorted.findIndex(st => st.studentId === data.studentId) + 1;
-        const oldRank = parseInt(card.dataset.rank || '0');
-
-        if (newRank !== oldRank || sorted.length !== document.querySelectorAll('.s-card').length) {
-          renderAllCards();
-        } else {
-          // In-place update
-          updateCardValues(data.studentId);
-        }
-        // Flash if needed
-        flashCardIfNeeded(data.studentId);
-      }
-
-      updateLobby();
-      updateLiveStats();
-    } else if (data.type === 'ended') {
-      if (!quizEnded) showResults();
-    } else if (data.type === 'started') {
-      if (!document.getElementById('s-live').classList.contains('active')) {
-        timeLeftSec = 45 * 60;
-        startTimer();
-        show('s-live');
-        renderAllCards();
-      }
-    }
-  };
-
-  sseSource.onerror = () => {
-    setTimeout(connectSSE2, 3000);
-  };
-}
-
-// Clean in-place value updater (no flash, no rebuild)
-function updateCardValues(studentId) {
-  const s = students.get(studentId);
-  if (!s) return;
-  const card = document.getElementById('card-' + studentId);
-  if (!card) return;
-
-  const encodedTotal = s.total || 0;
-  const level = decodeLevel(encodedTotal);
-  const total = decodeTotal(encodedTotal);
-  const score = s.score || 0;
-  const wrong = total - score;
-  const pct = total > 0 ? Math.round(score / total * 100) : 0;
-  const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
-  const barBg = pct >= 70 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
-
-  const pctEl = card.querySelector('.s-card-pct');
-  if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = col; }
-
-  const levelEl = card.querySelector('.s-card-level');
-  if (levelEl) levelEl.textContent = '🏆 Деңгей ' + level;
-
-  const statVals = card.querySelectorAll('.s-stat-val');
-  if (statVals[0]) statVals[0].textContent = score;
-  if (statVals[1]) statVals[1].textContent = wrong;
-  if (statVals[2]) statVals[2].textContent = total;
-
-  const barFill = card.querySelector('.s-bar-fill');
-  if (barFill) { barFill.style.width = pct + '%'; barFill.style.background = barBg; }
-
-  // Focus
-  const isFocused = s.focused !== false;
-  const focusDot = card.querySelector('.s-focus-dot');
-  const focusText = card.querySelector('.s-focus-text');
-  if (focusDot) focusDot.className = 's-focus-dot ' + (isFocused ? 'on' : 'off');
-  if (focusText) {
-    focusText.className = 's-focus-text' + (isFocused ? '' : ' away');
-    focusText.textContent = isFocused ? 'Экранда' : 'Сыртта';
-  }
-
-  // Tab-switch badge
-  const tabSw = s.tabSwitches || 0;
-  const awaySec = s.awaySeconds || 0;
-  let warnEl = card.querySelector('.tab-warn');
-  if (tabSw > 0) {
-    if (warnEl) {
-      warnEl.innerHTML = `👀 ${tabSw}× · ${awaySec}с`;
-    } else {
-      const footer = card.querySelector('.s-card-footer');
-      if (footer) {
-        const span = document.createElement('span');
-        span.className = 'tab-warn';
-        span.innerHTML = `👀 ${tabSw}× · ${awaySec}с`;
-        footer.appendChild(span);
-      }
-    }
-  } else if (warnEl) {
-    warnEl.remove();
-  }
-}
-
-// Override connectSSE to use the improved version
-const _origConnectSSE = connectSSE;
-connectSSE = connectSSE2;
-
-function updateLiveStats() {
-  const arr = Array.from(students.values());
-  document.getElementById('live-count').textContent = arr.length;
-  const withScore = arr.filter(s => decodeTotal(s.total) > 0);
-  const avg = withScore.length ? Math.round(withScore.reduce((sum, s) => sum + ((s.score || 0) / decodeTotal(s.total) * 100), 0) / withScore.length) : 0;
-  document.getElementById('avg-pct').textContent = avg;
-  const awayArr = arr.filter(s => s.focused === false);
-  const pill = document.getElementById('away-pill');
-  if (awayArr.length) { pill.style.display = ''; document.getElementById('away-count').textContent = awayArr.length; }
-  else pill.style.display = 'none';
-}
-
-// ══════════════════════════════════════════════════════════
-//  RESULTS
-// ══════════════════════════════════════════════════════════
-function showResults() {
-  if (quizEnded) return;
-  quizEnded = true;
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  if (sseSource) sseSource.close();
-
-  const arr = getSortedStudents();
-  const medals = ['🥇','🥈','🥉'];
-  document.getElementById('res-sub').textContent = arr.length + ' оқушы';
-  document.getElementById('leaderboard').innerHTML = arr.map((s, i) => {
-    const encodedTotal = s.total || 0;
-    const level = decodeLevel(encodedTotal);
-    const total = decodeTotal(encodedTotal);
-    const score = s.score || 0, wrong = total - score;
-    const pct = total > 0 ? Math.round(score / total * 100) : 0;
-    const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
-    const tabSw = s.tabSwitches || 0, awaySec = s.awaySeconds || 0;
-    const warnStr = tabSw > 0 ? `  👀 ${tabSw}× · ${awaySec}с` : '';
-    return `<div class="lb-row">
-      <div class="lb-rank">${medals[i] || (i+1)}</div>
-      <div class="lb-av" style="background:#4338ca18;color:#4338ca">${esc(s.name)[0].toUpperCase()}</div>
-      <div class="lb-info"><div class="lb-name">${esc(s.name)}</div><div class="lb-detail">✅ ${score}  ❌ ${wrong}  📝 ${total}  📊 ${pct}%  🏆 Д${level}${warnStr}</div></div>
-      <div class="lb-pct" style="color:${col}">${pct}%</div>
+function renderAllCards(){
+  const sorted=getSortedStudents(), medals=['🥇','🥈','🥉'];
+  document.getElementById('cards-grid').innerHTML=sorted.map((s,i)=>{
+    const et=s.total||0,level=decodeLevel(et),total=decodeTotal(et),score=s.score||0,wrong=total-score;
+    const pct=total>0?Math.round(score/total*100):0;
+    const col=pct>=70?'var(--green)':pct>=40?'var(--amber)':'var(--red)';
+    const barBg=pct>=70?'#059669':pct>=40?'#d97706':'#dc2626';
+    const ac=AV_COLORS[i%AV_COLORS.length];
+    const isFocused=s.focused!==false,tabSw=s.tabSwitches||0,awaySec=s.awaySeconds||0;
+    const warn=tabSw>0?`<span class="tab-warn">👀 ${tabSw}× · ${awaySec}с</span>`:'';
+    return `<div class="s-card new-card" id="card-${s.studentId}" data-rank="${i+1}">
+      <div class="s-card-header"><span class="s-card-rank">${medals[i]||(i+1)}</span><div class="s-card-av" style="background:${ac}18;color:${ac};border-color:${ac}30">${esc(s.name)[0].toUpperCase()}</div><span class="s-card-name">${esc(s.name)}</span><span class="s-card-pct" style="color:${col}">${pct}%</span></div>
+      <div class="s-card-level">🏆 Д${level}</div>
+      <div class="s-card-stats-row"><div class="s-stat-box"><div class="s-stat-val g">${score}</div><div class="s-stat-lbl">Дұрыс</div></div><div class="s-stat-box"><div class="s-stat-val r">${wrong}</div><div class="s-stat-lbl">Қате</div></div><div class="s-stat-box"><div class="s-stat-val a">${total}</div><div class="s-stat-lbl">Барлығы</div></div></div>
+      <div class="s-bar"><div class="s-bar-fill" style="width:${pct}%;background:${barBg}"></div></div>
+      <div class="s-card-footer"><div class="s-focus"><span class="s-focus-dot ${isFocused?'on':'off'}"></span><span class="s-focus-text${isFocused?'':' away'}">${isFocused?'Экранда':'Сыртта'}</span></div>${warn}</div>
     </div>`;
   }).join('');
-  show('s-results');
-  spawnConfetti();
+  sorted.forEach(s=>{prevTotals.set(s.studentId,s.total||0);prevScores.set(s.studentId,s.score||0);});
 }
 
-function newSession() {
-  sessionCode = null; quizEnded = false;
-  students.clear(); prevTotals.clear(); prevScores.clear();
-  document.getElementById('code-panel').style.display = 'none';
-  document.getElementById('create-btn').classList.remove('hidden');
-  document.getElementById('start-btn').classList.add('hidden');
-  show('s-lobby');
+function updateLiveStats(){
+  const arr=Array.from(students.values());
+  document.getElementById('live-count').textContent=arr.length;
+  const ws=arr.filter(s=>decodeTotal(s.total)>0);
+  const avg=ws.length?Math.round(ws.reduce((sum,s)=>sum+((s.score||0)/decodeTotal(s.total)*100),0)/ws.length):0;
+  document.getElementById('avg-pct').textContent=avg;
+  const aw=arr.filter(s=>s.focused===false);
+  const pill=document.getElementById('away-pill');
+  if(aw.length){pill.style.display='';document.getElementById('away-count').textContent=aw.length;}else pill.style.display='none';
+}
+
+function showResults(){
+  if(quizEnded)return;quizEnded=true;
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  if(sseSource)sseSource.close();
+  const arr=getSortedStudents(),medals=['🥇','🥈','🥉'];
+  document.getElementById('res-sub').textContent=arr.length+' оқушы';
+  document.getElementById('leaderboard').innerHTML=arr.map((s,i)=>{
+    const et=s.total||0,level=decodeLevel(et),total=decodeTotal(et),score=s.score||0,wrong=total-score;
+    const pct=total>0?Math.round(score/total*100):0;
+    const col=pct>=70?'var(--green)':pct>=40?'var(--amber)':'var(--red)';
+    const tabSw=s.tabSwitches||0,awaySec=s.awaySeconds||0;
+    const warnStr=tabSw>0?`  👀 ${tabSw}× · ${awaySec}с`:'';
+    return `<div class="lb-row"><div class="lb-rank">${medals[i]||(i+1)}</div><div class="lb-av" style="background:#4338ca18;color:#4338ca">${esc(s.name)[0].toUpperCase()}</div><div class="lb-info"><div class="lb-name">${esc(s.name)}</div><div class="lb-detail">✅${score} ❌${wrong} 📝${total} 📊${pct}% 🏆Д${level}${warnStr}</div></div><div class="lb-pct" style="color:${col}">${pct}%</div></div>`;
+  }).join('');
+  show('s-results');spawnConfetti();
+}
+
+function newSession(){
+  sessionCode=null;quizEnded=false;students.clear();prevTotals.clear();prevScores.clear();
+  show('s-setup');
 }
 </script>
 </body>
