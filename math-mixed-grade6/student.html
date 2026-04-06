@@ -384,7 +384,9 @@ function pickQuestionsForLevel(level) {
   if (!saved) return;
   try {
     const res = await fetch(`${BACKEND}/status?code=${urlCode}`);
-    const data = await res.json();
+    if (!res.ok) return;
+    const text = await res.text();
+    let data; try { data = JSON.parse(text); } catch(_) { return; }
     if (data.status === 'not_found' || data.status === 'ended') { clearState(); return; }
     sessionCode = urlCode;
     studentId = saved.studentId;
@@ -422,15 +424,21 @@ async function joinQuiz() {
   studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
   try {
     const res = await fetch(`${BACKEND}/status?code=${code}`);
-    const data = await res.json();
+    if (!res.ok) { errEl.textContent = 'Серверге қосылу қатесі (' + res.status + '). Қайта тырысыңыз.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
+    const resText = await res.text();
+    let data; try { data = JSON.parse(resText); } catch(_) { errEl.textContent = 'Сервер жауабы дұрыс емес. Қайта тырысыңыз.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
     if (data.status === 'not_found') { errEl.textContent = 'Бөлме табылмады.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
     if (data.status === 'ended') { errEl.textContent = 'Бұл сабақ аяқталған.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
     stats = { correct:0, wrong:0, streak:0 }; currentLevel = 1; levelCorrect = 0; levelWrong = 0;
     levelResults = {}; levelQuestions = []; levelQIndex = 0;
-    await sendScore(); saveState();
+    sendScore().catch(()=>{}); // non-blocking initial registration
+    saveState();
     btn.disabled = false; btn.textContent = '🚀 Кіру';
     if (data.status === 'active') startQuiz(); else showWait();
-  } catch (e) { errEl.textContent = 'Серверге қосылу мүмкін болмады.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; }
+  } catch (e) {
+    console.error('Join error:', e);
+    errEl.textContent = 'Серверге қосылу мүмкін болмады. Қайта тырысыңыз.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру';
+  }
 }
 document.addEventListener('keydown', e => { if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz(); });
 
@@ -443,7 +451,9 @@ function showWait() {
 async function pollStatus() {
   try {
     const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
-    const data = await res.json();
+    if (!res.ok) return;
+    const text = await res.text();
+    let data; try { data = JSON.parse(text); } catch(_) { return; }
     if (data.status === 'active') { clearInterval(statusPollInterval); statusPollInterval = null; startQuiz(); }
     else if (data.status === 'ended' || data.status === 'not_found') { clearInterval(statusPollInterval); statusPollInterval = null; showEnd(); }
   } catch (_) {}
@@ -550,7 +560,9 @@ async function sendScore(finished) {
     const res = await fetch(`${BACKEND}/submit`, { method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ code:sessionCode, studentId, name:studentName, score:stats.correct, total:encodedTotal, finished:finished===true||(currentLevel>TOTAL_LEVELS), focused:isFocused, tabSwitches, awaySeconds:currentAway })
     });
-    const data = await res.json();
+    if (!res.ok) return;
+    const text = await res.text();
+    let data; try { data = JSON.parse(text); } catch(_) { return; }
     if (data.status === 'ended' || data.status === 'not_found') showEnd();
   } catch (_) {}
 }
