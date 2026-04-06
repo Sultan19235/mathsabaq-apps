@@ -150,6 +150,8 @@ body{overflow-x:hidden}
         <input type="text" id="scode" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
       </div>
       <button class="btn btn-primary btn-block" id="join-btn" style="margin-top:4px" onclick="joinQuiz()">🚀 Кіру</button>
+      <div style="text-align:center;margin-top:12px"><a href="#" onclick="testServer();return false" style="font-size:.7rem;color:var(--muted);text-decoration:underline">🔧 Серверді тексеру</a></div>
+      <div class="err" id="test-result" style="display:none;margin-top:8px"></div>
     </div>
   </div>
 </div>
@@ -205,6 +207,31 @@ body{overflow-x:hidden}
 // ═══════════════════════════════════════════════════════════════
 const BACKEND = 'https://mathsabaq.online';
 const STORAGE_KEY_PREFIX = 'ms_mathmixed6_';
+
+// Debug: test server connection
+async function testServer() {
+  const el = document.getElementById('test-result');
+  el.style.display = 'block';
+  el.style.background = '#fffbeb';
+  el.style.borderColor = '#fcd34d';
+  el.style.color = '#92400e';
+  el.textContent = '⏳ Серверге қосылуда...';
+  try {
+    const t0 = Date.now();
+    const res = await fetch(`${BACKEND}/health`);
+    const ms = Date.now() - t0;
+    const text = await res.text();
+    if (res.ok) {
+      el.style.background = '#ecfdf5'; el.style.borderColor = '#6ee7b7'; el.style.color = '#059669';
+      el.textContent = `✅ Сервер жұмыс істейді! (${ms}ms) Жауап: ${text.substring(0,80)}`;
+    } else {
+      el.textContent = `⚠️ Сервер жауабы: ${res.status} — ${text.substring(0,80)}`;
+    }
+  } catch(e) {
+    el.style.background = '#fef2f2'; el.style.borderColor = '#fca5a5'; el.style.color = '#dc2626';
+    el.textContent = `❌ Қосылу мүмкін болмады: ${e.message}`;
+  }
+}
 const TOTAL_LEVELS = 7;
 const Q_PER_LEVEL = 10;
 const PASS_PCT = 70; // need 7/10 correct
@@ -428,22 +455,50 @@ async function joinQuiz() {
   btn.disabled = true; btn.textContent = '⏳ Қосылуда...';
   sessionCode = code; studentName = name;
   studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
-  try {
-    const res = await fetch(`${BACKEND}/status?code=${code}`);
-    if (!res.ok) { errEl.textContent = 'Серверге қосылу қатесі (' + res.status + '). Қайта тырысыңыз.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
-    const resText = await res.text();
-    let data; try { data = JSON.parse(resText); } catch(_) { errEl.textContent = 'Сервер жауабы дұрыс емес. Қайта тырысыңыз.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
-    if (data.status === 'not_found') { errEl.textContent = 'Бөлме табылмады.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
-    if (data.status === 'ended') { errEl.textContent = 'Бұл сабақ аяқталған.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
-    stats = { correct:0, wrong:0, streak:0 }; currentLevel = 1; levelCorrect = 0; levelWrong = 0;
-    levelResults = {}; levelQuestions = []; levelQIndex = 0;
-    sendScore().catch(()=>{}); // non-blocking initial registration
-    saveState();
-    btn.disabled = false; btn.textContent = '🚀 Кіру';
-    if (data.status === 'active') startQuiz(); else showWait();
-  } catch (e) {
-    console.error('Join error:', e);
-    errEl.textContent = 'Серверге қосылу мүмкін болмады. Қайта тырысыңыз.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру';
+
+  // Try up to 3 times with increasing timeout
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      btn.textContent = attempt > 1 ? `⏳ ${attempt}-ші әрекет...` : '⏳ Қосылуда...';
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000); // 10 sec timeout
+      const res = await fetch(`${BACKEND}/status?code=${code}`, { signal: controller.signal });
+      clearTimeout(timeout);
+
+      if (!res.ok) {
+        if (attempt < 3) continue; // retry
+        errEl.textContent = 'Сервер қатесі (' + res.status + '). Кейінірек қайта тырысыңыз.';
+        errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+      }
+      const resText = await res.text();
+      let data;
+      try { data = JSON.parse(resText); } catch(_) {
+        if (attempt < 3) continue;
+        errEl.textContent = 'Сервер жауабы қате. Кейінірек қайта тырысыңыз.';
+        errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+      }
+
+      if (data.status === 'not_found') { errEl.textContent = 'Бөлме табылмады. Кодты тексеріңіз.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
+      if (data.status === 'ended') { errEl.textContent = 'Бұл сабақ аяқталған.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
+
+      // Success — join the quiz
+      stats = { correct:0, wrong:0, streak:0 }; currentLevel = 1; levelCorrect = 0; levelWrong = 0;
+      levelResults = {}; levelQuestions = []; levelQIndex = 0;
+      sendScore().catch(()=>{});
+      saveState();
+      btn.disabled = false; btn.textContent = '🚀 Кіру';
+      if (data.status === 'active') startQuiz(); else showWait();
+      return; // success, exit
+    } catch (e) {
+      if (attempt < 3) {
+        await new Promise(r => setTimeout(r, 1000)); // wait 1s before retry
+        continue;
+      }
+      // Final attempt failed
+      const msg = e.name === 'AbortError' ? 'Сервер жауап бермеді (timeout). Интернетті тексеріңіз.' : 'Серверге қосылу мүмкін болмады. Интернетті тексеріңіз.';
+      errEl.textContent = msg;
+      errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру';
+    }
   }
 }
 document.addEventListener('keydown', e => { if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz(); });
