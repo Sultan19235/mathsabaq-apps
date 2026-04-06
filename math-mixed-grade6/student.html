@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Арифметикалық орта, Мода, Медиана, Комбинаторика — Оқушы</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;--amber-light:#fffbeb;
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
+  --shadow-lg:0 8px 30px rgba(20,24,38,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+
+.screen{display:none;min-height:100vh;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+.container{max-width:520px;margin:0 auto;padding:1rem;padding-bottom:2rem}
+
+/* ── JOIN ── */
+.join-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.join-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.join-logo{text-align:center;margin-bottom:20px}
+.join-icon{font-size:2.4rem;margin-bottom:6px}
+.join-title{font-size:1.3rem;font-weight:800;margin-bottom:2px}
+.join-sub{color:var(--muted);font-size:.82rem}
+.field{margin-bottom:12px}
+.field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px}
+.field input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;outline:none;transition:border-color .15s;background:var(--bg)}
+.field input:focus{border-color:var(--primary)}
+.field input.code-input{font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:6px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn-green{background:var(--green);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
+.err.on{display:block}
+
+/* ── WAIT ── */
+.wait-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.wait-icon{font-size:3.5rem;margin-bottom:12px}
+.wait-title{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+.wait-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.wait-name{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.82rem;font-weight:700;margin-top:8px}
+.dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-top:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+
+/* ── QUIZ ── */
+.level-bar{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.7rem 1rem;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.level-badge{display:flex;align-items:center;gap:6px;font-weight:800;font-size:.9rem;color:var(--primary)}
+.level-progress{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:var(--muted)}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.75rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.5rem .4rem;text-align:center;box-shadow:var(--shadow-sm)}
+.stat-card.hl{background:var(--primary-light);border-color:rgba(67,56,202,.25)}
+.stat-icon{font-size:.9rem;margin-bottom:.1rem}
+.stat-value{font-size:1.15rem;font-weight:800;color:var(--primary)}
+.stat-card.g .stat-value{color:var(--green)}
+.stat-card.r .stat-value{color:var(--red)}
+.stat-card.a .stat-value{color:var(--amber)}
+.stat-label{font-size:.58rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow)}
+.q-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-light);color:var(--primary);padding:.3rem .7rem;border-radius:16px;font-size:.72rem;font-weight:700;margin-bottom:.75rem}
+.q-text{font-size:1rem;font-weight:600;line-height:1.55;margin-bottom:1rem;color:var(--text)}
+.q-text .katex{font-size:1.05em}
+.opts-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.opt-btn{display:flex;align-items:center;gap:10px;padding:13px 14px;border:2.5px solid var(--border);border-radius:14px;background:var(--bg2);cursor:pointer;transition:all .2s;text-align:left;font-family:inherit;font-size:.92rem;font-weight:600;color:var(--text);touch-action:manipulation;width:100%;min-height:48px}
+.opt-btn:active{transform:scale(.98)}
+.opt-btn .opt-letter{width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;flex-shrink:0;transition:all .2s}
+.opt-btn.selected{border-color:var(--primary);background:var(--primary-light)}
+.opt-btn.selected .opt-letter{background:var(--primary);color:#fff}
+.opt-btn.correct{border-color:var(--green);background:var(--green-light)}
+.opt-btn.correct .opt-letter{background:var(--green);color:#fff}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-light)}
+.opt-btn.wrong .opt-letter{background:var(--red);color:#fff}
+.opt-btn .opt-text{flex:1;line-height:1.4}
+.opt-btn .opt-text .katex{font-size:1em}
+.feedback{padding:.85rem;border-radius:12px;margin-bottom:.75rem;font-weight:600;font-size:.86rem;line-height:1.5}
+.feedback.correct{background:var(--green-light);color:var(--green);border:1px solid var(--green)}
+.feedback.wrong{background:var(--red-light);color:var(--red);border:1px solid var(--red)}
+.explanation-box{background:#f8f9ff;border:1px solid rgba(67,56,202,.15);border-radius:12px;padding:.85rem;margin-bottom:.75rem;font-size:.84rem;line-height:1.6;color:var(--text2)}
+.explanation-box .katex{font-size:.95em}
+.btn-group{display:flex;gap:.6rem;justify-content:center;align-items:center;flex-wrap:wrap}
+.hidden{display:none!important}
+
+/* ── LEVEL COMPLETE ── */
+.level-result{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2rem 1.5rem;text-align:center;box-shadow:var(--shadow-lg);max-width:400px;width:100%;margin:0 auto}
+.level-result .emoji{font-size:3rem;margin-bottom:8px}
+.level-result .title{font-size:1.2rem;font-weight:800;margin-bottom:4px}
+.level-result .sub{color:var(--muted);font-size:.84rem;margin-bottom:16px}
+.level-result .stat-row{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.level-result .stat-box{background:var(--bg);border-radius:12px;padding:10px 16px;text-align:center}
+.level-result .stat-box .val{font-size:1.3rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.level-result .stat-box .lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+
+/* ── RESULTS ── */
+.res-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.res-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg)}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.res-stat{background:var(--bg);border-radius:12px;padding:12px 8px}
+.res-val{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.res-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+.levels-summary{text-align:left;margin:12px 0;font-size:.82rem}
+.levels-summary .lv-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bg3)}
+.levels-summary .lv-row:last-child{border-bottom:none}
+.levels-summary .lv-badge{font-weight:700;width:60px;flex-shrink:0}
+.levels-summary .lv-status{flex:1}
+
+.cfw{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.cfp{position:absolute;animation:cfFall linear forwards}
+</style>
+</head>
+<body>
+<div class="cfw" id="confetti"></div>
+
+<!-- ════ JOIN ════ -->
+<div class="screen active" id="s-join">
+  <div class="join-wrap">
+    <div class="join-card">
+      <div class="join-logo">
+        <div class="join-icon">🧮</div>
+        <div class="join-title">Арифметикалық орта, Мода, Медиана</div>
+        <div class="join-sub">Комбинаторика · 6-сынып · 7 деңгей</div>
+      </div>
+      <div class="err" id="join-err"></div>
+      <div class="field">
+        <label>Аты-жөні</label>
+        <input type="text" id="sname" placeholder="Атыңызды жазыңыз" maxlength="20" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="field" id="code-wrap">
+        <label>Бөлме коды</label>
+        <input type="text" id="scode" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
+      </div>
+      <button class="btn btn-primary btn-block" id="join-btn" style="margin-top:4px" onclick="joinQuiz()">🚀 Кіру</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WAIT ════ -->
+<div class="screen" id="s-wait">
+  <div class="wait-wrap">
+    <div class="wait-icon">✅</div>
+    <div class="wait-title">Қосылдыңыз!</div>
+    <div class="wait-sub">Мұғалім сабақты бастағанша күтіңіз</div>
+    <div class="wait-name" id="wait-name"></div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div class="screen" id="s-quiz">
+  <div class="container">
+    <div class="level-bar">
+      <div class="level-badge">🏆 <span id="lv-label">Деңгей 1</span></div>
+      <div class="level-progress" id="lv-progress">0 / 7</div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-card hl"><div class="stat-icon">📊</div><div class="stat-value" id="st-total">0</div><div class="stat-label">Жауап</div></div>
+      <div class="stat-card g"><div class="stat-icon">✓</div><div class="stat-value" id="st-correct">0</div><div class="stat-label">Дұрыс</div></div>
+      <div class="stat-card r"><div class="stat-icon">✗</div><div class="stat-value" id="st-wrong">0</div><div class="stat-label">Қате</div></div>
+      <div class="stat-card a"><div class="stat-icon">🔥</div><div class="stat-value" id="st-streak">0</div><div class="stat-label">Қатарынан</div></div>
+    </div>
+    <div class="quiz-card" id="quiz-card">
+      <!-- Question content injected here -->
+    </div>
+    <div id="level-result-area" class="hidden" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+<!-- ════ RESULTS ════ -->
+<div class="screen" id="s-results">
+  <div class="res-wrap">
+    <div class="res-card">
+      <div style="font-size:3rem;margin-bottom:8px" id="res-emoji">🏆</div>
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px">Тест аяқталды!</div>
+      <div style="color:var(--muted);font-size:.86rem">Нәтижелеріңіз</div>
+      <div class="res-stats">
+        <div class="res-stat"><div class="res-val" id="res-correct" style="color:var(--green)">0</div><div class="res-lbl">Дұрыс</div></div>
+        <div class="res-stat"><div class="res-val" id="res-wrong" style="color:var(--red)">0</div><div class="res-lbl">Қате</div></div>
+        <div class="res-stat"><div class="res-val" id="res-pct" style="color:var(--primary)">0%</div><div class="res-lbl">Пайыз</div></div>
+      </div>
+      <div class="levels-summary" id="levels-summary"></div>
+      <p style="color:var(--muted);margin-top:16px;font-size:.82rem">Нәтижелер мұғалімге жіберілді ✓</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const STORAGE_KEY_PREFIX = 'ms_mathmixed6_';
+const TOTAL_LEVELS = 7;
+const Q_PER_LEVEL = 7;
+const PASS_PCT = 70;
+// ═══════════════════════════════════════════════════════════════
+
+const tex = s => {
+  if (!s) return '';
+  return s.replace(/\$([^$]+)\$/g, (_, m) => katex.renderToString(m, { throwOnError: false }));
+};
+
+// ── URL params ──────────────────────────────────────────
+const urlParams = new URLSearchParams(location.search);
+const urlCode = (urlParams.get('code') || '').toUpperCase();
+
+// ── State ───────────────────────────────────────────────
+let sessionCode = '';
+let studentId = '';
+let studentName = '';
+let stats = { correct: 0, wrong: 0, streak: 0 };
+let currentLevel = 1;
+let levelCorrect = 0;
+let levelWrong = 0;
+let levelQuestions = []; // array of question objects for current level attempt
+let levelQIndex = 0;    // current question index within levelQuestions
+let usedQuestionKeys = new Set(); // track used questions across all attempts (per level)
+let allUsedKeys = {};   // { level: Set() } — persist across retries
+let levelResults = {};  // { level: { passed, attempts, correct, wrong } }
+let quiz = { selected: null, answered: false };
+let submitInterval = null;
+let statusPollInterval = null;
+let quizStarted = false;
+let sessionEnded = false;
+
+// ── Focus tracking ──────────────────────────────────────
+let isFocused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let awayStart = null;
+
+function markAway() {
+  if (!isFocused) return;
+  isFocused = false;
+  tabSwitches++;
+  awayStart = Date.now();
+  saveState();
+  sendScore();
+}
+function markBack() {
+  if (isFocused) return;
+  isFocused = true;
+  if (awayStart) {
+    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
+    awayStart = null;
+  }
+  sendScore();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) markAway(); else markBack();
+});
+window.addEventListener('blur', markAway);
+window.addEventListener('focus', markBack);
+
+// ── localStorage helpers ────────────────────────────────
+function saveState() {
+  if (!sessionCode) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  // Serialize usedKeys
+  const usedKeysObj = {};
+  for (const [lv, st] of Object.entries(allUsedKeys)) {
+    usedKeysObj[lv] = Array.from(st);
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + sessionCode, JSON.stringify({
+      studentId,
+      name: studentName,
+      correct: stats.correct,
+      wrong: stats.wrong,
+      streak: stats.streak,
+      tabSwitches,
+      awaySeconds: currentAway,
+      currentLevel,
+      levelCorrect,
+      levelWrong,
+      levelQuestions,
+      levelQIndex,
+      allUsedKeys: usedKeysObj,
+      levelResults,
+      ts: Date.now()
+    }));
+  } catch (_) {}
+}
+function loadState(code) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + code);
+      return null;
+    }
+    return data;
+  } catch (_) { return null; }
+}
+function clearState() {
+  if (sessionCode) {
+    try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {}
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function shuffleArray(arr) { const r = [...arr]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
+function spawnConfetti() {
+  const w = document.getElementById('confetti'); w.innerHTML = '';
+  const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626'];
+  for (let i = 0; i < 60; i++) { const e = document.createElement('div'); e.className = 'cfp'; const s = 5 + Math.random() * 9; e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`; w.appendChild(e); }
+  setTimeout(() => w.innerHTML = '', 6000);
+}
+
+// ── Auto-fill code from URL ─────────────────────────────
+if (urlCode) {
+  sessionCode = urlCode;
+  document.getElementById('scode').value = urlCode;
+  document.getElementById('code-wrap').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════
+//  QUESTION BANK (70 base questions, 10 per level)
+// ══════════════════════════════════════════════════════════
+const QUESTION_BANK = {
+1: [
+  { q:"$2$, $4$ және $6$ сандарының арифметикалық ортасын табыңыз.", opts:["$3$","$4$","$5$","$6$"], ans:1, exp:"Арифметикалық ортаны табу үшін сандарды қосып, олардың санына бөлеміз: $(2 + 4 + 6) \\div 3 = 12 \\div 3 = 4$." },
+  { q:"$10$ және $20$ сандарының арифметикалық ортасы неге тең?", opts:["$10$","$15$","$20$","$30$"], ans:1, exp:"$(10 + 20) \\div 2 = 30 \\div 2 = 15$." },
+  { q:"Берілген қатардың модасын табыңыз: $3, 5, 5, 7$.", opts:["$3$","$5$","$7$","Мода жоқ"], ans:1, exp:"Мода — қатарда ең жиі кездесетін сан. $5$ саны екі рет кездеседі." },
+  { q:"Мына сандар қатарының модасы қандай: $1, 1, 2, 3, 4, 4, 4$?", opts:["$1$","$2$","$3$","$4$"], ans:3, exp:"$4$ саны қатарда үш рет кездеседі — ең көбі." },
+  { q:"$1, 5, 9$ сандарының медианасын табыңыз.", opts:["$1$","$5$","$9$","$15$"], ans:1, exp:"Тақ санды қатардың ортасындағы сан — $5$." },
+  { q:"$2, 4, 6, 8$ сандарының медианасын табыңыз.", opts:["$4$","$5$","$6$","$10$"], ans:1, exp:"Жұп санды қатарда ортадағы екі санның ортасы: $(4 + 6) \\div 2 = 5$." },
+  { q:"Асқардың $2$ түрлі жейдесі және $3$ түрлі шалбары бар. Ол неше түрлі киім үлгісін кие алады?", opts:["$5$","$6$","$8$","$9$"], ans:1, exp:"Көбейту ережесі: $2 \\times 3 = 6$ нұсқа." },
+  { q:"$1$ және $2$ цифрларынан қанша екі таңбалы сан құрастыруға болады (цифрлар қайталануы мүмкін)?", opts:["$2$","$4$","$6$","$8$"], ans:1, exp:"Нұсқалар: $11, 12, 21, 22$. Барлығы $4$ сан." },
+  { q:"$5, 5, 5, 5$ сандарының арифметикалық ортасы қандай?", opts:["$4$","$5$","$10$","$20$"], ans:1, exp:"Барлық сандар бірдей болғанда, олардың ортасы сол санның өзіне тең." },
+  { q:"$9, 3, 7$ сандарының медианасын табыңыз.", opts:["$3$","$7$","$9$","$6$"], ans:1, exp:"Өсу ретімен: $3, 7, 9$. Ортада — $7$." }
+],
+2: [
+  { q:"$12, 14, 16, 18$ сандарының арифметикалық ортасы неге тең?", opts:["$14$","$15$","$16$","$17$"], ans:1, exp:"$(12 + 14 + 16 + 18) \\div 4 = 60 \\div 4 = 15$." },
+  { q:"$1{,}5$, $2{,}5$ және $5$ сандарының арифметикалық ортасын табыңыз.", opts:["$2$","$3$","$4$","$4{,}5$"], ans:1, exp:"$(1{,}5 + 2{,}5 + 5) \\div 3 = 9 \\div 3 = 3$." },
+  { q:"$8, 9, 10, 8, 12, 10, 8$ қатарының модасы нешеге тең?", opts:["$8$","$9$","$10$","$12$"], ans:0, exp:"$8$ саны үш рет кездеседі — ең жиі." },
+  { q:"$12, 7, 9, 4, 15$ сандарының медианасын анықтаңыз.", opts:["$7$","$9$","$12$","$15$"], ans:1, exp:"Өсу ретімен: $4, 7, 9, 12, 15$. Ортадағы сан — $9$." },
+  { q:"$10, 20, 30, 40$ сандарының медианасын табыңыз.", opts:["$20$","$25$","$30$","$35$"], ans:1, exp:"Ортадағы екі сан $20$ мен $30$. $(20 + 30) \\div 2 = 25$." },
+  { q:"$3$ оқушыны бір қатарға неше тәсілмен отырғызуға болады?", opts:["$3$","$6$","$9$","$12$"], ans:1, exp:"$3! = 3 \\times 2 \\times 1 = 6$ тәсіл." },
+  { q:"$0, 1, 5$ цифрларынан цифрлары қайталанбайтын неше екі таңбалы сан құруға болады?", opts:["$2$","$4$","$6$","$9$"], ans:1, exp:"$0$-ден басталмайды. Нұсқалар: $10, 15, 50, 51$. Барлығы $4$ сан." },
+  { q:"$100$ және $200$ сандарының арифметикалық ортасы неге тең?", opts:["$120$","$150$","$175$","$300$"], ans:1, exp:"$(100 + 200) \\div 2 = 300 \\div 2 = 150$." },
+  { q:"$1, 2, 3, 4$ сандарының модасы неге тең?", opts:["$1$","$2{,}5$","$4$","Мода жоқ"], ans:3, exp:"Барлық сандар бір реттен кездесетіндіктен, мода жоқ." },
+  { q:"Қызыл, көк, жасыл түсті $3$ шарды неше түрлі ретпен қатарластыруға болады?", opts:["$3$","$6$","$9$","$12$"], ans:1, exp:"$3! = 3 \\times 2 \\times 1 = 6$ нұсқа." }
+],
+3: [
+  { q:"Үш санның арифметикалық ортасы $15$-ке тең. Олардың қосындысы нешеге тең?", opts:["$5$","$15$","$30$","$45$"], ans:3, exp:"$15 \\times 3 = 45$." },
+  { q:"$8$ және $X$ сандарының арифметикалық ортасы $12$. $X$ неге тең?", opts:["$10$","$14$","$16$","$20$"], ans:2, exp:"$(8 + X) \\div 2 = 12$. Осыдан $X = 24 - 8 = 16$." },
+  { q:"$2, 3, 3, 4, 5, 5, 6$ қатарының модасы(лары) қандай?", opts:["$3$","$5$","$3$ және $5$","$4$"], ans:2, exp:"$3$ және $5$ сандары екі реттен кездеседі — қатардың екі модасы бар." },
+  { q:"$15, 11, 14, 12, 17, 13$ сандарының медианасын анықтаңыз.", opts:["$13$","$13{,}5$","$14$","$14{,}5$"], ans:1, exp:"Реттейміз: $11, 12, 13, 14, 15, 17$. Ортада $13$ пен $14$. $(13 + 14) \\div 2 = 13{,}5$." },
+  { q:"$1, 2, 3$ цифрларынан (қайталанбайтын) қанша үш таңбалы сан құрастыруға болады?", opts:["$3$","$6$","$9$","$27$"], ans:1, exp:"$3! = 3 \\times 2 \\times 1 = 6$ нұсқа." },
+  { q:"А қаласынан В-ға $3$ жол, В-дан С-ға $2$ жол бар. А-дан С-ға В арқылы неше жолмен баруға болады?", opts:["$5$","$6$","$8$","$9$"], ans:1, exp:"$3 \\times 2 = 6$ нұсқа." },
+  { q:"Оқушының бағалары: $4, 5, 3$. Орташа $4$ болу үшін ол төртінші бақылаудан қандай баға алуы керек?", opts:["$3$","$4$","$5$","мүмкін емес"], ans:1, exp:"$(4 + 5 + 3 + X) \\div 4 = 4$. Осыдан $X = 16 - 12 = 4$." },
+  { q:"$0{,}1; 0{,}2; 0{,}1; 0{,}3; 0{,}2; 0{,}1$ қатарының модасын табыңыз.", opts:["$0{,}1$","$0{,}2$","$0{,}3$","Модасы жоқ"], ans:0, exp:"$0{,}1$ саны үш рет кездеседі — ең жоғары." },
+  { q:"$0, 10, 20, 30, 40$ сандарының арифметикалық ортасы нешеге тең?", opts:["$10$","$20$","$25$","$30$"], ans:1, exp:"$(0 + 10 + 20 + 30 + 40) \\div 5 = 100 \\div 5 = 20$." },
+  { q:"Тиынды $3$ рет лақтырғанда неше түрлі нәтиже болуы мүмкін?", opts:["$3$","$6$","$8$","$9$"], ans:2, exp:"$2 \\times 2 \\times 2 = 8$ нұсқа." }
+],
+4: [
+  { q:"Велосипедші $2$ сағат $15$ км/сағ, $3$ сағат $10$ км/сағ жүрді. Орташа жылдамдығын табыңыз.", opts:["$12$ км/сағ","$12{,}5$ км/сағ","$13$ км/сағ","$14$ км/сағ"], ans:0, exp:"Жалпы жол: $(2 \\times 15) + (3 \\times 10) = 60$ км. Уақыт: $5$ сағ. $60 \\div 5 = 12$ км/сағ." },
+  { q:"$4$ санның ортасы $20$. Тағы бір сан қоссақ, жаңа орта $22$. Қосылған сан қандай?", opts:["$24$","$26$","$28$","$30$"], ans:3, exp:"$4 \\times 20 = 80$. $5 \\times 22 = 110$. Қосылған сан: $110 - 80 = 30$." },
+  { q:"$5$ санның ортасы $10$. $14$ санын алып тастасақ, қалған $4$ санның ортасы?", opts:["$8$","$9$","$10$","$11$"], ans:1, exp:"$50 - 14 = 36$. $36 \\div 4 = 9$." },
+  { q:"$4$ адам бір-бірімен қол алысса, барлығы неше қол алысу болды?", opts:["$4$","$6$","$8$","$12$"], ans:1, exp:"$1$-$2$, $1$-$3$, $1$-$4$, $2$-$3$, $2$-$4$, $3$-$4$. Барлығы $6$." },
+  { q:"$4$ түрлі қалам, $3$ түрлі дәптер. $1$ қалам мен $1$ дәптер жиынтығы неше тәсілмен?", opts:["$7$","$10$","$12$","$14$"], ans:2, exp:"$4 \\times 3 = 12$." },
+  { q:"$5$ тізбектес натурал санның медианасы $12$. Ең үлкені қандай?", opts:["$13$","$14$","$15$","$16$"], ans:1, exp:"Сандар: $10, 11, 12, 13, 14$. Ең үлкені $14$." },
+  { q:"Бірінші топтағы $3$ санның ортасы $10$, екінші топтағы $2$ санның ортасы $20$. Барлық $5$ санның ортасы?", opts:["$14$","$15$","$16$","$17$"], ans:0, exp:"$30 + 40 = 70$. $70 \\div 5 = 14$." },
+  { q:"$X, 2, 3, 2, 4, 3$ қатарының модасы $3$ болу үшін $X$ неге тең?", opts:["$2$","$3$","$4$","$5$"], ans:1, exp:"$3$ саны ең жиі болу үшін $X = 3$." },
+  { q:"$1, 2, 3, 4$ цифрларынан (қайталанбайтын) қанша жұп екі таңбалы сан құрастыруға болады?", opts:["$4$","$6$","$8$","$12$"], ans:1, exp:"Соңы $2$: $12, 32, 42$. Соңы $4$: $14, 24, 34$. Барлығы $6$." },
+  { q:"$x-2$, $x$ және $x+2$ сандарының ортасы $10$. $x$ неге тең?", opts:["$8$","$10$","$12$","$14$"], ans:1, exp:"$3x \\div 3 = 10$, яғни $x = 10$." }
+],
+5: [
+  { q:"$11$ футболшының орташа жасы $22$. Бір ойыншы шығып кетсе, қалғандарының ортасы $21$. Шығып кеткеннің жасы?", opts:["$30$","$31$","$32$","$33$"], ans:2, exp:"$11 \\times 22 = 242$. $10 \\times 21 = 210$. $242 - 210 = 32$." },
+  { q:"«АЛМА» сөзіндегі әріптерден неше түрлі сөз құрастыруға болады?", opts:["$12$","$16$","$24$","$36$"], ans:0, exp:"$4$ әріп, екі «А» бірдей. $4! \\div 2! = 24 \\div 2 = 12$." },
+  { q:"$4$ оң бүтін санның модасы $8$, медианасы $9$, ортасы $10$. Ең үлкен сан?", opts:["$12$","$14$","$16$","$18$"], ans:1, exp:"Сандар: $8, 8, 10, x$. $26 + x = 40$, $x = 14$." },
+  { q:"$5$ әртүрлі натурал санның ортасы $8$. Ең үлкені қандай ең үлкен мәнге ие бола алады?", opts:["$20$","$26$","$30$","$34$"], ans:2, exp:"Қосынды $40$. Қалған $4$ сан ең кіші: $1+2+3+4=10$. Ең үлкені: $40-10=30$." },
+  { q:"$0, 1, 2, 3$ цифрларынан цифрлары қайталанбайтын неше төрт таңбалы сан құрастыруға болады?", opts:["$18$","$24$","$36$","$48$"], ans:0, exp:"Бірінші орынға $0$ тұрмайды: $3 \\times 3 \\times 2 \\times 1 = 18$." },
+  { q:"$3, 5, 7, X$ сандарының ортасы $6$. Медианасы неге тең?", opts:["$5$","$5{,}5$","$6$","$6{,}5$"], ans:2, exp:"$15 + X = 24$, $X = 9$. Реттейміз: $3, 5, 7, 9$. Медиана: $(5+7)\\div 2 = 6$." },
+  { q:"Математика мен Физика қатар тұруы шартымен $4$ кітапты неше тәсілмен орналастыруға болады?", opts:["$6$","$12$","$18$","$24$"], ans:1, exp:"$3! \\times 2! = 6 \\times 2 = 12$." },
+  { q:"Үш топтың орташалары $50, 60, 70$, оқушылар саны $10, 20, 20$. Жалпы орташа?", opts:["$60$","$61$","$62$","$63$"], ans:2, exp:"$(500 + 1200 + 1400) \\div 50 = 3100 \\div 50 = 62$." },
+  { q:"$15$ саны $4$ рет, $20$ саны $4$ рет, $25$ саны $3$ рет кездеседі. Модасы?", opts:["$15$","$20$","$25$","$15$ және $20$"], ans:3, exp:"$15$ пен $20$ бірдей $4$ реттен — екі мода." },
+  { q:"Шеңбер бойындағы $5$ нүктеден неше үшбұрыш сызуға болады?", opts:["$5$","$8$","$10$","$15$"], ans:2, exp:"$(5 \\times 4 \\times 3) \\div (3 \\times 2 \\times 1) = 10$." }
+],
+6: [
+  { q:"$0, 1, 2, 3, 4, 5$ цифрларынан (қайталанбайтын) неше $3$ таңбалы жұп сан құрастыруға болады?", opts:["$36$","$48$","$52$","$60$"], ans:2, exp:"$0$-мен аяқталатын: $5 \\times 4 = 20$. $2$ немесе $4$-пен: $4 \\times 4 = 16$ (әрқайсысы). $20 + 16 + 16 = 52$." },
+  { q:"$10$ санның ортасы $15$. Әрқайсысына $3$ қоссақ, жаңа орта?", opts:["$15$","$18$","$30$","$150$"], ans:1, exp:"Әрбір санға бірдей мән қосылса, орта да сол мәнге артады: $15 + 3 = 18$." },
+  { q:"$5, 8, 12, x, 20$ сандарының медианасы $12$, ортасы $13$. $x$ неге тең?", opts:["$14$","$16$","$20$","$22$"], ans:2, exp:"$45 + x = 65$, $x = 20$. $12$ ортада қалады." },
+  { q:"$1$-ден $50$-ге дейінгі сандардың медианасы?", opts:["$25$","$25{,}5$","$26$","$26{,}5$"], ans:1, exp:"$50$ сан. Ортада $25$ пен $26$. $(25 + 26) \\div 2 = 25{,}5$." },
+  { q:"Шахмат турниріне $8$ ойыншы қатысты. Барлығы неше партия ойналды?", opts:["$28$","$36$","$56$","$64$"], ans:0, exp:"$(8 \\times 7) \\div 2 = 28$." },
+  { q:"$5$ санның модасы жоқ, медианасы $10$, ортасы $10$. Ең кіші $6$, ең үлкен $15$. Белгісіз екі санның қосындысы?", opts:["$17$","$18$","$19$","$20$"], ans:2, exp:"$6 + a + 10 + b + 15 = 50$. $a + b = 19$." },
+  { q:"$4$ оқушыны $4$ орындыққа отырғызу: Асқар мен Мақсат қатар отырмаса, неше тәсіл?", opts:["$12$","$14$","$16$","$24$"], ans:0, exp:"$4! - 3! \\times 2 = 24 - 12 = 12$." },
+  { q:"«ҚАЗАҚ» сөзінен неше түрлі сөз құрастыруға болады?", opts:["$15$","$30$","$60$","$120$"], ans:1, exp:"$5! \\div (2! \\times 2!) = 120 \\div 4 = 30$." },
+  { q:"Ұлдардың орташа бойы $160$ см, қыздікі $150$ см. Жалпы орташа $154$ см. Кімдер көп?", opts:["Ұлдар","Қыздар","Бірдей","Анықтау мүмкін емес"], ans:1, exp:"Жалпы орта қыздардың мәніне жақын — қыздар көп." },
+  { q:"$6$ түрлі кітаптың $3$-еуін таңдап қатарластыруды неше тәсілмен?", opts:["$20$","$60$","$120$","$216$"], ans:2, exp:"$6 \\times 5 \\times 4 = 120$." }
+],
+7: [
+  { q:"$1, 2, 3, 4, 5$ цифрларынан (қайталанбайтын) $5$-ке еселік болатын неше төрт таңбалы сан?", opts:["$12$","$24$","$48$","$60$"], ans:1, exp:"Соңғы цифр $5$. Алдыңғы $3$ орынға: $4 \\times 3 \\times 2 = 24$." },
+  { q:"$100$ санның ортасы $50$. $50$ және $60$ сандарын алып тастасақ, $98$ санның ортасы шамамен?", opts:["$48{,}9$","$49{,}9$","$50$","$50{,}1$"], ans:1, exp:"$(5000 - 110) \\div 98 \\approx 49{,}9$." },
+  { q:"$10, 15, x, 25, 30$: медиана мен орта тең. $x$?", opts:["$15$","$20$","$22$","$25$"], ans:1, exp:"$x = (80 + x) \\div 5$. $4x = 80$, $x = 20$." },
+  { q:"$5$ адамның орташа жасы $30$. Ең жас екеуін санамасақ, $3$-ұінің ортасы $36$. Бір жасы $18$-де болса, екіншісі?", opts:["$20$","$22$","$24$","$26$"], ans:2, exp:"$150 - 108 = 42$. $42 - 18 = 24$." },
+  { q:"Жазықтықта $6$ нүкте, ешқандай $3$-еуі бір түзуде емес. Неше кесінді жүргізуге болады?", opts:["$10$","$15$","$20$","$30$"], ans:1, exp:"$(6 \\times 5) \\div 2 = 15$." },
+  { q:"$5$ қызыл, $4$ көк, $3$ қара қалам. Қарамай $2$ қызыл алу тәсілі?", opts:["$10$","$12$","$20$","$25$"], ans:0, exp:"$(5 \\times 4) \\div 2 = 10$." },
+  { q:"$4$ баланың модасы $8$, медианасы $9$, ортасы $10$. Ең үлкен баланың жасы?", opts:["$12$","$13$","$14$","$15$"], ans:2, exp:"$8, 8, 10, x$. $26 + x = 40$, $x = 14$." },
+  { q:"$3$ хатты $4$ жәшікке неше тәсілмен салуға болады?", opts:["$12$","$24$","$64$","$81$"], ans:2, exp:"$4 \\times 4 \\times 4 = 64$." },
+  { q:"Шеңбер бойымен $5$ адамды неше тәсілмен отырғызуға болады?", opts:["$12$","$24$","$60$","$120$"], ans:1, exp:"$(5-1)! = 4! = 24$." },
+  { q:"Студент $5$ емтиханнан орташа $70$ ұпай. Алғашқы $4$-ұінің ортасы $65$. Соңғы емтихан?", opts:["$80$","$85$","$90$","$95$"], ans:2, exp:"$350 - 260 = 90$." }
+]
+};
+
+// ── Dynamic question variations generator ───────────────
+// When bank questions are exhausted, generate variations with new numbers
+function generateVariation(level) {
+  // Simple arithmetic mean / median / mode / combinatorics variations
+  const generators = {
+    1: [
+      () => { const a = 2+Math.floor(Math.random()*8), b = a+2+Math.floor(Math.random()*4), c = b+2+Math.floor(Math.random()*4); const avg = (a+b+c)/3; if (!Number.isInteger(avg)) return null; const wrongs = shuffleArray([avg-1, avg+1, avg+2]).slice(0,3); const opts = shuffleArray([{v:avg,c:true},...wrongs.map(v=>({v,c:false}))]); const ai = opts.findIndex(o=>o.c); return { q:`$${a}$, $${b}$ және $${c}$ сандарының арифметикалық ортасын табыңыз.`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`$(${a} + ${b} + ${c}) \\div 3 = ${a+b+c} \\div 3 = ${avg}$.` }; },
+      () => { const a = 2+Math.floor(Math.random()*18)*2, b = a+2+Math.floor(Math.random()*18)*2; const avg = (a+b)/2; const wrongs = shuffleArray([avg-2, avg+3, a+b]).slice(0,3); const opts = shuffleArray([{v:avg,c:true},...wrongs.map(v=>({v,c:false}))]); const ai = opts.findIndex(o=>o.c); return { q:`$${a}$ және $${b}$ сандарының арифметикалық ортасы неге тең?`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`$(${a} + ${b}) \\div 2 = ${a+b} \\div 2 = ${avg}$.` }; }
+    ],
+    2: [
+      () => { const n = 3+Math.floor(Math.random()*3); const vals = []; for (let i=0;i<n;i++) vals.push(5+Math.floor(Math.random()*20)); const sum = vals.reduce((a,b)=>a+b,0); if (sum % n !== 0) return null; const avg = sum/n; const wrongs = shuffleArray([avg-1, avg+2, avg+3]).slice(0,3); const opts = shuffleArray([{v:avg,c:true},...wrongs.map(v=>({v,c:false}))]); const ai = opts.findIndex(o=>o.c); return { q:`$${vals.join(', ')}$ сандарының арифметикалық ортасы?`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`$(${vals.join(' + ')}) \\div ${n} = ${sum} \\div ${n} = ${avg}$.` }; }
+    ],
+    3: [
+      () => { const a = 1+Math.floor(Math.random()*10), x = a+2+Math.floor(Math.random()*8); const avg = (a+x)/2; if (!Number.isInteger(avg)) return null; const wrongs = shuffleArray([x-2, x+2, x+4]).slice(0,3); const opts = shuffleArray([{v:x,c:true},...wrongs.map(v=>({v,c:false}))]); const ai = opts.findIndex(o=>o.c); return { q:`$${a}$ және $X$ сандарының арифметикалық ортасы $${avg}$. $X$ неге тең?`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`$(${a} + X) \\div 2 = ${avg}$. Осыдан $X = ${avg*2} - ${a} = ${x}$.` }; }
+    ],
+    4: [
+      () => { const n = 3+Math.floor(Math.random()*3), avg = 8+Math.floor(Math.random()*15); const sum = n*avg; const wrongs = shuffleArray([sum-n, sum+n, sum*2]).slice(0,3); const opts = shuffleArray([{v:sum,c:true},...wrongs.map(v=>({v,c:false}))]); const ai = opts.findIndex(o=>o.c); return { q:`$${n}$ санның арифметикалық ортасы $${avg}$. Олардың қосындысы?`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`$${n} \\times ${avg} = ${sum}$.` }; }
+    ],
+    5: [
+      () => { const shirts = 2+Math.floor(Math.random()*4), pants = 2+Math.floor(Math.random()*4); const ans = shirts*pants; const wrongs = shuffleArray([ans+1, ans-1, shirts+pants]).slice(0,3); const opts = shuffleArray([{v:ans,c:true},...wrongs.map(v=>({v,c:false}))]); const ai = opts.findIndex(o=>o.c); return { q:`$${shirts}$ түрлі жейде және $${pants}$ түрлі шалбардан неше үлгі кие аласыз?`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`$${shirts} \\times ${pants} = ${ans}$.` }; }
+    ],
+    6: [
+      () => { const n = 5+Math.floor(Math.random()*6), avg = 10+Math.floor(Math.random()*20), add = 2+Math.floor(Math.random()*5); const newAvg = avg + add; const wrongs = shuffleArray([avg, newAvg+1, avg+add*2]).slice(0,3); const opts = shuffleArray([{v:newAvg,c:true},...wrongs.map(v=>({v,c:false}))]); const ai = opts.findIndex(o=>o.c); return { q:`$${n}$ санның ортасы $${avg}$. Әрқайсысына $${add}$ қоссақ, жаңа орта?`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`$${avg} + ${add} = ${newAvg}$.` }; }
+    ],
+    7: [
+      () => { const n = 4+Math.floor(Math.random()*4), avg = 15+Math.floor(Math.random()*30); const sum = n*avg; const removed = avg + Math.floor(Math.random()*10) - 5; const newSum = sum - removed; const newAvg = newSum / (n-1); if (!Number.isInteger(newAvg)) return null; const wrongs = shuffleArray([newAvg-1, newAvg+1, avg]).slice(0,3); const opts = shuffleArray([{v:newAvg,c:true},...wrongs.map(v=>({v,c:false}))]); const ai = opts.findIndex(o=>o.c); return { q:`$${n}$ санның ортасы $${avg}$. $${removed}$ санын алып тастасақ, қалған $${n-1}$ санның ортасы?`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`$(${sum} - ${removed}) \\div ${n-1} = ${newSum} \\div ${n-1} = ${newAvg}$.` }; }
+    ]
+  };
+  const gens = generators[level] || generators[1];
+  for (let attempts = 0; attempts < 50; attempts++) {
+    const gen = gens[Math.floor(Math.random() * gens.length)];
+    const result = gen();
+    if (result) {
+      // Create a unique key
+      result._key = 'gen_' + level + '_' + Math.random().toString(36).substr(2,8);
+      return result;
+    }
+  }
+  return null;
+}
+
+function getQuestionKey(q) {
+  return q._key || q.q.substr(0, 60);
+}
+
+function pickQuestionsForLevel(level) {
+  const bank = QUESTION_BANK[level] || [];
+  if (!allUsedKeys[level]) allUsedKeys[level] = new Set();
+  const used = allUsedKeys[level];
+
+  // Filter out used questions from bank
+  let available = bank.filter((q, i) => !used.has('bank_' + level + '_' + i));
+
+  // Assign keys to bank questions
+  available = available.map((q, idx) => {
+    const origIdx = bank.indexOf(q);
+    return { ...q, _key: 'bank_' + level + '_' + origIdx };
+  });
+
+  let selected = [];
+
+  if (available.length >= Q_PER_LEVEL) {
+    // Enough bank questions — pick Q_PER_LEVEL randomly
+    selected = shuffleArray(available).slice(0, Q_PER_LEVEL);
+  } else {
+    // Use all remaining bank questions + generate variations
+    selected = [...available];
+    let needed = Q_PER_LEVEL - selected.length;
+    let genAttempts = 0;
+    while (needed > 0 && genAttempts < 100) {
+      const variation = generateVariation(level);
+      if (variation && !used.has(variation._key)) {
+        selected.push(variation);
+        needed--;
+      }
+      genAttempts++;
+    }
+    // If still not enough, allow re-use of bank with reshuffled options
+    if (needed > 0) {
+      const recycled = shuffleArray([...bank]).slice(0, needed).map((q, i) => ({
+        ...q, _key: 'recycle_' + level + '_' + Date.now() + '_' + i
+      }));
+      selected.push(...recycled);
+    }
+  }
+
+  // Mark all selected as used
+  selected.forEach(q => used.add(q._key));
+
+  // Shuffle options for each question
+  return selected.map(q => {
+    const correctOpt = q.opts[q.ans];
+    const shuffled = shuffleArray(q.opts.map((o, i) => ({ text: o, isCorrect: i === q.ans })));
+    const newAns = shuffled.findIndex(o => o.isCorrect);
+    return { ...q, opts: shuffled.map(o => o.text), ans: newAns };
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+//  RECONNECTION
+// ══════════════════════════════════════════════════════════
+(async function tryReconnect() {
+  if (!urlCode) return;
+  const saved = loadState(urlCode);
+  if (!saved) return;
+
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${urlCode}`);
+    const data = await res.json();
+
+    if (data.status === 'not_found' || data.status === 'ended') {
+      clearState();
+      return;
+    }
+
+    sessionCode = urlCode;
+    studentId = saved.studentId;
+    studentName = saved.name;
+    stats = { correct: saved.correct || 0, wrong: saved.wrong || 0, streak: saved.streak || 0 };
+    tabSwitches = saved.tabSwitches || 0;
+    awaySeconds = saved.awaySeconds || 0;
+    currentLevel = saved.currentLevel || 1;
+    levelCorrect = saved.levelCorrect || 0;
+    levelWrong = saved.levelWrong || 0;
+    levelResults = saved.levelResults || {};
+
+    // Restore used keys
+    if (saved.allUsedKeys) {
+      for (const [lv, arr] of Object.entries(saved.allUsedKeys)) {
+        allUsedKeys[lv] = new Set(arr);
+      }
+    }
+
+    // Restore current level questions + position
+    if (saved.levelQuestions && saved.levelQuestions.length > 0 && saved.levelQIndex < saved.levelQuestions.length) {
+      levelQuestions = saved.levelQuestions;
+      levelQIndex = saved.levelQIndex;
+    } else {
+      levelQuestions = [];
+      levelQIndex = 0;
+    }
+
+    if (data.status === 'active') {
+      startQuiz();
+    } else if (data.status === 'waiting') {
+      showWait();
+    }
+  } catch (_) {}
+})();
+
+// ══════════════════════════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════════════════════════
+async function joinQuiz() {
+  const name = document.getElementById('sname').value.trim();
+  const code = (urlCode || document.getElementById('scode').value.trim()).toUpperCase();
+  const errEl = document.getElementById('join-err');
+
+  if (!name) { errEl.textContent = 'Атыңызды жазыңыз'; errEl.classList.add('on'); return; }
+  if (code.length < 4) { errEl.textContent = 'Бөлме кодын енгізіңіз'; errEl.classList.add('on'); return; }
+  errEl.classList.remove('on');
+
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = '⏳ Қосылуда...';
+
+  sessionCode = code;
+  studentName = name;
+  studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
+
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${code}`);
+    const data = await res.json();
+
+    if (data.status === 'not_found') {
+      errEl.textContent = 'Бөлме табылмады. Кодты тексеріңіз.';
+      errEl.classList.add('on');
+      btn.disabled = false; btn.textContent = '🚀 Кіру';
+      return;
+    }
+    if (data.status === 'ended') {
+      errEl.textContent = 'Бұл сабақ аяқталған.';
+      errEl.classList.add('on');
+      btn.disabled = false; btn.textContent = '🚀 Кіру';
+      return;
+    }
+
+    stats = { correct: 0, wrong: 0, streak: 0 };
+    currentLevel = 1; levelCorrect = 0; levelWrong = 0;
+    levelResults = {}; allUsedKeys = {};
+    levelQuestions = []; levelQIndex = 0;
+
+    await sendScore();
+    saveState();
+
+    btn.disabled = false; btn.textContent = '🚀 Кіру';
+
+    if (data.status === 'active') {
+      startQuiz();
+    } else {
+      showWait();
+    }
+  } catch (e) {
+    errEl.textContent = 'Серверге қосылу мүмкін болмады.';
+    errEl.classList.add('on');
+    btn.disabled = false; btn.textContent = '🚀 Кіру';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz();
+});
+
+// ══════════════════════════════════════════════════════════
+//  WAIT
+// ══════════════════════════════════════════════════════════
+function showWait() {
+  document.getElementById('wait-name').textContent = studentName;
+  show('s-wait');
+  if (statusPollInterval) clearInterval(statusPollInterval);
+  statusPollInterval = setInterval(pollStatus, 2000);
+}
+
+async function pollStatus() {
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
+    const data = await res.json();
+    if (data.status === 'active') {
+      clearInterval(statusPollInterval);
+      statusPollInterval = null;
+      startQuiz();
+    } else if (data.status === 'ended' || data.status === 'not_found') {
+      clearInterval(statusPollInterval);
+      statusPollInterval = null;
+      showEnd();
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  START QUIZ
+// ══════════════════════════════════════════════════════════
+function startQuiz() {
+  if (quizStarted) return;
+  quizStarted = true;
+  sessionEnded = false;
+  updateStats();
+  show('s-quiz');
+
+  // If we have saved questions, resume from where we left off
+  if (levelQuestions.length > 0 && levelQIndex < levelQuestions.length) {
+    renderQuestion();
+  } else {
+    startLevel(currentLevel);
+  }
+
+  sendScore();
+  if (submitInterval) clearInterval(submitInterval);
+  submitInterval = setInterval(sendScore, 5000);
+}
+
+// ══════════════════════════════════════════════════════════
+//  LEVEL MANAGEMENT
+// ══════════════════════════════════════════════════════════
+function startLevel(level) {
+  currentLevel = level;
+  levelCorrect = 0;
+  levelWrong = 0;
+  levelQIndex = 0;
+  levelQuestions = pickQuestionsForLevel(level);
+  document.getElementById('level-result-area').classList.add('hidden');
+  document.getElementById('quiz-card').classList.remove('hidden');
+  updateLevelBar();
+  renderQuestion();
+  saveState();
+}
+
+function updateLevelBar() {
+  const diffNames = ['Өте оңай','Оңай','Орташа','Қиын','Өте қиын','Логика','Олимпиадалық'];
+  document.getElementById('lv-label').textContent = `Деңгей ${currentLevel} — ${diffNames[currentLevel-1] || ''}`;
+  document.getElementById('lv-progress').textContent = `${levelQIndex} / ${Q_PER_LEVEL}`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  RENDER QUESTION
+// ══════════════════════════════════════════════════════════
+function renderQuestion() {
+  if (sessionEnded) return;
+  const q = levelQuestions[levelQIndex];
+  if (!q) return;
+
+  quiz = { selected: null, answered: false };
+  updateLevelBar();
+
+  const labels = ['A', 'B', 'C', 'D'];
+  const card = document.getElementById('quiz-card');
+  card.innerHTML = `
+    <div class="q-badge"><span>📝</span><span>Деңгей ${currentLevel} · Сұрақ ${levelQIndex + 1}/${Q_PER_LEVEL}</span></div>
+    <div class="q-text">${tex(q.q)}</div>
+    <div class="opts-list" id="opts-list">
+      ${q.opts.map((o, i) => `
+        <button class="opt-btn" data-idx="${i}" onclick="selectOpt(${i})">
+          <span class="opt-letter">${labels[i]}</span>
+          <span class="opt-text">${tex(o)}</span>
+        </button>
+      `).join('')}
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+    <div class="explanation-box hidden" id="explanation"></div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()" disabled>✓ Тексеру</button>
+      <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Келесі →</button>
+    </div>
+  `;
+  card.classList.remove('hidden');
+  document.getElementById('level-result-area').classList.add('hidden');
+}
+
+function selectOpt(idx) {
+  if (quiz.answered) return;
+  document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector(`.opt-btn[data-idx="${idx}"]`).classList.add('selected');
+  quiz.selected = idx;
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer() {
+  if (quiz.selected === null || quiz.answered) return;
+  quiz.answered = true;
+  const q = levelQuestions[levelQIndex];
+  const isCorrect = quiz.selected === q.ans;
+
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach((b, i) => {
+    b.style.pointerEvents = 'none';
+    if (i === q.ans) b.classList.add('correct');
+    else if (i === quiz.selected && !isCorrect) b.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('hidden', 'correct', 'wrong');
+  if (isCorrect) {
+    stats.correct++; stats.streak++; levelCorrect++;
+    fb.classList.add('correct'); fb.innerHTML = '✓ Дұрыс!';
+  } else {
+    stats.wrong++; stats.streak = 0; levelWrong++;
+    fb.classList.add('wrong'); fb.innerHTML = '✗ Қате!';
+  }
+
+  // Show explanation
+  const expEl = document.getElementById('explanation');
+  expEl.innerHTML = `<b>Түсіндірме:</b> ${tex(q.exp)}`;
+  expEl.classList.remove('hidden');
+
+  updateStats();
+  saveState();
+  sendScore();
+
+  document.getElementById('check-btn').classList.add('hidden');
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+  levelQIndex++;
+  saveState();
+
+  if (levelQIndex >= Q_PER_LEVEL) {
+    showLevelResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  LEVEL RESULT
+// ══════════════════════════════════════════════════════════
+function showLevelResult() {
+  const total = levelCorrect + levelWrong;
+  const pct = total > 0 ? Math.round(levelCorrect / total * 100) : 0;
+  const passed = pct >= PASS_PCT;
+
+  if (!levelResults[currentLevel]) levelResults[currentLevel] = { attempts: 0 };
+  levelResults[currentLevel].attempts++;
+  levelResults[currentLevel].passed = passed;
+  levelResults[currentLevel].correct = levelCorrect;
+  levelResults[currentLevel].wrong = levelWrong;
+  levelResults[currentLevel].pct = pct;
+
+  saveState();
+
+  document.getElementById('quiz-card').classList.add('hidden');
+  const area = document.getElementById('level-result-area');
+  area.classList.remove('hidden');
+
+  if (passed) {
+    const isLast = currentLevel >= TOTAL_LEVELS;
+    area.innerHTML = `
+      <div class="level-result">
+        <div class="emoji">${isLast ? '🏆' : '🎉'}</div>
+        <div class="title">${isLast ? 'Барлық деңгейлер өтілді!' : `Деңгей ${currentLevel} өтілді!`}</div>
+        <div class="sub">${pct}% дұрыс жауап · ${levelResults[currentLevel].attempts} әрекет</div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="val" style="color:var(--green)">${levelCorrect}</div><div class="lbl">Дұрыс</div></div>
+          <div class="stat-box"><div class="val" style="color:var(--red)">${levelWrong}</div><div class="lbl">Қате</div></div>
+          <div class="stat-box"><div class="val" style="color:var(--primary)">${pct}%</div><div class="lbl">Пайыз</div></div>
+        </div>
+        <button class="btn ${isLast ? 'btn-primary' : 'btn-green'} btn-block" onclick="${isLast ? 'showEnd()' : `startLevel(${currentLevel + 1})`}">
+          ${isLast ? '🏆 Нәтижелерді көру' : `Деңгей ${currentLevel + 1}-ге өту →`}
+        </button>
+      </div>`;
+    spawnConfetti();
+  } else {
+    area.innerHTML = `
+      <div class="level-result">
+        <div class="emoji">💪</div>
+        <div class="title">Деңгей ${currentLevel} өтілмеді</div>
+        <div class="sub">${pct}% дұрыс жауап · Кемінде ${PASS_PCT}% қажет</div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="val" style="color:var(--green)">${levelCorrect}</div><div class="lbl">Дұрыс</div></div>
+          <div class="stat-box"><div class="val" style="color:var(--red)">${levelWrong}</div><div class="lbl">Қате</div></div>
+          <div class="stat-box"><div class="val" style="color:var(--primary)">${pct}%</div><div class="lbl">Пайыз</div></div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="startLevel(${currentLevel})">🔄 Қайта тапсыру</button>
+      </div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  SEND SCORE (with focus + check status)
+// ══════════════════════════════════════════════════════════
+async function sendScore(finished) {
+  if (!sessionCode || !studentName) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+
+  // Encode level into total: (level-1)*1000 + totalAnswers
+  const totalAnswers = stats.correct + stats.wrong;
+  const encodedTotal = (currentLevel - 1) * 1000 + totalAnswers;
+
+  try {
+    const res = await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: sessionCode,
+        studentId,
+        name: studentName,
+        score: stats.correct,
+        total: encodedTotal,
+        finished: finished === true || (currentLevel > TOTAL_LEVELS),
+        focused: isFocused,
+        tabSwitches,
+        awaySeconds: currentAway
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'ended' || data.status === 'not_found') {
+      showEnd();
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  END
+// ══════════════════════════════════════════════════════════
+function showEnd() {
+  if (sessionEnded) return;
+  sessionEnded = true;
+  if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
+  if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+
+  const total = stats.correct + stats.wrong;
+  const pct = total > 0 ? Math.round(stats.correct / total * 100) : 0;
+  document.getElementById('res-correct').textContent = stats.correct;
+  document.getElementById('res-wrong').textContent = stats.wrong;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-emoji').textContent = pct >= 70 ? '🎉' : pct >= 40 ? '👍' : '💪';
+
+  // Build level summary
+  let summaryHtml = '';
+  for (let lv = 1; lv <= TOTAL_LEVELS; lv++) {
+    const r = levelResults[lv];
+    if (r) {
+      const icon = r.passed ? '✅' : '❌';
+      summaryHtml += `<div class="lv-row"><span class="lv-badge">${icon} Деңгей ${lv}</span><span class="lv-status">${r.pct}% · ${r.attempts} әрекет</span></div>`;
+    } else {
+      summaryHtml += `<div class="lv-row"><span class="lv-badge">⬜ Деңгей ${lv}</span><span class="lv-status" style="color:var(--muted)">Басталмаған</span></div>`;
+    }
+  }
+  document.getElementById('levels-summary').innerHTML = summaryHtml;
+
+  show('s-results');
+  if (pct >= 70) spawnConfetti();
+  clearState();
+}
+
+function updateStats() {
+  document.getElementById('st-total').textContent = stats.correct + stats.wrong;
+  document.getElementById('st-correct').textContent = stats.correct;
+  document.getElementById('st-wrong').textContent = stats.wrong;
+  document.getElementById('st-streak').textContent = stats.streak;
+}
+</script>
+</body>
+</html>
