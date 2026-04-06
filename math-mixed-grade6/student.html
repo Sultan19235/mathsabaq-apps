@@ -227,253 +227,152 @@ let currentLevel = 1;
 let levelCorrect = 0;
 let levelWrong = 0;
 let levelQuestions = [];
-let levelQIndex = 0;
-let allUsedKeys = {};
-let levelResults = {};
-let quiz = { selected: null, answered: false };
-let submitInterval = null;
-let statusPollInterval = null;
-let quizStarted = false;
-let sessionEnded = false;
-
-// ── Focus tracking ──────────────────────────────────────
-let isFocused = true;
-let tabSwitches = 0;
-let awaySeconds = 0;
-let awayStart = null;
-
-function markAway() {
-  if (!isFocused) return;
-  isFocused = false;
-  tabSwitches++;
-  awayStart = Date.now();
-  saveState();
-  sendScore();
-}
-function markBack() {
-  if (isFocused) return;
-  isFocused = true;
-  if (awayStart) {
-    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
-    awayStart = null;
-  }
-  sendScore();
-}
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) markAway(); else markBack();
-});
-window.addEventListener('blur', markAway);
-window.addEventListener('focus', markBack);
-
-// ── localStorage ────────────────────────────────────────
-function saveState() {
-  if (!sessionCode) return;
-  let currentAway = awaySeconds;
-  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
-  const usedKeysObj = {};
-  for (const [lv, st] of Object.entries(allUsedKeys)) usedKeysObj[lv] = Array.from(st);
-  try {
-    localStorage.setItem(STORAGE_KEY_PREFIX + sessionCode, JSON.stringify({
-      studentId, name: studentName,
-      correct: stats.correct, wrong: stats.wrong, streak: stats.streak,
-      tabSwitches, awaySeconds: currentAway,
-      currentLevel, levelCorrect, levelWrong,
-      levelQuestions, levelQIndex,
-      allUsedKeys: usedKeysObj, levelResults,
-      ts: Date.now()
-    }));
-  } catch (_) {}
-}
-function loadState(code) {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) { localStorage.removeItem(STORAGE_KEY_PREFIX + code); return null; }
-    return data;
-  } catch (_) { return null; }
-}
-function clearState() {
-  if (sessionCode) try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {}
-}
-
-// ── Helpers ──────────────────────────────────────────────
-function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function shuffleArray(arr) { const r = [...arr]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
-function spawnConfetti() {
-  const w = document.getElementById('confetti'); w.innerHTML = '';
-  const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626'];
-  for (let i = 0; i < 60; i++) { const e = document.createElement('div'); e.className = 'cfp'; const s = 5 + Math.random() * 9; e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`; w.appendChild(e); }
-  setTimeout(() => w.innerHTML = '', 6000);
-}
-
-if (urlCode) {
-  sessionCode = urlCode;
-  document.getElementById('scode').value = urlCode;
-  document.getElementById('code-wrap').style.display = 'none';
-}
-
 // ══════════════════════════════════════════════════════════
-//  QUESTION BANK — 7 levels x 10 questions
-//  Includes decimals, fractions, detailed explanations
+//  DYNAMIC QUESTION GENERATORS — fresh numbers every attempt
+//  Each level has 10 generator functions. Every call = new random numbers.
+//  Students can NEVER cheat by memorizing answers.
 // ══════════════════════════════════════════════════════════
-const QUESTION_BANK = {
+function R(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+function RC(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function fmtDec(n){ return Number.isInteger(n) ? ''+n : (''+(Math.round(n*10)/10)).replace('.','{,}'); }
+
+function makeOpts(correct, wrongs) {
+  let w = wrongs.filter(v => v !== correct && v > 0);
+  const used = new Set([correct]);
+  w = w.filter(v => { if(used.has(v)) return false; used.add(v); return true; });
+  while (w.length < 3) { const nv = correct + w.length + R(1,3); if(!used.has(nv)){w.push(nv);used.add(nv);} }
+  const all = shuffleArray([{v:correct,c:true}, ...w.slice(0,3).map(v=>({v,c:false}))]);
+  return { opts: all.map(o => `$${o.v}$`), ans: all.findIndex(o => o.c) };
+}
+function makeOptsDec(correct, wrongs) {
+  let w = wrongs.filter(v => v !== correct && v > 0).map(v=>Math.round(v*10)/10);
+  const used = new Set([correct]);
+  w = w.filter(v => { if(used.has(v)) return false; used.add(v); return true; });
+  while (w.length < 3) { const nv = Math.round((correct + (w.length+1)*0.5)*10)/10; if(!used.has(nv)){w.push(nv);used.add(nv);} }
+  const all = shuffleArray([{v:correct,c:true}, ...w.slice(0,3).map(v=>({v,c:false}))]);
+  return { opts: all.map(o => `$${fmtDec(o.v)}$`), ans: all.findIndex(o => o.c) };
+}
+
+const GENERATORS = {
+// ═══ LEVEL 1: Өте оңай ═══
 1: [
-  { q:"$2$, $4$ және $6$ сандарының арифметикалық ортасын табыңыз.", opts:["$3$","$4$","$5$","$6$"], ans:1, exp:"Алдымен сандарды қосамыз: $2 + 4 + 6 = 12$. Содан кейін сандардың санына бөлеміз. Бізде 3 сан бар, сондықтан $12 : 3 = 4$. Жауабы: $4$." },
-  { q:"$10$ және $20$ сандарының арифметикалық ортасы неге тең?", opts:["$10$","$15$","$20$","$30$"], ans:1, exp:"Екі санды қосамыз: $10 + 20 = 30$. Сандар саны 2, сондықтан $30 : 2 = 15$. Яғни ортасы $15$." },
-  { q:"Берілген қатардың модасын табыңыз: $3, 5, 5, 7$.", opts:["$3$","$5$","$7$","Мода жоқ"], ans:1, exp:"Мода дегеніміз — қатарда ең көп қайталанатын сан. $3$ бір рет, $5$ екі рет, $7$ бір рет кездеседі. $5$ екі рет кездеседі — ол ең көбі. Сондықтан мода $= 5$." },
-  { q:"$1, 1, 2, 3, 4, 4, 4$ қатарының модасы қандай?", opts:["$1$","$2$","$3$","$4$"], ans:3, exp:"Санап шығамыз: $1$ — 2 рет, $2$ — 1 рет, $3$ — 1 рет, $4$ — 3 рет. Ең көп қайталанғаны $4$ (3 рет). Мода $= 4$." },
-  { q:"$1, 5, 9$ сандарының медианасын табыңыз.", opts:["$1$","$5$","$9$","$15$"], ans:1, exp:"Сандар өсу ретімен: $1, 5, 9$. Бізде 3 сан бар — тақ сан. Ортасындағы (2-ші) сан — $5$. Медиана $= 5$." },
-  { q:"$2, 4, 6, 8$ сандарының медианасын табыңыз.", opts:["$4$","$5$","$6$","$10$"], ans:1, exp:"Бізде 4 сан бар — жұп сан. Ортадағы екі санды аламыз: $4$ пен $6$. Оларды қосып 2-ге бөлеміз: $(4 + 6) : 2 = 10 : 2 = 5$. Медиана $= 5$." },
-  { q:"Асқардың $2$ жейдесі және $3$ шалбары бар. Ол неше үлгі кие алады?", opts:["$5$","$6$","$8$","$9$"], ans:1, exp:"Әрбір жейдеге 3 шалбар сәйкес келеді. 1-ші жейде + 3 шалбар = 3 нұсқа. 2-ші жейде + 3 шалбар = тағы 3 нұсқа. Барлығы $3 + 3 = 6$ нұсқа." },
-  { q:"$5, 5, 5, 5$ сандарының арифметикалық ортасы қандай?", opts:["$4$","$5$","$10$","$20$"], ans:1, exp:"Қосамыз: $5 + 5 + 5 + 5 = 20$. Сандар саны 4. Бөлеміз: $20 : 4 = 5$. Барлық сандар бірдей болса, орта сол санға тең болады." },
-  { q:"$9, 3, 7$ сандарының медианасын табыңыз.", opts:["$3$","$7$","$9$","$6$"], ans:1, exp:"Алдымен сандарды кішіден үлкенге қарай жазамыз: $3, 7, 9$. Ортадағы сан — $7$. Медиана $= 7$." },
-  { q:"$1{,}5$ және $2{,}5$ сандарының арифметикалық ортасын табыңыз.", opts:["$1{,}5$","$2$","$2{,}5$","$4$"], ans:1, exp:"Қосамыз: $1{,}5 + 2{,}5 = 4$. Сандар саны 2. Бөлеміз: $4 : 2 = 2$. Жауабы: $2$." }
+  () => { const a=R(1,10),b=a+R(1,5),c=b+R(1,5); const s=a+b+c; if(s%3!==0)return null; const avg=s/3; const r=makeOpts(avg,[avg-1,avg+1,avg+2]); return{q:`$${a}$, $${b}$ және $${c}$ сандарының арифметикалық ортасын табыңыз.`,...r,exp:`Қосамыз: $${a}+${b}+${c}=${s}$. Сандар саны 3. Бөлеміз: $${s}:3=${avg}$.`}; },
+  () => { const a=R(2,30)*2,b=a+R(2,20)*2; const avg=(a+b)/2; const r=makeOpts(avg,[avg-2,avg+3,a+b]); return{q:`$${a}$ және $${b}$ сандарының арифметикалық ортасы неге тең?`,...r,exp:`Қосамыз: $${a}+${b}=${a+b}$. Бөлеміз: $${a+b}:2=${avg}$.`}; },
+  () => { const mode=R(2,9),o1=mode+R(1,3),o2=mode-R(1,2); if(o2<1)return null; const arr=[o2,mode,mode,o1].sort((a,b)=>a-b); const r=makeOpts(mode,[o1,o2,mode+1]); return{q:`$${arr.join(', ')}$ қатарының модасын табыңыз.`,...r,exp:`$${mode}$ саны 2 рет кездеседі — ең көбі. Мода $=${mode}$.`}; },
+  () => { const mode=R(2,8),o1=mode-R(1,2),o2=mode+R(1,3); if(o1<1)return null; const arr=[o1,o1,mode,mode,mode,o2].sort((a,b)=>a-b); const r=makeOpts(mode,[o1,o2,mode+1]); return{q:`$${arr.join(', ')}$ қатарының модасы қандай?`,...r,exp:`$${mode}$ — 3 рет, $${o1}$ — 2 рет, $${o2}$ — 1 рет. Мода $=${mode}$.`}; },
+  () => { const a=R(1,10),b=a+R(2,6),c=b+R(2,6); const r=makeOpts(b,[a,c,a+b+c]); return{q:`$${a}$, $${b}$, $${c}$ сандарының медианасын табыңыз.`,...r,exp:`Сандар: $${a},${b},${c}$. Ортадағы сан — $${b}$. Медиана $=${b}$.`}; },
+  () => { const a=R(2,8)*2,d=R(2,4)*2; const b=a+d,c=b+d,e=c+d; const med=(b+c)/2; const r=makeOptsDec(med,[b,c,a+e]); return{q:`$${a}$, $${b}$, $${c}$, $${e}$ сандарының медианасын табыңыз.`,...r,exp:`4 сан бар. Ортадағы: $${b}$ пен $${c}$. $(${b}+${c}):2=${fmtDec(med)}$.`}; },
+  () => { const s=R(2,5),p=R(2,5); const v=s*p; const r=makeOpts(v,[s+p,v+1,v-1]); return{q:`Балада $${s}$ жейде және $${p}$ шалбар бар. Неше үлгі кие алады?`,...r,exp:`Әрбір жейдеге $${p}$ шалбар сәйкес. Барлығы $${s}\\cdot${p}=${v}$ нұсқа.`}; },
+  () => { const vals=[R(2,8),R(10,18),R(20,30)]; const sh=shuffleArray([...vals]); const sorted=[...vals].sort((a,b)=>a-b); const med=sorted[1]; const r=makeOpts(med,[sorted[0],sorted[2],sorted[0]+sorted[2]]); return{q:`$${sh.join(', ')}$ сандарының медианасын табыңыз.`,...r,exp:`Реттейміз: $${sorted.join(',')}$. Ортадағы — $${med}$.`}; },
+  () => { const a=R(1,9)*0.5,b=a+R(2,8)*0.5; const avg=(a+b)/2; if(!Number.isInteger(avg*2))return null; const r=makeOptsDec(avg,[avg-0.5,avg+1,a+b]); return{q:`$${fmtDec(a)}$ және $${fmtDec(b)}$ сандарының ортасын табыңыз.`,...r,exp:`Қосамыз: $${fmtDec(a)}+${fmtDec(b)}=${fmtDec(a+b)}$. Бөлеміз: $${fmtDec(a+b)}:2=${fmtDec(avg)}$.`}; },
+  () => { const v=R(3,15); const r=makeOpts(v,[v-1,v*4,v+1]); return{q:`$${v}, ${v}, ${v}, ${v}$ сандарының ортасы?`,...r,exp:`Барлық сандар бірдей — орта сол санға тең: $${v}$.`}; }
 ],
+// ═══ LEVEL 2: Оңай ═══
 2: [
-  { q:"$12, 14, 16, 18$ сандарының арифметикалық ортасын табыңыз.", opts:["$14$","$15$","$16$","$17$"], ans:1, exp:"Қосамыз: $12 + 14 + 16 + 18 = 60$. Сандар саны 4. Бөлеміз: $60 : 4 = 15$." },
-  { q:"$1{,}5$, $2{,}5$ және $5$ сандарының арифметикалық ортасын табыңыз.", opts:["$2$","$3$","$4$","$4{,}5$"], ans:1, exp:"Қосамыз: $1{,}5 + 2{,}5 + 5 = 9$. Сандар саны 3. Бөлеміз: $9 : 3 = 3$." },
-  { q:"$8, 9, 10, 8, 12, 10, 8$ қатарының модасы нешеге тең?", opts:["$8$","$9$","$10$","$12$"], ans:0, exp:"Санаймыз: $8$ — 3 рет, $9$ — 1 рет, $10$ — 2 рет, $12$ — 1 рет. Ең көп кездескені $8$ (3 рет). Мода $= 8$." },
-  { q:"$12, 7, 9, 4, 15$ сандарының медианасын анықтаңыз.", opts:["$7$","$9$","$12$","$15$"], ans:1, exp:"Кішіден үлкенге реттейміз: $4, 7, 9, 12, 15$. Бізде 5 сан бар. Ортадағы (3-ші) сан — $9$. Медиана $= 9$." },
-  { q:"$10, 20, 30, 40$ сандарының медианасын табыңыз.", opts:["$20$","$25$","$30$","$35$"], ans:1, exp:"4 сан бар — жұп сан. Ортадағы екі сан: $20$ мен $30$. Оларды қосып 2-ге бөлеміз: $(20 + 30) : 2 = 50 : 2 = 25$." },
-  { q:"$3$ оқушыны бір қатарға неше тәсілмен отырғызуға болады?", opts:["$3$","$6$","$9$","$12$"], ans:1, exp:"Оқушыларды А, Б, В деп алайық. 1-ші орынға 3 оқушының кез келгені отырады. 2-ші орынға қалған 2 оқушы. 3-ші орынға қалған 1 оқушы. Барлығы: $3 \\cdot 2 \\cdot 1 = 6$ тәсіл." },
-  { q:"$100$ және $200$ сандарының арифметикалық ортасы неге тең?", opts:["$120$","$150$","$175$","$300$"], ans:1, exp:"Қосамыз: $100 + 200 = 300$. Сандар саны 2. Бөлеміз: $300 : 2 = 150$." },
-  { q:"$1, 2, 3, 4$ сандарының модасы неге тең?", opts:["$1$","$2{,}5$","$4$","Мода жоқ"], ans:3, exp:"Әрбір сан тек бір рет кездеседі. Ешбір сан басқалардан жиі қайталанбайды. Сондықтан бұл қатардың модасы жоқ." },
-  { q:"$0{,}5$; $1{,}5$; $2{,}5$ сандарының арифметикалық ортасын табыңыз.", opts:["$1$","$1{,}5$","$2$","$4{,}5$"], ans:1, exp:"Қосамыз: $0{,}5 + 1{,}5 + 2{,}5 = 4{,}5$. Сандар саны 3. Бөлеміз: $4{,}5 : 3 = 1{,}5$." },
-  { q:"$0{,}2$; $0{,}2$; $0{,}5$; $0{,}8$; $0{,}8$; $0{,}8$ қатарының модасын табыңыз.", opts:["$0{,}2$","$0{,}5$","$0{,}8$","Мода жоқ"], ans:2, exp:"$0{,}2$ — 2 рет, $0{,}5$ — 1 рет, $0{,}8$ — 3 рет. Ең жиі кездескені $0{,}8$ (3 рет). Мода $= 0{,}8$." }
+  () => { const a=R(5,15)*2,d=R(1,3)*2; const b=a+d,c=b+d,e=c+d; const s=a+b+c+e; if(s%4!==0)return null; const avg=s/4; const r=makeOpts(avg,[avg-1,avg+1,avg+2]); return{q:`$${a}$, $${b}$, $${c}$, $${e}$ сандарының ортасын табыңыз.`,...r,exp:`$${a}+${b}+${c}+${e}=${s}$. $${s}:4=${avg}$.`}; },
+  () => { const a=R(1,5)*0.5,b=R(3,7)*0.5,c=R(5,12)*0.5; const s=Math.round((a+b+c)*10)/10; if(Math.round(s*10)%3!==0)return null; const avg=Math.round(s/3*10)/10; const r=makeOptsDec(avg,[avg-0.5,avg+0.5,s]); return{q:`$${fmtDec(a)}$, $${fmtDec(b)}$ және $${fmtDec(c)}$ сандарының ортасын табыңыз.`,...r,exp:`$${fmtDec(a)}+${fmtDec(b)}+${fmtDec(c)}=${fmtDec(s)}$. $${fmtDec(s)}:3=${fmtDec(avg)}$.`}; },
+  () => { const mode=R(2,8)*0.5,o1=(mode-0.5>0)?mode-0.5:mode+1.5,o2=mode+R(1,3)*0.5; const arr=[fmtDec(o1),fmtDec(mode),fmtDec(mode),fmtDec(mode),fmtDec(o2)].sort(); const r=makeOptsDec(mode,[o1,o2,mode+0.5]); return{q:`$${arr.join('; ')}$ қатарының модасын табыңыз.`,...r,exp:`$${fmtDec(mode)}$ — 3 рет кездеседі. Мода $=${fmtDec(mode)}$.`}; },
+  () => { const vals=[R(2,8),R(10,15),R(16,22),R(23,28),R(30,40)]; const sh=shuffleArray([...vals]); const sorted=[...vals].sort((a,b)=>a-b); const med=sorted[2]; const r=makeOpts(med,[sorted[1],sorted[3],sorted[0]]); return{q:`$${sh.join(', ')}$ сандарының медианасын табыңыз.`,...r,exp:`Реттейміз: $${sorted.join(',')}$. 5 сан, ортадағы — $${med}$.`}; },
+  () => { const a=R(5,15),b=a+R(3,7),c=b+R(3,7),d=c+R(3,7); const med=(b+c)/2; if(Number.isInteger(med))return null; const r=makeOptsDec(med,[b,c,med+1]); return{q:`$${a}$, $${b}$, $${c}$, $${d}$ сандарының медианасын табыңыз.`,...r,exp:`4 сан бар. Ортадағы: $${b}$ пен $${c}$. $(${b}+${c}):2=${fmtDec(med)}$.`}; },
+  () => { const n=R(3,5); let f=1; for(let i=2;i<=n;i++)f*=i; const r=makeOpts(f,[f-n,f+n,n*n]); return{q:`$${n}$ оқушыны бір қатарға неше тәсілмен отырғызуға болады?`,...r,exp:`$${Array.from({length:n},(_,i)=>n-i).join('\\cdot')}=${f}$ тәсіл.`}; },
+  () => { const a=R(10,90)*10,b=a+R(2,10)*10; const avg=(a+b)/2; const r=makeOpts(avg,[avg-10,avg+20,a+b]); return{q:`$${a}$ және $${b}$ сандарының ортасы?`,...r,exp:`$(${a}+${b}):2=${a+b}:2=${avg}$.`}; },
+  () => { const a=R(1,5),b=a+1,c=b+1,d=c+1; return{q:`$${a}, ${b}, ${c}, ${d}$ сандарының модасы?`,opts:["$"+a+"$","$"+b+"$","$"+d+"$","Мода жоқ"],ans:3,exp:`Әр сан 1 реттен кездеседі. Мода жоқ.`}; },
+  () => { const a=R(1,8)*0.5,b=a+1,c=b+1; const s=Math.round((a+b+c)*10)/10; const avg=Math.round(s/3*10)/10; if(Math.abs(avg*3-s)>0.01)return null; const r=makeOptsDec(avg,[avg-0.5,avg+1,s]); return{q:`$${fmtDec(a)}$; $${fmtDec(b)}$; $${fmtDec(c)}$ сандарының ортасын табыңыз.`,...r,exp:`$${fmtDec(a)}+${fmtDec(b)}+${fmtDec(c)}=${fmtDec(s)}$. $${fmtDec(s)}:3=${fmtDec(avg)}$.`}; },
+  () => { const n=R(3,5); const cols=['қызыл','көк','жасыл','сары','қара']; let f=1; for(let i=2;i<=n;i++)f*=i; const r=makeOpts(f,[n,f+1,f*2]); return{q:`${n} түрлі шарды неше ретпен қатарластыруға болады?`,...r,exp:`$${Array.from({length:n},(_,i)=>n-i).join('\\cdot')}=${f}$ нұсқа.`}; }
 ],
+// ═══ LEVEL 3: Орташа ═══
 3: [
-  { q:"Үш санның арифметикалық ортасы $15$. Олардың қосындысы нешеге тең?", opts:["$5$","$15$","$30$","$45$"], ans:3, exp:"Арифметикалық орта = қосынды : сандар саны. Сондықтан қосынды = орта × сандар саны. Бізде: $15 \\cdot 3 = 45$." },
-  { q:"$8$ және $X$ сандарының арифметикалық ортасы $12$. $X$ неге тең?", opts:["$10$","$14$","$16$","$20$"], ans:2, exp:"$(8 + X) : 2 = 12$ деген шарт берілген. Олай болса $8 + X = 12 \\cdot 2 = 24$. Осыдан $X = 24 - 8 = 16$." },
-  { q:"$2, 3, 3, 4, 5, 5, 6$ қатарының модалары қандай?", opts:["$3$","$5$","$3$ және $5$","$4$"], ans:2, exp:"$3$ — 2 рет, $5$ — 2 рет кездеседі. Екеуі де ең жиі қайталанған. Сондықтан бұл қатардың екі модасы бар: $3$ және $5$." },
-  { q:"$15, 11, 14, 12, 17, 13$ сандарының медианасын анықтаңыз.", opts:["$13$","$13{,}5$","$14$","$14{,}5$"], ans:1, exp:"Реттейміз: $11, 12, 13, 14, 15, 17$. Бізде 6 сан бар — жұп. Ортадағы екі сан: $13$ пен $14$. Медиана $= (13 + 14) : 2 = 27 : 2 = 13{,}5$." },
-  { q:"А-дан В-ға $3$ жол, В-дан С-ға $2$ жол бар. А-дан С-ға В арқылы неше жолмен баруға болады?", opts:["$5$","$6$","$8$","$9$"], ans:1, exp:"Әрбір бірінші жолға 2 екінші жол сәйкес келеді. 1-ші жол + 2 нұсқа = 2. 2-ші жол + 2 нұсқа = 2. 3-ші жол + 2 нұсқа = 2. Барлығы $2 + 2 + 2 = 6$ жол." },
-  { q:"Оқушының бағалары: $4, 5, 3$. Орташа $4$ болу үшін төртінші бақылаудан қандай баға алу керек?", opts:["$3$","$4$","$5$","мүмкін емес"], ans:1, exp:"4 бағаның ортасы 4 болуы үшін, қосындысы $4 \\cdot 4 = 16$ болуы керек. Алғашқы үш бағаның қосындысы: $4 + 5 + 3 = 12$. Төртінші баға: $16 - 12 = 4$." },
-  { q:"$0, 10, 20, 30, 40$ сандарының арифметикалық ортасы нешеге тең?", opts:["$10$","$20$","$25$","$30$"], ans:1, exp:"Қосамыз: $0 + 10 + 20 + 30 + 40 = 100$. Сандар саны 5. Бөлеміз: $100 : 5 = 20$." },
-  { q:"Тиынды $3$ рет лақтырғанда неше түрлі нәтиже болуы мүмкін?", opts:["$3$","$6$","$8$","$9$"], ans:2, exp:"Тиынды лақтырғанда 2 нәтиже болады: Елтаңба немесе Сан. 3 рет лақтырғанда: $2 \\cdot 2 \\cdot 2 = 8$ нұсқа." },
-  { q:"$2{,}5$; $3{,}5$; $X$ сандарының ортасы $4$. $X$ неге тең?", opts:["$4$","$5$","$6$","$6{,}5$"], ans:2, exp:"Қосынды $= 4 \\cdot 3 = 12$ болуы керек. $2{,}5 + 3{,}5 = 6$. Сондықтан $X = 12 - 6 = 6$." },
-  { q:"$\\dfrac{1}{2}$, $\\dfrac{3}{2}$ және $1$ сандарының арифметикалық ортасын табыңыз.", opts:["$\\dfrac{1}{2}$","$1$","$\\dfrac{3}{2}$","$3$"], ans:1, exp:"Қосамыз: $\\dfrac{1}{2} + \\dfrac{3}{2} + 1 = \\dfrac{1}{2} + \\dfrac{3}{2} + \\dfrac{2}{2} = \\dfrac{6}{2} = 3$. Сандар саны 3. Бөлеміз: $3 : 3 = 1$." }
+  () => { const n=R(3,6),avg=R(5,20); const s=n*avg; const r=makeOpts(s,[s-n,s+n,avg]); return{q:`$${n}$ санның ортасы $${avg}$. Олардың қосындысы?`,...r,exp:`Қосынды = орта × сандар саны = $${avg}\\cdot${n}=${s}$.`}; },
+  () => { const a=R(4,20),avg=a+R(2,8); const x=avg*2-a; const r=makeOpts(x,[x-2,x+2,x+4]); return{q:`$${a}$ және $X$ сандарының ортасы $${avg}$. $X$?`,...r,exp:`$(${a}+X):2=${avg}$. $${a}+X=${avg*2}$. $X=${x}$.`}; },
+  () => { const m1=R(2,6),m2=m1+R(2,4),o1=m1-1>0?m1-1:m2+1,o2=m2+R(1,2); const arr=[m1,m1,m2,m2,o1,o2].sort((a,b)=>a-b); return{q:`$${arr.join(', ')}$ қатарының модалары?`,opts:[`$${m1}$`,`$${m2}$`,`$${m1}$ және $${m2}$`,`$${o1}$`],ans:2,exp:`$${m1}$ — 2 рет, $${m2}$ — 2 рет. Екі мода: $${m1}$ және $${m2}$.`}; },
+  () => { const vals=[R(5,10),R(11,15),R(16,20),R(21,25),R(26,30),R(31,40)]; const sorted=[...vals].sort((a,b)=>a-b); const med=(sorted[2]+sorted[3])/2; const sh=shuffleArray([...vals]); const r=makeOptsDec(med,[sorted[2],sorted[3],sorted[1]]); return{q:`$${sh.join(', ')}$ сандарының медианасын табыңыз.`,...r,exp:`Реттейміз: $${sorted.join(',')}$. 6 сан. Ортадағы: $${sorted[2]}$ пен $${sorted[3]}$. $(${sorted[2]}+${sorted[3]}):2=${fmtDec(med)}$.`}; },
+  () => { const ab=R(2,5),bc=R(2,5); const v=ab*bc; const r=makeOpts(v,[ab+bc,v+1,v*2]); return{q:`А-дан В-ға $${ab}$ жол, В-дан С-ға $${bc}$ жол. А-дан С-ға неше жолмен?`,...r,exp:`$${ab}\\cdot${bc}=${v}$ жол.`}; },
+  () => { const g1=R(3,5),g2=R(3,5),g3=R(3,5),target=R(3,5); const g4=target*4-g1-g2-g3; if(g4<2||g4>5)return null; const r=makeOpts(g4,[g4-1,g4+1,target]); return{q:`Бағалар: $${g1}, ${g2}, ${g3}$. Орташа $${target}$ болу үшін 4-ші баға?`,...r,exp:`Қосынды $${target}\\cdot4=${target*4}$ болуы керек. $${g1}+${g2}+${g3}=${g1+g2+g3}$. 4-ші: $${target*4}-${g1+g2+g3}=${g4}$.`}; },
+  () => { const a0=R(0,5)*10,d=10; const vals=Array.from({length:5},(_,i)=>a0+i*d); const s=vals.reduce((a,b)=>a+b,0); const avg=s/5; const r=makeOpts(avg,[avg-10,avg+10,s]); return{q:`$${vals.join(', ')}$ сандарының ортасы?`,...r,exp:`$${vals.join('+')}=${s}$. $${s}:5=${avg}$.`}; },
+  () => { const n=R(2,5); const v=Math.pow(2,n); const r=makeOpts(v,[n*2,v+1,v-2]); return{q:`Тиынды $${n}$ рет лақтырғанда неше нәтиже?`,...r,exp:`Әр лақтыру 2 нұсқа. $${Array(n).fill('2').join('\\cdot')}=${v}$.`}; },
+  () => { const a=R(1,6)*0.5,b=a+R(2,4)*0.5,avg=R(2,8); const x=avg*3-a-b; if(x<=0)return null; const r=makeOptsDec(x,[x-1,x+1,x+2]); return{q:`$${fmtDec(a)}$; $${fmtDec(b)}$; $X$ сандарының ортасы $${avg}$. $X$?`,...r,exp:`Қосынды $=${avg}\\cdot3=${avg*3}$. $${fmtDec(a)}+${fmtDec(b)}=${fmtDec(a+b)}$. $X=${fmtDec(x)}$.`}; },
+  () => { const a=R(1,5),b=a+R(2,4),c=a+b; if((a+b+c)%3!==0)return null; const avg=(a+b+c)/3; return{q:`$\\dfrac{${a}}{2}$, $\\dfrac{${b}}{2}$, $\\dfrac{${c}}{2}$ сандарының ортасы?`,opts:[`$\\dfrac{${avg-1}}{2}$`,`$\\dfrac{${avg}}{2}$`,`$\\dfrac{${avg+1}}{2}$`,`$${avg}$`],ans:1,exp:`$\\dfrac{${a}+${b}+${c}}{2}=\\dfrac{${a+b+c}}{2}$. $\\dfrac{${a+b+c}}{2}:3=\\dfrac{${avg}}{2}$.`}; }
 ],
+// ═══ LEVEL 4: Қиын ═══
 4: [
-  { q:"Велосипедші $2$ сағат $15$ км/сағ, $3$ сағат $10$ км/сағ жүрді. Орташа жылдамдығы қандай?", opts:["$12$ км/сағ","$12{,}5$ км/сағ","$13$ км/сағ","$14$ км/сағ"], ans:0, exp:"Алдымен жалпы жолды табамыз. 1-ші бөлік: $2 \\cdot 15 = 30$ км. 2-ші бөлік: $3 \\cdot 10 = 30$ км. Жалпы жол: $30 + 30 = 60$ км. Жалпы уақыт: $2 + 3 = 5$ сағат. Орташа жылдамдық $= 60 : 5 = 12$ км/сағ." },
-  { q:"$4$ санның ортасы $20$. Тағы бір сан қоссақ, жаңа орта $22$. Қосылған сан?", opts:["$24$","$26$","$28$","$30$"], ans:3, exp:"Алғашқы 4 санның қосындысы: $20 \\cdot 4 = 80$. Жаңа 5 санның қосындысы: $22 \\cdot 5 = 110$. Қосылған сан: $110 - 80 = 30$." },
-  { q:"$5$ санның ортасы $10$. $14$ санын алсақ, қалған $4$ санның ортасы?", opts:["$8$","$9$","$10$","$11$"], ans:1, exp:"5 санның қосындысы: $10 \\cdot 5 = 50$. $14$ алып тастаймыз: $50 - 14 = 36$. Қалған 4 санның ортасы: $36 : 4 = 9$." },
-  { q:"$4$ адам бір-бірімен қол алысса, барлығы неше қол алысу?", opts:["$4$","$6$","$8$","$12$"], ans:1, exp:"1-ші адам 3 адаммен, 2-шісі қалған 2 адаммен, 3-шісі қалған 1 адаммен қол алысады. $3 + 2 + 1 = 6$ қол алысу." },
-  { q:"$4$ түрлі қалам, $3$ түрлі дәптер. $1$ қалам мен $1$ дәптер жиынтығын неше тәсілмен алуға болады?", opts:["$7$","$10$","$12$","$14$"], ans:2, exp:"Әрбір қаламға 3 дәптер сәйкес келеді. 4 қаламның әрқайсысына 3 дәптер: $3 + 3 + 3 + 3 = 12$." },
-  { q:"$5$ тізбектес натурал санның медианасы $12$. Ең үлкені қандай?", opts:["$13$","$14$","$15$","$16$"], ans:1, exp:"Тізбектес 5 сан дегеніміз — бірінен кейін бірі: $..., 11, 12, 13, ...$. Медиана ортадағы сан, ол $12$. Сандар: $10, 11, 12, 13, 14$. Ең үлкені $= 14$." },
-  { q:"$X, 2, 3, 2, 4, 3$ қатарының модасы тек $3$ болу үшін $X$ неге тең?", opts:["$2$","$3$","$4$","$5$"], ans:1, exp:"Қазір $2$ — 2 рет, $3$ — 2 рет кездеседі. Мода тек $3$ болу үшін $3$ ең жиі болуы керек. Егер $X = 3$ болса, $3$ — 3 рет, $2$ — 2 рет. Сонда мода тек $3$." },
-  { q:"$x-2$, $x$ және $x+2$ сандарының ортасы $10$. $x$ неге тең?", opts:["$8$","$10$","$12$","$14$"], ans:1, exp:"Қосамыз: $(x-2) + x + (x+2) = 3x$. $(-2)$ мен $(+2)$ жойылады. Ортасы: $3x : 3 = x$. Шарт бойынша $x = 10$." },
-  { q:"$1{,}5$; $2{,}5$; $3{,}5$; $4{,}5$ сандарының медианасын табыңыз.", opts:["$2{,}5$","$3$","$3{,}5$","$4$"], ans:1, exp:"4 сан бар — жұп. Ортадағы екі сан: $2{,}5$ пен $3{,}5$. Медиана $= (2{,}5 + 3{,}5) : 2 = 6 : 2 = 3$." },
-  { q:"$\\dfrac{1}{4}$, $\\dfrac{3}{4}$, $\\dfrac{1}{2}$ сандарының медианасын табыңыз.", opts:["$\\dfrac{1}{4}$","$\\dfrac{1}{2}$","$\\dfrac{3}{4}$","$1$"], ans:1, exp:"Реттейміз: $\\dfrac{1}{4}, \\dfrac{1}{2}, \\dfrac{3}{4}$. Бізде 3 сан бар. Ортадағы сан — $\\dfrac{1}{2}$." }
+  () => { const t1=R(2,4),v1=R(10,20),t2=R(2,4),v2=R(5,15); const d=t1*v1+t2*v2,t=t1+t2; if(d%t!==0)return null; const avg=d/t; const r=makeOpts(avg,[avg-1,avg+1,v1+v2]); return{q:`Велосипедші $${t1}$ сағ $${v1}$ км/сағ, $${t2}$ сағ $${v2}$ км/сағ жүрді. Орташа жылдамдығы?`,...r,exp:`Жол: $${t1}\\cdot${v1}=${t1*v1}$ км + $${t2}\\cdot${v2}=${t2*v2}$ км = $${d}$ км. Уақыт: $${t}$ сағ. $${d}:${t}=${avg}$ км/сағ.`}; },
+  () => { const n=R(3,6),avg1=R(10,25),avg2=avg1+R(1,4); const s1=n*avg1,s2=(n+1)*avg2,added=s2-s1; const r=makeOpts(added,[added-2,added+2,avg2]); return{q:`$${n}$ санның ортасы $${avg1}$. Тағы бір сан қоссақ, жаңа орта $${avg2}$. Қосылған сан?`,...r,exp:`Ескі қосынды: $${avg1}\\cdot${n}=${s1}$. Жаңа: $${avg2}\\cdot${n+1}=${s2}$. Қосылған: $${s2}-${s1}=${added}$.`}; },
+  () => { const n=R(4,7),avg=R(8,20); const s=n*avg; const removed=avg+R(-4,4); if(removed<=0)return null; const newS=s-removed,newN=n-1; if(newS%newN!==0)return null; const newAvg=newS/newN; const r=makeOpts(newAvg,[newAvg-1,newAvg+1,avg]); return{q:`$${n}$ санның ортасы $${avg}$. $${removed}$ алсақ, қалған $${newN}$ санның ортасы?`,...r,exp:`Қосынды: $${s}$. $${s}-${removed}=${newS}$. $${newS}:${newN}=${newAvg}$.`}; },
+  () => { const n=R(3,7); const h=n*(n-1)/2; const detail=Array.from({length:n-1},(_,i)=>n-1-i); const r=makeOpts(h,[n,h+1,n*n]); return{q:`$${n}$ адам бір-бірімен қол алысса, неше қол алысу?`,...r,exp:`$${detail.join('+')}=${h}$.`}; },
+  () => { const a=R(2,6),b=R(2,6); const v=a*b; const it1=RC(['қалам','кітап','жейде']),it2=RC(['дәптер','шалбар','сөмке']); const r=makeOpts(v,[a+b,v+1,v*2]); return{q:`$${a}$ түрлі ${it1} және $${b}$ түрлі ${it2}. Жиынтық неше тәсіл?`,...r,exp:`$${a}\\cdot${b}=${v}$.`}; },
+  () => { const med=R(8,25),n=RC([3,5,7]); const half=(n-1)/2; const biggest=med+half; const r=makeOpts(biggest,[biggest-1,biggest+1,biggest+2]); return{q:`$${n}$ тізбектес санның медианасы $${med}$. Ең үлкені?`,...r,exp:`Медиана $${med}$. Ең үлкені $=${med}+${half}=${biggest}$.`}; },
+  () => { const d=R(1,5),x=R(6,20); const r=makeOpts(x,[x-d,x+d,x*3]); return{q:`$x-${d}$, $x$, $x+${d}$ сандарының ортасы $${x}$. $x$?`,...r,exp:`$(x-${d})+x+(x+${d})=3x$. $3x:3=x=${x}$.`}; },
+  () => { const a=R(1,5)*0.5,d=R(2,4)*0.5; const b=a+d,c=b+d,e=c+d; const med=(b+c)/2; const r=makeOptsDec(med,[b,c,a]); return{q:`$${fmtDec(a)}$; $${fmtDec(b)}$; $${fmtDec(c)}$; $${fmtDec(e)}$ медианасы?`,...r,exp:`Ортадағы: $${fmtDec(b)}$ пен $${fmtDec(c)}$. $(${fmtDec(b)}+${fmtDec(c)}):2=${fmtDec(med)}$.`}; },
+  () => { const a=R(2,6),b=R(8,14),c=R(16,22),d=R(24,30); const s=a+b+c+d; if(s%4!==0)return null; const avg=s/4; const r=makeOpts(avg,[avg-1,avg+1,avg+3]); return{q:`$${a}$, $${b}$, $${c}$, $${d}$ сандарының ортасын табыңыз.`,...r,exp:`$${a}+${b}+${c}+${d}=${s}$. $${s}:4=${avg}$.`}; },
+  () => { const mode=R(3,8),rival=mode+R(1,3); return{q:`$X, ${rival}, ${mode}, ${rival}, ${mode+1}$ модасы тек $${rival}$ болу үшін $X$?`,opts:['$'+rival+'$','$'+mode+'$','$'+(mode+1)+'$','$'+(rival+2)+'$'],ans:0,exp:`$${rival}$ ең жиі болу үшін $X=${rival}$. Сонда $${rival}$ 3 рет кездеседі.`}; }
 ],
+// ═══ LEVEL 5: Өте қиын ═══
 5: [
-  { q:"$11$ футболшының орташа жасы $22$. Бір ойыншы шықса, қалғанының ортасы $21$. Шыққанның жасы?", opts:["$30$","$31$","$32$","$33$"], ans:2, exp:"11 ойыншының жас қосындысы: $22 \\cdot 11 = 242$. 10 ойыншының жас қосындысы: $21 \\cdot 10 = 210$. Шыққан ойыншының жасы: $242 - 210 = 32$." },
-  { q:"«АЛМА» сөзіндегі әріптерден неше түрлі сөз құрастыруға болады?", opts:["$12$","$16$","$24$","$36$"], ans:0, exp:"4 әріп бар: А, Л, М, А. Егер бәрі әртүрлі болса $4 \\cdot 3 \\cdot 2 \\cdot 1 = 24$ болар еді. Бірақ 2 А бірдей, сондықтан $24 : 2 = 12$." },
-  { q:"$4$ оң санның модасы $8$, медианасы $9$, ортасы $10$. Ең үлкен сан?", opts:["$12$","$14$","$16$","$18$"], ans:1, exp:"Мода $8$ — яғни кемінде екі сан $8$. Сандар: $8, 8, ?, ?$. Медиана $9$ — ортадағы екі сан $8$ мен $?$, олардың ортасы $9$, яғни $? = 10$. Сандар: $8, 8, 10, x$. Ортасы $10$: $(8+8+10+x) : 4 = 10$. $26 + x = 40$, $x = 14$." },
-  { q:"$5$ әртүрлі натурал санның ортасы $8$. Ең үлкені мүмкін ең үлкен мәні?", opts:["$20$","$26$","$30$","$34$"], ans:2, exp:"Қосынды $= 8 \\cdot 5 = 40$. Ең үлкені максимал болу үшін қалған 4 сан ең кіші болуы керек: $1, 2, 3, 4$. Олардың қосындысы $= 10$. Ең үлкен сан $= 40 - 10 = 30$." },
-  { q:"$0, 1, 2, 3$ цифрларынан цифрлары қайталанбайтын неше төрт таңбалы сан құруға болады?", opts:["$18$","$24$","$36$","$48$"], ans:0, exp:"Бірінші орынға $0$ тұра алмайды (сан $0$-ден басталмайды). 1-ші орынға 3 нұсқа ($1, 2, 3$). 2-ші орынға қалған 3 цифрдың кез келгені. 3-ші орынға 2 цифр. 4-ші орынға 1 цифр. $3 \\cdot 3 \\cdot 2 \\cdot 1 = 18$." },
-  { q:"$3, 5, 7, X$ сандарының ортасы $6$. Медианасы неге тең?", opts:["$5$","$5{,}5$","$6$","$6{,}5$"], ans:2, exp:"Ортасы $6$: $(3+5+7+X) : 4 = 6$. $15 + X = 24$, $X = 9$. Реттейміз: $3, 5, 7, 9$. Медиана $= (5+7) : 2 = 12 : 2 = 6$." },
-  { q:"Мат. мен Физика қатар тұруы шартымен $4$ кітапты неше тәсілмен орналастыруға болады?", opts:["$6$","$12$","$18$","$24$"], ans:1, exp:"Мат. пен Физиканы 1 блок деп алайық. Онда 3 объект бар: [МФ], Тарих, Қ.тілі. 3 объектіні $3 \\cdot 2 \\cdot 1 = 6$ тәсілмен орналастырамыз. [МФ] блокта 2 кітап орын ауыстыра алады: МФ немесе ФМ (2 нұсқа). Барлығы: $6 \\cdot 2 = 12$." },
-  { q:"$15$ мен $20$ $4$ реттен, $25$ — $3$ рет кездеседі. Модасы?", opts:["$15$","$20$","$25$","$15$ және $20$"], ans:3, exp:"$15$ — 4 рет, $20$ — 4 рет. Екеуі де ең жиі кездеседі. Мода бірнеше болуы мүмкін. Сондықтан мода: $15$ және $20$." },
-  { q:"$\\dfrac{1}{2}$, $\\dfrac{3}{4}$, $\\dfrac{1}{4}$, $X$ сандарының ортасы $\\dfrac{1}{2}$. $X$ неге тең?", opts:["$\\dfrac{1}{4}$","$\\dfrac{1}{2}$","$\\dfrac{3}{4}$","$1$"], ans:1, exp:"Қосынды $= \\dfrac{1}{2} \\cdot 4 = 2$ болуы керек. $\\dfrac{1}{2} + \\dfrac{3}{4} + \\dfrac{1}{4} = \\dfrac{2}{4} + \\dfrac{3}{4} + \\dfrac{1}{4} = \\dfrac{6}{4} = \\dfrac{3}{2}$. $X = 2 - \\dfrac{3}{2} = \\dfrac{1}{2}$." },
-  { q:"Шеңбер бойындағы $5$ нүктеден неше үшбұрыш сызуға болады?", opts:["$5$","$8$","$10$","$15$"], ans:2, exp:"Әрбір үшбұрыш үшін 3 нүкте таңдау керек. Тізіп шығамыз: АБВ, АБГ, АБД, АВГ, АВД, АГД, БВГ, БВД, БГД, ВГД — барлығы $10$ үшбұрыш." }
+  () => { const n=R(8,15),avg=R(18,30),newAvg=avg-R(1,3); const s=n*avg,newS=(n-1)*newAvg; const left=s-newS; const r=makeOpts(left,[left-1,left+1,left+2]); return{q:`$${n}$ адамның ортасы $${avg}$. Бірі шықса, қалғаны $${newAvg}$. Шыққанның жасы?`,...r,exp:`$${avg}\\cdot${n}=${s}$. $${newAvg}\\cdot${n-1}=${newS}$. Шыққан: $${s}-${newS}=${left}$.`}; },
+  () => { const mode=R(4,12),third=mode+2,avg=mode+R(2,4); const x=avg*4-mode*2-third; if(x<=third)return null; const r=makeOpts(x,[x-2,x+2,x+4]); return{q:`4 санның модасы $${mode}$, медианасы $${mode+1}$, ортасы $${avg}$. Ең үлкен сан?`,...r,exp:`Сандар: $${mode},${mode},${third},x$. $(${mode*2+third}+x):4=${avg}$. $x=${x}$.`}; },
+  () => { const n=R(4,7),avg=R(6,15); const s=n*avg; const minS=n*(n-1)/2; const maxVal=s-minS; if(maxVal<=n-1)return null; const r=makeOpts(maxVal,[maxVal-2,maxVal+2,s]); return{q:`$${n}$ әртүрлі натурал санның ортасы $${avg}$. Ең үлкенінің ең үлкен мәні?`,...r,exp:`Қосынды $=${s}$. Қалғандары ең кіші: $${Array.from({length:n-1},(_,i)=>i+1).join('+')}=${minS}$. Ең үлкені: $${s}-${minS}=${maxVal}$.`}; },
+  () => { const a=R(1,5),b=a+R(2,4),c=b+R(2,4),avg=R(a+1,c); const x=avg*4-a-b-c; if(x<=0||x===a||x===b||x===c)return null; const sorted=[a,b,c,x].sort((n1,n2)=>n1-n2); const med=(sorted[1]+sorted[2])/2; const r=makeOptsDec(med,[sorted[1],sorted[2],avg]); return{q:`$${a}, ${b}, ${c}, X$ ортасы $${avg}$. Медиана?`,...r,exp:`$X=${avg*4}-${a+b+c}=${x}$. Реттейміз: $${sorted.join(',')}$. Медиана $=(${sorted[1]}+${sorted[2]}):2=${fmtDec(med)}$.`}; },
+  () => { const n1=R(5,15),avg1=R(40,70),n2=R(5,15),avg2=R(50,80); const total=n1*avg1+n2*avg2,nt=n1+n2; if(total%nt!==0)return null; const avg=total/nt; const r=makeOpts(avg,[avg-2,avg+2,Math.round((avg1+avg2)/2)]); return{q:`1-ші топ: $${n1}$ адам (ортасы $${avg1}$), 2-ші: $${n2}$ адам (ортасы $${avg2}$). Жалпы орта?`,...r,exp:`$(${n1}\\cdot${avg1}+${n2}\\cdot${avg2}):${nt}=${total}:${nt}=${avg}$.`}; },
+  () => { const n=R(4,8); const v=n*(n-1)*(n-2)/6; const r=makeOpts(v,[v-n,n*(n-1)/2,v+1]); return{q:`$${n}$ нүктеден неше үшбұрыш?`,...r,exp:`$(${n}\\cdot${n-1}\\cdot${n-2}):(3\\cdot2\\cdot1)=${v}$.`}; },
+  () => { const n=R(4,7),totalAvg=R(60,85),prevAvg=totalAvg-R(3,8); const last=totalAvg*n-prevAvg*(n-1); if(last<0||last>100)return null; const r=makeOpts(last,[last-5,last+5,totalAvg]); return{q:`$${n}$ емтиханнан орташа $${totalAvg}$. Алғашқы $${n-1}$-нің ортасы $${prevAvg}$. Соңғы?`,...r,exp:`$${totalAvg}\\cdot${n}=${totalAvg*n}$. $${prevAvg}\\cdot${n-1}=${prevAvg*(n-1)}$. Соңғы: $${totalAvg*n}-${prevAvg*(n-1)}=${last}$.`}; },
+  () => { const n=R(4,6); let total=1; for(let i=2;i<=n;i++)total*=i; let block=1; for(let i=2;i<=n-1;i++)block*=i; block*=2; const r=makeOpts(block,[total,block/2,block+1]); return{q:`$${n}$ кітаптан 2-еуі қатар тұру шартымен неше тәсіл?`,...r,exp:`Блок ретінде: $${block/2}$ тәсіл. Блок ішінде 2 нұсқа. $${block/2}\\cdot2=${block}$.`}; },
+  () => { const n=R(4,8); const segs=n*(n-1)/2; const r=makeOpts(segs,[n,segs+1,n*n]); return{q:`$${n}$ нүкте (3-еуі бір түзуде емес). Неше кесінді?`,...r,exp:`$${Array.from({length:n-1},(_,i)=>n-1-i).join('+')}=${segs}$.`}; },
+  () => { const n=R(5,15),avg=R(10,30),add=R(2,8); const newAvg=avg+add; const r=makeOpts(newAvg,[avg,newAvg+add,avg-add]); return{q:`$${n}$ санның ортасы $${avg}$. Әрқайсысына $${add}$ қоссақ, жаңа орта?`,...r,exp:`Әр санға бірдей мән қосылса, орта да артады: $${avg}+${add}=${newAvg}$.`}; }
 ],
+// ═══ LEVEL 6: Логика ═══
 6: [
-  { q:"$0,1,2,3,4,5$ цифрларынан (қайталанбайтын) неше $3$ таңбалы жұп сан құруға болады?", opts:["$36$","$48$","$52$","$60$"], ans:2, exp:"Жұп сан $0, 2$ немесе $4$-пен аяқталады. $0$-мен аяқталатын: 1-ші орынға 5 нұсқа, 2-ші орынға 4 нұсқа = $5 \\cdot 4 = 20$ сан. $2$-мен аяқталатын: 1-ші орынға $0$ тұрмайды, яғни 4 нұсқа, 2-ші орынға 4 нұсқа = $4 \\cdot 4 = 16$ сан. $4$-пен дәл солай: $16$ сан. Барлығы: $20 + 16 + 16 = 52$." },
-  { q:"$10$ санның ортасы $15$. Әрқайсысына $3$ қоссақ, жаңа орта?", opts:["$15$","$18$","$30$","$150$"], ans:1, exp:"Әрбір санға бірдей мән қосылса, орта да дәл сол мәнге артады. Ескі орта $15$, әрқайсысына $3$ қоссақ, жаңа орта $= 15 + 3 = 18$." },
-  { q:"$5, 8, 12, x, 20$ сандарының медианасы $12$, ортасы $13$. $x$ неге тең?", opts:["$14$","$16$","$20$","$22$"], ans:2, exp:"Ортасы $13$: $(5+8+12+x+20) : 5 = 13$. $45 + x = 65$. $x = 20$. Реттейміз: $5, 8, 12, 20, 20$. Ортадағы сан $12$. Шарт орындалады." },
-  { q:"$1$-ден $50$-ге дейінгі сандардың медианасы?", opts:["$25$","$25{,}5$","$26$","$26{,}5$"], ans:1, exp:"$50$ сан бар — жұп сан. Ортадағы екі сан: $25$ пен $26$. Медиана $= (25 + 26) : 2 = 51 : 2 = 25{,}5$." },
-  { q:"Шахмат турниріне $8$ ойыншы қатысты. Барлығы неше партия ойналды?", opts:["$28$","$36$","$56$","$64$"], ans:0, exp:"1-ші ойыншы 7 адаммен ойнайды. 2-шісі қалған 6 адаммен (1-шімен ойнаған). 3-шісі 5, 4-шісі 4, т.с.с. $7 + 6 + 5 + 4 + 3 + 2 + 1 = 28$." },
-  { q:"$5$ санның медианасы $10$, ортасы $10$. Ең кіші $6$, ең үлкен $15$. Белгісіз екеуінің қосындысы?", opts:["$17$","$18$","$19$","$20$"], ans:2, exp:"Сандар өсу ретімен: $6, a, 10, b, 15$. Қосындысы $= 10 \\cdot 5 = 50$. $6 + a + 10 + b + 15 = 50$. $31 + a + b = 50$. $a + b = 19$." },
-  { q:"«ҚАЗАҚ» сөзінен неше сөз құрастыруға болады?", opts:["$15$","$30$","$60$","$120$"], ans:1, exp:"5 әріп: Қ, А, З, А, Қ. Екі Қ және екі А қайталанады. $5 \\cdot 4 \\cdot 3 \\cdot 2 \\cdot 1 = 120$. Бірақ Қ бірдей (2-ге бөлеміз) және А бірдей (2-ге бөлеміз): $120 : 2 : 2 = 30$." },
-  { q:"$4$ оқушыны $4$ орындыққа: Асқар мен Мақсат қатар отырмаса, неше тәсіл?", opts:["$12$","$14$","$16$","$24$"], ans:0, exp:"Барлық тәсіл: $4 \\cdot 3 \\cdot 2 \\cdot 1 = 24$. Асқар мен Мақсат қатар отыратын жағдайлар: оларды 1 блок деп алсақ, 3 объектіні $3 \\cdot 2 \\cdot 1 = 6$ тәсілмен, блок ішінде $2$ тәсіл. Барлығы $6 \\cdot 2 = 12$ жағдай. Қатар отырмайтын: $24 - 12 = 12$." },
-  { q:"$6$ кітаптың $3$-еуін таңдап қатарластырудың неше тәсілі бар?", opts:["$20$","$60$","$120$","$216$"], ans:2, exp:"1-ші орынға 6 кітаптың кез келгені. 2-ші орынға қалған 5. 3-ші орынға қалған 4. Барлығы: $6 \\cdot 5 \\cdot 4 = 120$." },
-  { q:"$2{,}4$; $3{,}6$; $1{,}2$; $4{,}8$ сандарының арифметикалық ортасын табыңыз.", opts:["$2{,}4$","$3$","$3{,}6$","$4$"], ans:1, exp:"Қосамыз: $2{,}4 + 3{,}6 + 1{,}2 + 4{,}8 = 12$. Сандар саны 4. Бөлеміз: $12 : 4 = 3$." }
+  () => { const min=R(3,8),med=min+R(4,8),max=med+R(4,8); const abSum=med*5-min-med-max; if(abSum<=min*2||abSum>=max*2)return null; const r=makeOpts(abSum,[abSum-1,abSum+1,abSum+2]); return{q:`5 санның медианасы $${med}$, ортасы $${med}$. Ең кіші $${min}$, ең үлкен $${max}$. Белгісіз екеуінің қосындысы?`,...r,exp:`Сандар: $${min},a,${med},b,${max}$. Қосынды $=${med*5}$. $a+b=${med*5}-${min}-${med}-${max}=${abSum}$.`}; },
+  () => { const n=R(5,12),avg=R(8,20),mult=R(2,4); const newAvg=avg*mult; const r=makeOpts(newAvg,[avg+mult,avg,newAvg+1]); return{q:`$${n}$ санның ортасы $${avg}$. Әрқайсысын $${mult}$-ке көбейтсек, жаңа орта?`,...r,exp:`Әр санды бірдей санға көбейтсек, орта да көбейеді: $${avg}\\cdot${mult}=${newAvg}$.`}; },
+  () => { const n=R(5,10); const games=n*(n-1)/2; const r=makeOpts(games,[n*(n-1),n*n,games+n]); return{q:`Шахмат турниріне $${n}$ ойыншы. Барлығы неше партия?`,...r,exp:`$${Array.from({length:n-1},(_,i)=>n-1-i).join('+')}=${games}$.`}; },
+  () => { const n=R(5,8),k=R(2,4); if(k>=n)return null; let v=1; for(let i=0;i<k;i++)v*=(n-i); const r=makeOpts(v,[v/2,v+n,n*k]); return{q:`$${n}$ кітаптың $${k}$-еуін таңдап қатарластыру?`,...r,exp:`$${Array.from({length:k},(_,i)=>n-i).join('\\cdot')}=${v}$.`}; },
+  () => { const n=R(20,60)*2; const med=(n/2+n/2+1)/2; const r=makeOptsDec(med,[n/2,n/2+1,n]); return{q:`$1$-ден $${n}$-ге дейінгі сандардың медианасы?`,...r,exp:`$${n}$ сан. Ортадағы: $${n/2}$ пен $${n/2+1}$. $(${n/2}+${n/2+1}):2=${fmtDec(med)}$.`}; },
+  () => { const n=R(4,6); let total=1; for(let i=2;i<=n;i++)total*=i; let together=1; for(let i=2;i<=n-1;i++)together*=i; together*=2; const apart=total-together; const r=makeOpts(apart,[total,together,apart+1]); return{q:`$${n}$ оқушыдан 2-еуі қатар отырмаса, неше тәсіл?`,...r,exp:`Барлығы: $${total}$. Қатар: $${together}$. Қатар емес: $${total}-${together}=${apart}$.`}; },
+  () => { const letters=R(2,4),boxes=R(3,5); const v=Math.pow(boxes,letters); const r=makeOpts(v,[letters*boxes,v+1,Math.pow(letters,boxes)]); return{q:`$${letters}$ хатты $${boxes}$ жәшікке неше тәсілмен?`,...r,exp:`$${Array(letters).fill(boxes).join('\\cdot')}=${v}$.`}; },
+  () => { const n=R(4,9); const c2=n*(n-1)/2; const r=makeOpts(c2,[n,n*(n-1),c2+1]); return{q:`$${n}$ қаламнан $2$-еуін таңдау тәсілі?`,...r,exp:`$${n}\\cdot${n-1}:2=${c2}$.`}; },
+  () => { const n=R(4,7); let f=1; for(let i=2;i<=n-1;i++)f*=i; const r=makeOpts(f,[f*n,f+1,n]); return{q:`Шеңбер бойымен $${n}$ адамды неше тәсілмен?`,...r,exp:`Бірін бекітеміз. Қалған $${n-1}$: $${Array.from({length:n-1},(_,i)=>n-1-i).join('\\cdot')}=${f}$.`}; },
+  () => { const vals=[R(1,4)*1.2,R(2,5)*1.2,R(3,6)*1.2,R(4,7)*1.2].map(v=>Math.round(v*10)/10); const s=Math.round(vals.reduce((a,b)=>a+b,0)*10)/10; const avg=Math.round(s/4*10)/10; if(Math.abs(avg*4-s)>0.05)return null; const r=makeOptsDec(avg,[avg-0.5,avg+0.5,avg+1]); return{q:`$${vals.map(fmtDec).join('; ')}$ сандарының ортасы?`,...r,exp:`$${vals.map(fmtDec).join('+')}=${fmtDec(s)}$. $${fmtDec(s)}:4=${fmtDec(avg)}$.`}; }
 ],
+// ═══ LEVEL 7: Олимпиадалық ═══
 7: [
-  { q:"$1,2,3,4,5$ цифрларынан (қайталанбайтын) $5$-ке бөлінетін неше төрт таңбалы сан?", opts:["$12$","$24$","$48$","$60$"], ans:1, exp:"$5$-ке бөліну үшін соңғы цифр $5$ болуы керек ($0$ жоқ). Соңғы орын бекітілді: $5$. Алдыңғы 3 орынға $1, 2, 3, 4$ цифрлары: $4 \\cdot 3 \\cdot 2 = 24$." },
-  { q:"$100$ санның ортасы $50$. $50$ мен $60$ сандарын алсақ, $98$ санның ортасы шамамен?", opts:["$48{,}9$","$49{,}9$","$50$","$50{,}1$"], ans:1, exp:"Жалпы қосынды: $50 \\cdot 100 = 5000$. Екі санды алып тастаймыз: $5000 - 50 - 60 = 4890$. Жаңа орта: $4890 : 98 \\approx 49{,}9$." },
-  { q:"$10, 15, x, 25, 30$: медиана мен орта тең. $x$?", opts:["$15$","$20$","$22$","$25$"], ans:1, exp:"Сандар өсу ретімен, сондықтан медиана $= x$. Орта $= (10+15+x+25+30) : 5 = (80+x) : 5$. Медиана = орта: $x = (80+x) : 5$. $5x = 80 + x$. $4x = 80$. $x = 20$." },
-  { q:"$5$ адамның орташа жасы $30$. Жас екеуін санамасақ, $3$-ұінің ортасы $36$. Бірі $18$ жаста болса, екіншісі?", opts:["$20$","$22$","$24$","$26$"], ans:2, exp:"5 адамның жас қосындысы: $30 \\cdot 5 = 150$. Үлкен 3 адамнікі: $36 \\cdot 3 = 108$. Жас 2 адамнікі: $150 - 108 = 42$. Екіншісі: $42 - 18 = 24$." },
-  { q:"$6$ нүкте, ешқандай $3$-еуі бір түзуде емес. Неше кесінді жүргізуге болады?", opts:["$10$","$15$","$20$","$30$"], ans:1, exp:"Әрбір кесінді 2 нүктені жалғайды. 1-ші нүкте 5 кесінді, 2-шісі 4, 3-шісі 3, 4-шісі 2, 5-шісі 1. $5+4+3+2+1 = 15$." },
-  { q:"$5$ қызыл, $4$ көк, $3$ қара қалам. $2$ қызыл алу тәсілі?", opts:["$10$","$12$","$20$","$25$"], ans:0, exp:"5 қызыл қаламнан 2 таңдау. 1-ші қызыл 5 нұсқа, 2-шісі 4 нұсқа. Бірақ ретсіз таңдаймыз (1-2 мен 2-1 бірдей), сондықтан $5 \\cdot 4 : 2 = 10$." },
-  { q:"$4$ баланың жас модасы $8$, медианасы $9$, ортасы $10$. Ең үлкен баланың жасы?", opts:["$12$","$13$","$14$","$15$"], ans:2, exp:"Мода $8$ — кемінде екі бала $8$ жаста. Медиана $9$: ортадағы екі жас $8$ пен $?$. $(8 + ?) : 2 = 9$, $? = 10$. Сандар: $8, 8, 10, x$. Ортасы $10$: $(8+8+10+x) : 4 = 10$. $26 + x = 40$. $x = 14$." },
-  { q:"$3$ хатты $4$ жәшікке неше тәсілмен салуға болады?", opts:["$12$","$24$","$64$","$81$"], ans:2, exp:"Әр хатты кез келген жәшікке салуға болады. 1-ші хат — 4 нұсқа, 2-ші хат — 4 нұсқа, 3-ші хат — 4 нұсқа. $4 \\cdot 4 \\cdot 4 = 64$." },
-  { q:"Шеңбер бойымен $5$ адамды неше тәсілмен отырғызуға болады?", opts:["$12$","$24$","$60$","$120$"], ans:1, exp:"Шеңберде бірін бекітеміз (айналу бірдей болмас үшін). Қалған 4 адамды орналастырамыз: $4 \\cdot 3 \\cdot 2 \\cdot 1 = 24$." },
-  { q:"Студент $5$ емтиханнан орташа $70$ ұпай. Алғашқы $4$-ұінің ортасы $65$. Соңғы емтихан?", opts:["$80$","$85$","$90$","$95$"], ans:2, exp:"5 емтиханның жалпы ұпайы: $70 \\cdot 5 = 350$. Алғашқы 4 емтихан: $65 \\cdot 4 = 260$. Соңғы: $350 - 260 = 90$." }
+  () => { const n=R(50,200),avg=R(30,70); const s=n*avg; const r1=avg+R(-10,10),r2=avg+R(-10,10); const newS=s-r1-r2,newN=n-2; const newAvg=Math.round(newS/newN*10)/10; const r=makeOptsDec(newAvg,[avg,newAvg+0.5,newAvg-0.5]); return{q:`$${n}$ санның ортасы $${avg}$. $${r1}$ мен $${r2}$ алсақ, $${newN}$ санның ортасы шамамен?`,...r,exp:`$${s}-${r1}-${r2}=${newS}$. $${newS}:${newN}\\approx${fmtDec(newAvg)}$.`}; },
+  () => { const a=R(5,15),b=a+R(3,8),d=b-a; const c=b+d,e=c+R(3,8); const rest=a+b+c+e; if(rest%4!==0)return null; const x=rest/4; if(x<=b||x>=c)return null; const r=makeOpts(x,[x-2,x+2,x+4]); return{q:`$${a},${b},x,${c},${e}$ медиана=орта. $x$?`,...r,exp:`$x=(${rest}+x):5$. $4x=${rest}$. $x=${x}$.`}; },
+  () => { const n=R(4,8),avg=R(25,40); const s=n*avg; const bigN=n-2,bigAvg=avg+R(3,8); const bigS=bigN*bigAvg; const smallS=s-bigS; const known=R(15,25); const unknown=smallS-known; if(unknown<=0||unknown>60)return null; const r=makeOpts(unknown,[unknown-2,unknown+2,unknown+4]); return{q:`$${n}$ адамның ортасы $${avg}$. Жас 2-еуін санамасақ, $${bigN}$-нің ортасы $${bigAvg}$. Бірі $${known}$ жаста, екіншісі?`,...r,exp:`$${s}-${bigS}=${smallS}$. $${smallS}-${known}=${unknown}$.`}; },
+  () => { const mode=R(5,15),third=mode+2,avg=mode+R(2,5); const x=avg*4-mode*2-third; if(x<=third||x>50)return null; const r=makeOpts(x,[x-2,x+2,x+4]); return{q:`4 баланың модасы $${mode}$, медианасы $${mode+1}$, ортасы $${avg}$. Ең үлкен жас?`,...r,exp:`$${mode},${mode},${third},x$. $${mode*2+third}+x=${avg*4}$. $x=${x}$.`}; },
+  () => { const n=R(4,8),totalAvg=R(60,90),prevAvg=totalAvg-R(3,10); const last=totalAvg*n-prevAvg*(n-1); if(last<0||last>100)return null; const r=makeOpts(last,[last-5,last+5,totalAvg]); return{q:`$${n}$ емтиханнан орташа $${totalAvg}$. Алғашқы $${n-1}$-нің ортасы $${prevAvg}$. Соңғы?`,...r,exp:`$${totalAvg*n}-${prevAvg*(n-1)}=${last}$.`}; },
+  () => { const n=R(5,10); const c2=n*(n-1)/2; const r=makeOpts(c2,[n,n*(n-1),c2+1]); return{q:`$${n}$ қаламнан $2$ таңдау тәсілі?`,...r,exp:`$${n}\\cdot${n-1}:2=${c2}$.`}; },
+  () => { const n=R(5,8); let f=1; for(let i=2;i<=n-1;i++)f*=i; const r=makeOpts(f,[f*n,f+1,n*(n-1)]); return{q:`$${n}$ адамды дөңгелек үстелге неше тәсілмен?`,...r,exp:`Бірін бекітіп, $${n-1}$: $${Array.from({length:n-1},(_,i)=>n-1-i).join('\\cdot')}=${f}$.`}; },
+  () => { const letters=R(3,5),boxes=R(3,6); const v=Math.pow(boxes,letters); const r=makeOpts(v,[letters*boxes,Math.pow(letters,boxes),v+1]); return{q:`$${letters}$ хатты $${boxes}$ жәшікке неше тәсілмен?`,...r,exp:`$${Array(letters).fill(boxes).join('\\cdot')}=${v}$.`}; },
+  () => { const n=R(5,10); const segs=n*(n-1)/2; const r=makeOpts(segs,[n,n*n,segs+n]); return{q:`$${n}$ нүкте. Неше кесінді?`,...r,exp:`$${Array.from({length:n-1},(_,i)=>n-1-i).join('+')}=${segs}$.`}; },
+  () => { const n=R(4,8),avg=R(8,20); const s=n*avg; const minS=n*(n-1)/2; const maxVal=s-minS; if(maxVal<=n-1||maxVal>200)return null; const r=makeOpts(maxVal,[maxVal-2,s,maxVal+2]); return{q:`$${n}$ әртүрлі натурал санның ортасы $${avg}$. Ең үлкенінің ең үлкен мәні?`,...r,exp:`Қосынды $=${s}$. Ең кішілері: $${Array.from({length:n-1},(_,i)=>i+1).join('+')}=${minS}$. $${s}-${minS}=${maxVal}$.`}; }
 ]
 };
 
-// ── Dynamic variation generators ────────────────────────
-function generateVariation(level) {
-  // Generate arithmetic mean questions with random numbers
-  const gens = [
-    () => { // 2 numbers mean
-      const a = 2+Math.floor(Math.random()*20)*2, b = a+4+Math.floor(Math.random()*10)*2;
-      const avg = (a+b)/2;
-      const wrongs = [avg-2, avg+3, a+b].filter(v => v !== avg && v > 0);
-      if (wrongs.length < 3) return null;
-      const opts = shuffleArray([{v:avg,c:true},...wrongs.slice(0,3).map(v=>({v,c:false}))]);
-      const ai = opts.findIndex(o=>o.c);
-      return { q:`$${a}$ және $${b}$ сандарының арифметикалық ортасын табыңыз.`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`Қосамыз: $${a} + ${b} = ${a+b}$. Сандар саны 2. Бөлеміз: $${a+b} : 2 = ${avg}$.` };
-    },
-    () => { // 3 numbers mean
-      const a = 2+Math.floor(Math.random()*10), b = a+3, c = b+3;
-      const sum = a+b+c;
-      if (sum % 3 !== 0) return null;
-      const avg = sum/3;
-      const wrongs = [avg-1, avg+2, avg+3].filter(v => v !== avg);
-      const opts = shuffleArray([{v:avg,c:true},...wrongs.slice(0,3).map(v=>({v,c:false}))]);
-      const ai = opts.findIndex(o=>o.c);
-      return { q:`$${a}$, $${b}$ және $${c}$ сандарының арифметикалық ортасын табыңыз.`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`Қосамыз: $${a} + ${b} + ${c} = ${sum}$. Сандар саны 3. Бөлеміз: $${sum} : 3 = ${avg}$.` };
-    },
-    () => { // find X in mean
-      const a = 4+Math.floor(Math.random()*12), target = a + 2 + Math.floor(Math.random()*6);
-      const x = target * 2 - a;
-      if (x <= 0 || x === a) return null;
-      const wrongs = [x-2, x+2, x+4].filter(v => v !== x && v > 0);
-      if (wrongs.length < 3) return null;
-      const opts = shuffleArray([{v:x,c:true},...wrongs.slice(0,3).map(v=>({v,c:false}))]);
-      const ai = opts.findIndex(o=>o.c);
-      return { q:`$${a}$ және $X$ сандарының ортасы $${target}$. $X$ неге тең?`, opts:opts.map(o=>`$${o.v}$`), ans:ai, exp:`$(${a} + X) : 2 = ${target}$. Осыдан $${a} + X = ${target*2}$. $X = ${target*2} - ${a} = ${x}$.` };
-    }
-  ];
-  for (let i = 0; i < 50; i++) {
-    const gen = gens[Math.floor(Math.random() * gens.length)];
-    const r = gen();
-    if (r) { r._key = 'gen_' + level + '_' + Math.random().toString(36).substr(2,8); return r; }
-  }
-  return null;
-}
-
 function pickQuestionsForLevel(level) {
-  const bank = QUESTION_BANK[level] || [];
-  if (!allUsedKeys[level]) allUsedKeys[level] = new Set();
-  const used = allUsedKeys[level];
-  let available = bank.map((q, i) => ({ ...q, _key: 'b' + level + '_' + i })).filter(q => !used.has(q._key));
-  let selected = [];
-
-  if (available.length >= Q_PER_LEVEL) {
-    selected = shuffleArray(available).slice(0, Q_PER_LEVEL);
-  } else {
-    selected = [...available];
-    let needed = Q_PER_LEVEL - selected.length;
-    let attempts = 0;
-    while (needed > 0 && attempts < 100) {
-      const v = generateVariation(level);
-      if (v && !used.has(v._key)) { selected.push(v); needed--; }
-      attempts++;
-    }
-    if (needed > 0) {
-      const recycled = shuffleArray([...bank]).slice(0, needed).map((q, i) => ({ ...q, _key: 'r' + Date.now() + '_' + i }));
-      selected.push(...recycled);
+  const gens = GENERATORS[level] || GENERATORS[1];
+  const questions = [];
+  const order = shuffleArray(Array.from({length: gens.length}, (_, i) => i));
+  for (let gi = 0; gi < order.length && questions.length < Q_PER_LEVEL; gi++) {
+    for (let attempt = 0; attempt < 30; attempt++) {
+      const q = gens[order[gi]]();
+      if (q && q.opts && q.opts.length === 4 && q.ans >= 0 && q.ans <= 3) {
+        const shuffled = shuffleArray(q.opts.map((o, i) => ({ text: o, isCorrect: i === q.ans })));
+        questions.push({ ...q, opts: shuffled.map(o => o.text), ans: shuffled.findIndex(o => o.isCorrect) });
+        break;
+      }
     }
   }
-  selected.forEach(q => used.add(q._key));
-  return selected.map(q => {
-    const shuffled = shuffleArray(q.opts.map((o, i) => ({ text: o, isCorrect: i === q.ans })));
-    return { ...q, opts: shuffled.map(o => o.text), ans: shuffled.findIndex(o => o.isCorrect) };
-  });
+  while (questions.length < Q_PER_LEVEL) {
+    const genFn = RC(gens);
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const q = genFn();
+      if (q && q.opts && q.opts.length === 4) {
+        const shuffled = shuffleArray(q.opts.map((o, i) => ({ text: o, isCorrect: i === q.ans })));
+        questions.push({ ...q, opts: shuffled.map(o => o.text), ans: shuffled.findIndex(o => o.isCorrect) });
+        break;
+      }
+    }
+  }
+  return questions;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -497,7 +396,7 @@ function pickQuestionsForLevel(level) {
     levelCorrect = saved.levelCorrect||0;
     levelWrong = saved.levelWrong||0;
     levelResults = saved.levelResults||{};
-    if (saved.allUsedKeys) for (const [lv, arr] of Object.entries(saved.allUsedKeys)) allUsedKeys[lv] = new Set(arr);
+    // allUsedKeys removed
     if (saved.levelQuestions?.length > 0 && saved.levelQIndex < saved.levelQuestions.length) {
       levelQuestions = saved.levelQuestions;
       levelQIndex = saved.levelQIndex;
@@ -527,7 +426,7 @@ async function joinQuiz() {
     if (data.status === 'not_found') { errEl.textContent = 'Бөлме табылмады.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
     if (data.status === 'ended') { errEl.textContent = 'Бұл сабақ аяқталған.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
     stats = { correct:0, wrong:0, streak:0 }; currentLevel = 1; levelCorrect = 0; levelWrong = 0;
-    levelResults = {}; allUsedKeys = {}; levelQuestions = []; levelQIndex = 0;
+    levelResults = {}; levelQuestions = []; levelQIndex = 0;
     await sendScore(); saveState();
     btn.disabled = false; btn.textContent = '🚀 Кіру';
     if (data.status === 'active') startQuiz(); else showWait();
