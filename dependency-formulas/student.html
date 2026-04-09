@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Шамалар тәуелділігі — Оқушы</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
+  --shadow-lg:0 8px 30px rgba(20,24,38,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+
+.screen{display:none;min-height:100vh;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+.container{max-width:520px;margin:0 auto;padding:1rem;padding-bottom:2rem}
+
+/* ── JOIN ── */
+.join-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.join-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.join-logo{text-align:center;margin-bottom:20px}
+.join-icon{font-size:2.4rem;margin-bottom:6px}
+.join-title{font-size:1.3rem;font-weight:800;margin-bottom:2px}
+.join-sub{color:var(--muted);font-size:.82rem}
+.field{margin-bottom:12px}
+.field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px}
+.field input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;outline:none;transition:border-color .15s;background:var(--bg)}
+.field input:focus{border-color:var(--primary)}
+.field input.code-input{font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:6px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn-amber{background:var(--amber);color:#fff}
+.btn-outline{background:transparent;border:2px solid var(--border);color:var(--text2)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
+.err.on{display:block}
+
+/* ── WAIT ── */
+.wait-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.wait-icon{font-size:3.5rem;margin-bottom:12px}
+.wait-title{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+.wait-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.wait-name{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.82rem;font-weight:700;margin-top:8px}
+.dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-top:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+
+/* ── QUIZ ── */
+.level-bar{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap}
+.level-badge{background:var(--primary);color:#fff;padding:4px 12px;border-radius:10px;font-size:.72rem;font-weight:800;letter-spacing:1px}
+.level-progress{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;min-width:60px}
+.level-progress-fill{height:100%;background:var(--primary);border-radius:3px;transition:width .4s ease}
+.level-info{font-size:.72rem;color:var(--muted);font-weight:600}
+
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.6rem .4rem;text-align:center;box-shadow:var(--shadow-sm)}
+.stat-card.hl{background:var(--primary-light);border-color:rgba(67,56,202,.25)}
+.stat-icon{font-size:1rem;margin-bottom:.15rem}
+.stat-value{font-size:1.25rem;font-weight:800;color:var(--primary)}
+.stat-card.g .stat-value{color:var(--green)}
+.stat-card.r .stat-value{color:var(--red)}
+.stat-card.a .stat-value{color:var(--amber)}
+.stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow)}
+.q-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-light);color:var(--primary);padding:.3rem .7rem;border-radius:16px;font-size:.72rem;font-weight:700;margin-bottom:.75rem}
+.q-text{font-size:.95rem;font-weight:600;color:var(--text);line-height:1.6;margin-bottom:1rem;padding:.6rem;background:var(--bg);border-radius:12px;border:1px solid var(--border)}
+.q-text .katex{font-size:1.05em}
+
+.opts{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+.opt{display:flex;align-items:center;gap:.6rem;padding:.75rem .85rem;border:2.5px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;background:var(--bg2);min-height:52px}
+.opt:active{transform:scale(.98)}
+.opt.selected{border-color:var(--primary);background:var(--primary-light)}
+.opt.correct{border-color:var(--green);background:var(--green-light)}
+.opt.wrong{border-color:var(--red);background:var(--red-light)}
+.opt-label{width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;flex-shrink:0;color:var(--muted);transition:all .2s}
+.opt.selected .opt-label{background:var(--primary);color:#fff}
+.opt.correct .opt-label{background:var(--green);color:#fff}
+.opt.wrong .opt-label{background:var(--red);color:#fff}
+.opt-text{font-size:.88rem;font-weight:600;flex:1;line-height:1.4}
+.opt-text .katex{font-size:1em}
+
+.feedback{text-align:center;padding:.85rem;border-radius:12px;margin-bottom:.75rem;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.feedback.correct{background:var(--green-light);color:var(--green);border:1px solid var(--green)}
+.feedback.wrong{background:var(--red-light);color:var(--red);border:1px solid var(--red)}
+
+.solution-box{background:#f8f9fc;border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:.75rem;font-size:.84rem;line-height:1.7;color:var(--text2)}
+.solution-box .sol-title{font-weight:800;color:var(--primary);margin-bottom:.4rem;font-size:.78rem;text-transform:uppercase;letter-spacing:1px}
+.solution-box .sol-step{margin-bottom:.3rem}
+.solution-box .katex{font-size:1em}
+
+.btn-group{display:flex;gap:.6rem;justify-content:center;align-items:center;flex-wrap:wrap}
+.hidden{display:none!important}
+
+/* ── HELP MODAL ── */
+.help-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px);padding:16px}
+.help-overlay.on{display:flex}
+.help-modal{background:var(--bg2);border-radius:20px;padding:24px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.help-title{font-size:1.1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:.5rem}
+.help-section{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.help-section-title{font-weight:700;font-size:.82rem;color:var(--primary);margin-bottom:6px}
+.help-formula{font-size:.92rem;margin-bottom:4px;line-height:1.6}
+.help-close{margin-top:10px}
+
+/* ── LEVEL COMPLETE ── */
+.level-complete{text-align:center;padding:1.5rem;animation:fadeUp .3s ease}
+.lc-icon{font-size:3rem;margin-bottom:8px}
+.lc-title{font-size:1.2rem;font-weight:800;margin-bottom:4px}
+.lc-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.lc-stats{display:flex;gap:12px;justify-content:center;margin-bottom:16px}
+.lc-stat{text-align:center}
+.lc-stat-val{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.lc-stat-lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+
+/* ── RESULTS ── */
+.res-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.res-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg)}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.res-stat{background:var(--bg);border-radius:12px;padding:12px 8px}
+.res-val{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.res-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+
+.cfw{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.cfp{position:absolute;animation:cfFall linear forwards}
+</style>
+</head>
+<body>
+<div class="cfw" id="confetti"></div>
+
+<!-- ═══ HELP OVERLAY ═══ -->
+<div class="help-overlay" id="help-overlay" onclick="if(event.target===this)closeHelp()">
+  <div class="help-modal">
+    <div class="help-title">📖 Формулалар анықтамасы</div>
+    <div class="help-section">
+      <div class="help-section-title">🔵 Шеңбер</div>
+      <div class="help-formula" id="hf-circle"></div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">🟦 Шаршы</div>
+      <div class="help-formula" id="hf-square"></div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">🟩 Тіктөртбұрыш</div>
+      <div class="help-formula" id="hf-rect"></div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">🚢 Қозғалыс (өзен)</div>
+      <div class="help-formula" id="hf-river"></div>
+    </div>
+    <button class="btn btn-primary btn-block help-close" onclick="closeHelp()">Жабу</button>
+  </div>
+</div>
+
+<!-- ════ JOIN ════ -->
+<div class="screen active" id="s-join">
+  <div class="join-wrap">
+    <div class="join-card">
+      <div class="join-logo">
+        <div class="join-icon">📐</div>
+        <div class="join-title">Шамалар тәуелділігі</div>
+        <div class="join-sub">Формулалар мен тәуелділіктер</div>
+      </div>
+      <div class="err" id="join-err"></div>
+      <div class="field">
+        <label>Аты-жөні</label>
+        <input type="text" id="sname" placeholder="Атыңызды жазыңыз" maxlength="20" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="field" id="code-wrap">
+        <label>Бөлме коды</label>
+        <input type="text" id="scode" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
+      </div>
+      <button class="btn btn-primary btn-block" id="join-btn" style="margin-top:4px" onclick="joinQuiz()">🚀 Кіру</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WAIT ════ -->
+<div class="screen" id="s-wait">
+  <div class="wait-wrap">
+    <div class="wait-icon">✅</div>
+    <div class="wait-title">Қосылдыңыз!</div>
+    <div class="wait-sub">Мұғалім сабақты бастағанша күтіңіз</div>
+    <div class="wait-name" id="wait-name"></div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div class="screen" id="s-quiz">
+  <div class="container">
+    <div class="level-bar">
+      <span class="level-badge" id="level-badge">ДЕҢГЕЙ 1</span>
+      <div class="level-progress"><div class="level-progress-fill" id="level-fill" style="width:0%"></div></div>
+      <span class="level-info" id="level-info">0/10</span>
+      <button class="btn btn-amber" style="padding:6px 14px;font-size:.76rem;min-height:32px" onclick="openHelp()">📖 Көмек</button>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-card hl"><div class="stat-icon">📊</div><div class="stat-value" id="st-total">0</div><div class="stat-label">Жауап</div></div>
+      <div class="stat-card g"><div class="stat-icon">✓</div><div class="stat-value" id="st-correct">0</div><div class="stat-label">Дұрыс</div></div>
+      <div class="stat-card r"><div class="stat-icon">✗</div><div class="stat-value" id="st-wrong">0</div><div class="stat-label">Қате</div></div>
+      <div class="stat-card a"><div class="stat-icon">🔥</div><div class="stat-value" id="st-streak">0</div><div class="stat-label">Қатарынан</div></div>
+    </div>
+    <div class="quiz-card" id="quiz-area">
+      <!-- Question rendered here -->
+    </div>
+  </div>
+</div>
+
+<!-- ════ RESULTS ════ -->
+<div class="screen" id="s-results">
+  <div class="res-wrap">
+    <div class="res-card">
+      <div style="font-size:3rem;margin-bottom:8px" id="res-emoji">🏆</div>
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px">Тест аяқталды!</div>
+      <div style="color:var(--muted);font-size:.86rem" id="res-level-info"></div>
+      <div class="res-stats">
+        <div class="res-stat"><div class="res-val" id="res-correct" style="color:var(--green)">0</div><div class="res-lbl">Дұрыс</div></div>
+        <div class="res-stat"><div class="res-val" id="res-wrong" style="color:var(--red)">0</div><div class="res-lbl">Қате</div></div>
+        <div class="res-stat"><div class="res-val" id="res-pct" style="color:var(--primary)">0%</div><div class="res-lbl">Пайыз</div></div>
+      </div>
+      <p style="color:var(--muted);margin-top:16px;font-size:.82rem">Нәтижелер мұғалімге жіберілді ✓</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const STORAGE_KEY_PREFIX = 'ms_depformula_';
+// ═══════════════════════════════════════════════════════════════
+
+const tex = s => katex.renderToString(s, { throwOnError: false });
+
+// ── URL params ──────────────────────────────────────────
+const urlParams = new URLSearchParams(location.search);
+const urlCode = (urlParams.get('code') || '').toUpperCase();
+
+// ── State ───────────────────────────────────────────────
+let sessionCode = '';
+let studentId = '';
+let studentName = '';
+let stats = { correct: 0, wrong: 0, streak: 0 };
+let currentLevel = 1;
+let levelQIndex = 0;
+let levelCorrect = 0;
+let levelWrong = 0;
+let levelQuestions = [];
+let quiz = { selected: null, answered: false };
+let submitInterval = null;
+let statusPollInterval = null;
+let quizStarted = false;
+let sessionEnded = false;
+
+const TOTAL_LEVELS = 5;
+const QS_PER_LEVEL = 10;
+const PASS_THRESHOLD = 0.7;
+
+// ── Focus tracking ──────────────────────────────────────
+let isFocused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let awayStart = null;
+
+function markAway() {
+  if (!isFocused) return;
+  isFocused = false;
+  tabSwitches++;
+  awayStart = Date.now();
+  saveState();
+  sendScore();
+}
+function markBack() {
+  if (isFocused) return;
+  isFocused = true;
+  if (awayStart) {
+    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
+    awayStart = null;
+  }
+  sendScore();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) markAway(); else markBack();
+});
+window.addEventListener('blur', markAway);
+window.addEventListener('focus', markBack);
+
+// ── localStorage helpers ────────────────────────────────
+function saveState() {
+  if (!sessionCode) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + sessionCode, JSON.stringify({
+      studentId, name: studentName,
+      correct: stats.correct, wrong: stats.wrong, streak: stats.streak,
+      currentLevel, levelQIndex, levelCorrect, levelWrong,
+      tabSwitches, awaySeconds: currentAway, ts: Date.now()
+    }));
+  } catch (_) {}
+}
+function loadState(code) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + code);
+      return null;
+    }
+    return data;
+  } catch (_) { return null; }
+}
+function clearState() {
+  if (sessionCode) {
+    try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {}
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function shuffleArray(arr) { const r = [...arr]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
+function randInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+function randChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function spawnConfetti() {
+  const w = document.getElementById('confetti'); w.innerHTML = '';
+  const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626'];
+  for (let i = 0; i < 60; i++) { const e = document.createElement('div'); e.className = 'cfp'; const s = 5 + Math.random() * 9; e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`; w.appendChild(e); }
+  setTimeout(() => w.innerHTML = '', 6000);
+}
+
+// ── Auto-fill code from URL ─────────────────────────────
+if (urlCode) {
+  sessionCode = urlCode;
+  document.getElementById('scode').value = urlCode;
+  document.getElementById('code-wrap').style.display = 'none';
+}
+
+// ── Help modal ──────────────────────────────────────────
+function openHelp() {
+  document.getElementById('hf-circle').innerHTML =
+    tex('S = \\pi r^2') + '<br><small style="color:var(--muted)">$S$ — аудан, $r$ — радиус, $\\pi \\approx 3{,}14$</small>'.replace(/\$([^$]+)\$/g, (_, m) => tex(m));
+  document.getElementById('hf-square').innerHTML =
+    tex('S = a^2') + ' &nbsp;|&nbsp; ' + tex('P = 4a') +
+    '<br><small style="color:var(--muted)">$S$ — аудан, $P$ — периметр, $a$ — қабырғасы</small>'.replace(/\$([^$]+)\$/g, (_, m) => tex(m));
+  document.getElementById('hf-rect').innerHTML =
+    tex('S = a \\cdot b') + ' &nbsp;|&nbsp; ' + tex('P = 2(a + b)') +
+    '<br><small style="color:var(--muted)">$a$, $b$ — қабырғалары</small>'.replace(/\$([^$]+)\$/g, (_, m) => tex(m));
+  document.getElementById('hf-river').innerHTML =
+    tex('v_{\\text{ағыспен}} = v_{\\text{меншікті}} + v_{\\text{ағыс}}') + '<br>' +
+    tex('v_{\\text{ағысқа қарсы}} = v_{\\text{меншікті}} - v_{\\text{ағыс}}') +
+    '<br><small style="color:var(--muted)">$v$ — жылдамдық (км/сағ)</small>'.replace(/\$([^$]+)\$/g, (_, m) => tex(m));
+  document.getElementById('help-overlay').classList.add('on');
+}
+function closeHelp() { document.getElementById('help-overlay').classList.remove('on'); }
+
+// ══════════════════════════════════════════════════════════
+//  RECONNECTION
+// ══════════════════════════════════════════════════════════
+(async function tryReconnect() {
+  if (!urlCode) return;
+  const saved = loadState(urlCode);
+  if (!saved) return;
+  try {
+    const r = await fetch(`${BACKEND}/status?code=${urlCode}`);
+    const txt = await r.text();
+    let data; try { data = JSON.parse(txt); } catch(_) { return; }
+    if (data.status === 'not_found' || data.status === 'ended') { clearState(); return; }
+    sessionCode = urlCode;
+    studentId = saved.studentId;
+    studentName = saved.name;
+    stats = { correct: saved.correct || 0, wrong: saved.wrong || 0, streak: saved.streak || 0 };
+    currentLevel = saved.currentLevel || 1;
+    levelQIndex = saved.levelQIndex || 0;
+    levelCorrect = saved.levelCorrect || 0;
+    levelWrong = saved.levelWrong || 0;
+    tabSwitches = saved.tabSwitches || 0;
+    awaySeconds = saved.awaySeconds || 0;
+    if (data.status === 'active') startQuiz();
+    else if (data.status === 'waiting') showWait();
+  } catch (_) {}
+})();
+
+// ══════════════════════════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════════════════════════
+async function joinQuiz() {
+  const name = document.getElementById('sname').value.trim();
+  const code = (urlCode || document.getElementById('scode').value.trim()).toUpperCase();
+  const errEl = document.getElementById('join-err');
+  if (!name) { errEl.textContent = 'Атыңызды жазыңыз'; errEl.classList.add('on'); return; }
+  if (code.length < 4) { errEl.textContent = 'Бөлме кодын енгізіңіз'; errEl.classList.add('on'); return; }
+  errEl.classList.remove('on');
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = '⏳ Қосылуда...';
+  sessionCode = code; studentName = name;
+  studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
+
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(`${BACKEND}/status?code=${code}`, { signal: controller.signal });
+      clearTimeout(timeout);
+      const txt = await res.text();
+      let data; try { data = JSON.parse(txt); } catch(_) { throw new Error('bad json'); }
+
+      if (data.status === 'not_found') {
+        errEl.textContent = 'Бөлме табылмады. Кодты тексеріңіз.'; errEl.classList.add('on');
+        btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+      }
+      if (data.status === 'ended') {
+        errEl.textContent = 'Бұл сабақ аяқталған.'; errEl.classList.add('on');
+        btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+      }
+      stats = { correct: 0, wrong: 0, streak: 0 };
+      currentLevel = 1; levelQIndex = 0; levelCorrect = 0; levelWrong = 0;
+      await sendScore();
+      saveState();
+      btn.disabled = false; btn.textContent = '🚀 Кіру';
+      if (data.status === 'active') startQuiz(); else showWait();
+      return;
+    } catch (e) {
+      retries--;
+      if (retries > 0) await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+  errEl.textContent = 'Серверге қосылу мүмкін болмады.'; errEl.classList.add('on');
+  btn.disabled = false; btn.textContent = '🚀 Кіру';
+}
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz();
+});
+
+// ══════════════════════════════════════════════════════════
+//  WAIT
+// ══════════════════════════════════════════════════════════
+function showWait() {
+  document.getElementById('wait-name').textContent = studentName;
+  show('s-wait');
+  if (statusPollInterval) clearInterval(statusPollInterval);
+  statusPollInterval = setInterval(pollStatus, 2000);
+}
+async function pollStatus() {
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
+    const txt = await res.text();
+    let data; try { data = JSON.parse(txt); } catch(_) { return; }
+    if (data.status === 'active') { clearInterval(statusPollInterval); statusPollInterval = null; startQuiz(); }
+    else if (data.status === 'ended' || data.status === 'not_found') { clearInterval(statusPollInterval); statusPollInterval = null; showEnd(); }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  START QUIZ
+// ══════════════════════════════════════════════════════════
+function startQuiz() {
+  if (quizStarted) return;
+  quizStarted = true;
+  updateStats();
+  show('s-quiz');
+  generateLevelQuestions();
+  renderQuestion();
+  sendScore();
+  if (submitInterval) clearInterval(submitInterval);
+  submitInterval = setInterval(sendScore, 5000);
+}
+
+// ══════════════════════════════════════════════════════════
+//  SEND SCORE (level encoded: (level-1)*1000 + totalAnswers)
+// ══════════════════════════════════════════════════════════
+async function sendScore(finished) {
+  if (!sessionCode || !studentName) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    const res = await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: sessionCode, studentId, name: studentName,
+        score: stats.correct,
+        total: (currentLevel - 1) * 1000 + (stats.correct + stats.wrong),
+        finished: finished === true,
+        focused: isFocused,
+        tabSwitches,
+        awaySeconds: currentAway
+      })
+    });
+    const txt = await res.text();
+    let data; try { data = JSON.parse(txt); } catch(_) { return; }
+    if (data.status === 'ended' || data.status === 'not_found') showEnd();
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  END
+// ══════════════════════════════════════════════════════════
+function showEnd() {
+  if (sessionEnded) return;
+  sessionEnded = true;
+  if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
+  if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+  const total = stats.correct + stats.wrong;
+  const pct = total > 0 ? Math.round(stats.correct / total * 100) : 0;
+  document.getElementById('res-correct').textContent = stats.correct;
+  document.getElementById('res-wrong').textContent = stats.wrong;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-emoji').textContent = pct >= 70 ? '🎉' : pct >= 40 ? '👍' : '💪';
+  document.getElementById('res-level-info').textContent = 'Деңгей: ' + currentLevel + ' / ' + TOTAL_LEVELS;
+  show('s-results');
+  if (pct >= 70) spawnConfetti();
+  clearState();
+}
+
+function updateStats() {
+  document.getElementById('st-total').textContent = stats.correct + stats.wrong;
+  document.getElementById('st-correct').textContent = stats.correct;
+  document.getElementById('st-wrong').textContent = stats.wrong;
+  document.getElementById('st-streak').textContent = stats.streak;
+}
+function updateLevelBar() {
+  document.getElementById('level-badge').textContent = 'ДЕҢГЕЙ ' + currentLevel;
+  document.getElementById('level-fill').style.width = (levelQIndex / QS_PER_LEVEL * 100) + '%';
+  document.getElementById('level-info').textContent = levelQIndex + '/' + QS_PER_LEVEL;
+}
+
+// ══════════════════════════════════════════════════════════
+//  QUESTION GENERATORS — 5 LEVELS
+// ══════════════════════════════════════════════════════════
+// Names for word problems
+const NAMES_F = ['Айгерім','Дана','Мадина','Ботагөз','Жансая','Ақмарал','Гүлнұр','Назерке'];
+const NAMES_M = ['Бауыржан','Мұрат','Ерлан','Жанболат','Асқар','Нұрлан','Дәулет','Тимур'];
+function rname() { return randChoice([...NAMES_F, ...NAMES_M]); }
+
+// Round helper for π
+function rndPi(v) { return Math.round(v * 100) / 100; }
+
+function generateQuestion(level) {
+  const generators = [
+    genLevel1, genLevel2, genLevel3, genLevel4, genLevel5
+  ];
+  return generators[level - 1]();
+}
+
+// ── LEVEL 1: тәуелді/тәуелсіз айнымалыны анықтау ───────
+function genLevel1() {
+  const scenarios = [
+    () => {
+      const a = randInt(2, 10);
+      return {
+        q: `Шаршының қабырғасы ${tex('$a = ' + a + '$ см')}. Ауданы ${tex('$S = a^2$')} формуласымен табылады. Осы формулада тәуелді айнымалы шама қайсы?`,
+        opts: [tex('$S$'), tex('$a$'), tex('$a^2$'), tex('$2$')],
+        correct: 0,
+        solution: `${tex('$S = a^2$')} формуласында ${tex('$a$')} — тәуелсіз айнымалы (оны біз таңдаймыз), ал ${tex('$S$')} — тәуелді айнымалы (ол ${tex('$a$')}-ға байланысты өзгереді).`
+      };
+    },
+    () => {
+      const r = randInt(1, 8);
+      return {
+        q: `Шеңбердің радиусы ${tex('$r = ' + r + '$ см')}. Ауданы ${tex('$S = \\pi r^2$')} формуласымен есептеледі. Тәуелсіз айнымалы шама қайсы?`,
+        opts: [tex('$S$'), tex('$\\pi$'), tex('$r$'), tex('$r^2$')],
+        correct: 2,
+        solution: `${tex('$S = \\pi r^2$')} формуласында ${tex('$r$')} — тәуелсіз айнымалы (оны біз өзгертеміз), ал ${tex('$S$')} — тәуелді айнымалы. ${tex('$\\pi$')} — тұрақты сан.`
+      };
+    },
+    () => {
+      const a = randInt(3, 12);
+      return {
+        q: `Шаршының қабырғасы ${tex('$a$')} болса, периметрі ${tex('$P = 4a$')} формуласымен табылады. Тәуелді айнымалы қайсы?`,
+        opts: [tex('$a$'), tex('$4$'), tex('$P$'), tex('$4a$')],
+        correct: 2,
+        solution: `${tex('$P = 4a$')} формуласында ${tex('$P$')} — тәуелді айнымалы (${tex('$a$')} өзгерсе, ${tex('$P$')} де өзгереді), ал ${tex('$a$')} — тәуелсіз айнымалы.`
+      };
+    },
+    () => {
+      const a = randInt(2, 8), b = randInt(3, 10);
+      return {
+        q: `Тіктөртбұрыштың қабырғалары ${tex('$a$')} және ${tex('$b$')}. Ауданы ${tex('$S = a \\cdot b$')}. Егер ${tex('$a = ' + a + '$ см')} тұрақты болса, ал ${tex('$b$')} өзгерсе, тәуелсіз айнымалы қайсы?`,
+        opts: [tex('$S$'), tex('$a$'), tex('$b$'), tex('$a \\cdot b$')],
+        correct: 2,
+        solution: `Егер ${tex('$a$')} тұрақты, ал ${tex('$b$')} өзгерсе, онда ${tex('$b$')} — тәуелсіз айнымалы, ${tex('$S$')} — тәуелді айнымалы.`
+      };
+    },
+    () => {
+      return {
+        q: `Қайық меншікті жылдамдығы ${tex('$v$')} км/сағ, ағыс жылдамдығы ${tex('$u$')} км/сағ. Ағыспен жылдамдығы: ${tex('$v_{\\text{ағ}} = v + u$')}. Егер ${tex('$u = 3$')} тұрақты болса, тәуелді айнымалы қайсы?`,
+        opts: [tex('$v$'), tex('$u$'), tex('$v_{\\text{ағ}}$'), tex('$3$')],
+        correct: 2,
+        solution: `${tex('$u = 3$')} тұрақты, ${tex('$v$')} — тәуелсіз айнымалы (оны біз таңдаймыз), ал ${tex('$v_{\\text{ағ}}$')} — тәуелді айнымалы (${tex('$v$')}-ге байланысты).`
+      };
+    },
+    () => {
+      return {
+        q: `Тіктөртбұрыштың периметрі ${tex('$P = 2(a + b)$')} формуласымен есептеледі. Егер ${tex('$b = 5$')} тұрақты болса, тәуелді шама қайсы?`,
+        opts: [tex('$a$'), tex('$b$'), tex('$P$'), tex('$2$')],
+        correct: 2,
+        solution: `${tex('$b = 5$')} тұрақты, ${tex('$a$')} — тәуелсіз айнымалы. ${tex('$P$')} — тәуелді айнымалы, себебі ол ${tex('$a$')}-ның мәніне байланысты өзгереді.`
+      };
+    },
+    () => {
+      return {
+        q: `Қайықтың ағысқа қарсы жылдамдығы: ${tex('$v_{\\text{қ}} = v - u$')}. Мұнда ${tex('$v$')} — меншікті жылдамдық, ${tex('$u$')} — ағыс жылдамдығы. Тәуелді шама қайсы?`,
+        opts: [tex('$v$'), tex('$u$'), tex('$v_{\\text{қ}}$'), tex('$v - u$')],
+        correct: 2,
+        solution: `${tex('$v_{\\text{қ}} = v - u$')} формуласында ${tex('$v$')} мен ${tex('$u$')} — тәуелсіз айнымалылар, ал ${tex('$v_{\\text{қ}}$')} — тәуелді айнымалы (нәтиже).`
+      };
+    },
+    () => {
+      return {
+        q: `${tex('$S = \\pi r^2$')} формуласындағы ${tex('$\\pi$')} қандай шама болып табылады?`,
+        opts: ['Тәуелді айнымалы', 'Тәуелсіз айнымалы', 'Тұрақты шама', 'Формула'],
+        correct: 2,
+        solution: `${tex('$\\pi \\approx 3{,}14$')} — тұрақты сан (константа). Ол ешқашан өзгермейді. Тәуелді айнымалы — ${tex('$S$')}, тәуелсіз айнымалы — ${tex('$r$')}.`
+      };
+    },
+    () => {
+      return {
+        q: `${tex('$P = 4a$')} формуласындағы ${tex('$4$')} қандай шама?`,
+        opts: ['Тәуелді айнымалы', 'Тәуелсіз айнымалы', 'Тұрақты сан (коэффициент)', 'Формула мүшесі'],
+        correct: 2,
+        solution: `${tex('$4$')} — тұрақты коэффициент. Ол шаршының 4 қабырғасы бар екенін білдіреді. ${tex('$a$')} — тәуелсіз, ${tex('$P$')} — тәуелді айнымалы.`
+      };
+    },
+    () => {
+      return {
+        q: `Келесі формулалардың қайсысында ${tex('$S$')} тәуелді айнымалы болады?`,
+        opts: [tex('$a = \\sqrt{S}$'), tex('$S = a^2$'), tex('$r = \\sqrt{\\dfrac{S}{\\pi}}$'), tex('$a = \\dfrac{P}{4}$')],
+        correct: 1,
+        solution: `${tex('$S = a^2$')} формуласында ${tex('$S$')} сол жақта тұр — ол тәуелді айнымалы. Қалған формулаларда ${tex('$S$')} тәуелсіз айнымалы немесе жоқ.`
+      };
+    }
+  ];
+  return randChoice(scenarios)();
+}
+
+// ── LEVEL 2: мәтіннен формуланы анықтау ─────────────────
+function genLevel2() {
+  const scenarios = [
+    () => {
+      const a = randInt(3, 12);
+      return {
+        q: `${rname()} шаршы пішінді бақшаның қабырғасын ${tex('$a$')} метр деп белгіледі. Бақшаның ауданын қандай формуламен табуға болады?`,
+        opts: [tex('$S = 4a$'), tex('$S = a^2$'), tex('$S = 2a$'), tex('$S = a + a$')],
+        correct: 1,
+        solution: `Шаршының ауданы: ${tex('$S = a \\times a = a^2$')}. Шаршының барлық қабырғасы тең болғандықтан, ауданы қабырғасының квадратына тең.`
+      };
+    },
+    () => {
+      return {
+        q: `${rname()} дөңгелек үстелдің радиусын ${tex('$r$')} деп белгіледі. Үстелдің ауданын қандай формуламен табады?`,
+        opts: [tex('$S = 2\\pi r$'), tex('$S = \\pi r^2$'), tex('$S = \\pi r$'), tex('$S = 4\\pi r^2$')],
+        correct: 1,
+        solution: `Шеңбердің (дөңгелектің) ауданы: ${tex('$S = \\pi r^2$')}. Мұнда ${tex('$r$')} — радиус, ${tex('$\\pi \\approx 3{,}14$')}.`
+      };
+    },
+    () => {
+      return {
+        q: `Тіктөртбұрыш пішінді алаңның ұзындығы ${tex('$a$')} м, ені ${tex('$b$')} м. Периметрін қандай формуламен табамыз?`,
+        opts: [tex('$P = a \\cdot b$'), tex('$P = a + b$'), tex('$P = 2(a + b)$'), tex('$P = 4(a + b)$')],
+        correct: 2,
+        solution: `Тіктөртбұрыштың периметрі: ${tex('$P = 2(a + b)$')} — екі ұзындық пен екі еннің қосындысы.`
+      };
+    },
+    () => {
+      return {
+        q: `Кеме меншікті жылдамдығы ${tex('$v$')} км/сағ, ағыс жылдамдығы ${tex('$u$')} км/сағ. Ағыспен жүзу жылдамдығын қандай формуламен табамыз?`,
+        opts: [tex('$v_{\\text{ағ}} = v - u$'), tex('$v_{\\text{ағ}} = v \\cdot u$'), tex('$v_{\\text{ағ}} = v + u$'), tex('$v_{\\text{ағ}} = \\dfrac{v}{u}$')],
+        correct: 2,
+        solution: `Ағыспен жүзу жылдамдығы: ${tex('$v_{\\text{ағ}} = v + u$')}. Ағыс кемені алға итереді, сондықтан жылдамдықтар қосылады.`
+      };
+    },
+    () => {
+      return {
+        q: `Кеме ағысқа қарсы жүзіп барады. Меншікті жылдамдығы ${tex('$v$')} км/сағ, ағыс жылдамдығы ${tex('$u$')} км/сағ. Ағысқа қарсы жылдамдықты табыңыз.`,
+        opts: [tex('$v_{\\text{қ}} = v + u$'), tex('$v_{\\text{қ}} = v \\cdot u$'), tex('$v_{\\text{қ}} = \\dfrac{v}{u}$'), tex('$v_{\\text{қ}} = v - u$')],
+        correct: 3,
+        solution: `Ағысқа қарсы жүзу жылдамдығы: ${tex('$v_{\\text{қ}} = v - u$')}. Ағыс кемеге кедергі жасайды, сондықтан жылдамдықтар азайтылады.`
+      };
+    },
+    () => {
+      return {
+        q: `Шаршы пішінді бөлменің қабырғасы ${tex('$a$')} м. Бөлменің периметрін қандай формуламен табамыз?`,
+        opts: [tex('$P = a^2$'), tex('$P = 2a$'), tex('$P = 4a$'), tex('$P = a + 4$')],
+        correct: 2,
+        solution: `Шаршының периметрі: ${tex('$P = 4a$')}. Шаршының 4 тең қабырғасы бар, сондықтан периметрі қабырғаны 4-ке көбейту.`
+      };
+    },
+    () => {
+      return {
+        q: `Тіктөртбұрыш пішінді алаңның ұзындығы ${tex('$a$')} м, ені ${tex('$b$')} м. Ауданын қандай формуламен табамыз?`,
+        opts: [tex('$S = 2(a + b)$'), tex('$S = a + b$'), tex('$S = \\dfrac{a \\cdot b}{2}$'), tex('$S = a \\cdot b$')],
+        correct: 3,
+        solution: `Тіктөртбұрыштың ауданы: ${tex('$S = a \\cdot b$')} — ұзындық пен еннің көбейтіндісі.`
+      };
+    },
+    () => {
+      return {
+        q: `${rname()} мынау формуланы жазды: ${tex('$S = \\pi r^2$')}. Бұл формула нені табады?`,
+        opts: ['Шеңбердің ұзындығын', 'Шеңбердің ауданын', 'Шаршының ауданын', 'Тіктөртбұрыштың ауданын'],
+        correct: 1,
+        solution: `${tex('$S = \\pi r^2$')} — шеңбердің (дөңгелектің) аудан формуласы. Мұнда ${tex('$r$')} — радиус.`
+      };
+    },
+    () => {
+      return {
+        q: `Қайсы формула тіктөртбұрыштың периметрін табады?`,
+        opts: [tex('$P = a \\cdot b$'), tex('$P = 4a$'), tex('$P = 2(a+b)$'), tex('$P = a^2 + b^2$')],
+        correct: 2,
+        solution: `${tex('$P = 2(a + b)$')} — тіктөртбұрыштың периметр формуласы. ${tex('$P = 4a$')} — шаршының периметрі (барлық қабырғасы тең болғанда ғана).`
+      };
+    },
+    () => {
+      return {
+        q: `${rname()} өзен бойымен жүзді. Меншікті жылдамдығы ${tex('$v$')}, ағыс ${tex('$u$')}. Ағыспен жүзсе жылдамдығы артады, ағысқа қарсы жүзсе азаяды. Ағысқа қарсы формуласы қандай?`,
+        opts: [tex('$v + u$'), tex('$v \\cdot u$'), tex('$v - u$'), tex('$\\dfrac{v}{u}$')],
+        correct: 2,
+        solution: `Ағысқа қарсы: ${tex('$v_{\\text{қ}} = v - u$')}. Ағыс кедергі жасағандықтан, меншікті жылдамдықтан ағыс жылдамдығы алынып тасталады.`
+      };
+    }
+  ];
+  return randChoice(scenarios)();
+}
+
+// ── LEVEL 3: қарапайым есептеу ──────────────────────────
+function genLevel3() {
+  const type = randInt(1, 6);
+  if (type === 1) {
+    // Шаршы аудан
+    const a = randInt(2, 15);
+    const S = a * a;
+    const w1 = a * 4, w2 = a * 2, w3 = S + randChoice([-2, -1, 1, 2, 3]);
+    return {
+      q: `Шаршының қабырғасы ${tex('$a = ' + a + '$ см')}. Ауданын табыңыз.`,
+      opts: [tex('$' + S + '$ см²'), tex('$' + w1 + '$ см²'), tex('$' + w2 + '$ см²'), tex('$' + (w3 === S ? w3 + 5 : w3) + '$ см²')],
+      correct: 0,
+      solution: `${tex('$S = a^2 = ' + a + '^2 = ' + S + '$')} см².`
+    };
+  }
+  if (type === 2) {
+    // Шаршы периметр
+    const a = randInt(2, 20);
+    const P = 4 * a;
+    const w1 = a * a, w2 = 2 * a, w3 = P + randChoice([-4, -2, 2, 4]);
+    return {
+      q: `Шаршының қабырғасы ${tex('$a = ' + a + '$ см')}. Периметрін табыңыз.`,
+      opts: [tex('$' + w1 + '$ см'), tex('$' + P + '$ см'), tex('$' + w2 + '$ см'), tex('$' + (w3 === P ? w3 + 4 : w3) + '$ см')],
+      correct: 1,
+      solution: `${tex('$P = 4a = 4 \\times ' + a + ' = ' + P + '$')} см.`
+    };
+  }
+  if (type === 3) {
+    // Тіктөртбұрыш аудан
+    const a = randInt(3, 15), b = randInt(2, 12);
+    const S = a * b;
+    const w1 = 2 * (a + b), w2 = a + b, w3 = S + randChoice([-3, -1, 1, 3, 5]);
+    return {
+      q: `Тіктөртбұрыштың ұзындығы ${tex('$a = ' + a + '$ см')}, ені ${tex('$b = ' + b + '$ см')}. Ауданын табыңыз.`,
+      opts: [tex('$' + w1 + '$ см²'), tex('$' + S + '$ см²'), tex('$' + w2 + '$ см²'), tex('$' + (w3 === S ? w3 + 5 : w3) + '$ см²')],
+      correct: 1,
+      solution: `${tex('$S = a \\cdot b = ' + a + ' \\times ' + b + ' = ' + S + '$')} см².`
+    };
+  }
+  if (type === 4) {
+    // Тіктөртбұрыш периметр
+    const a = randInt(3, 15), b = randInt(2, 12);
+    const P = 2 * (a + b);
+    const w1 = a * b, w2 = a + b, w3 = 4 * (a + b);
+    return {
+      q: `Тіктөртбұрыштың ұзындығы ${tex('$a = ' + a + '$ см')}, ені ${tex('$b = ' + b + '$ см')}. Периметрін табыңыз.`,
+      opts: [tex('$' + w1 + '$ см'), tex('$' + w2 + '$ см'), tex('$' + P + '$ см'), tex('$' + w3 + '$ см')],
+      correct: 2,
+      solution: `${tex('$P = 2(a + b) = 2(' + a + ' + ' + b + ') = 2 \\times ' + (a+b) + ' = ' + P + '$')} см.`
+    };
+  }
+  if (type === 5) {
+    // Шеңбер аудан — r таңдаймыз π·r² бүтін болатындай
+    const r = randInt(1, 10);
+    const S = rndPi(3.14 * r * r);
+    const w1 = rndPi(2 * 3.14 * r), w2 = rndPi(3.14 * r), w3 = rndPi(3.14 * 2 * r * r);
+    return {
+      q: `Шеңбердің радиусы ${tex('$r = ' + r + '$ см')}. Ауданын табыңыз. (${tex('$\\pi \\approx 3{,}14$')})`,
+      opts: [tex('$' + S + '$ см²'), tex('$' + w1 + '$ см²'), tex('$' + w2 + '$ см²'), tex('$' + w3 + '$ см²')],
+      correct: 0,
+      solution: `${tex('$S = \\pi r^2 = 3{,}14 \\times ' + r + '^2 = 3{,}14 \\times ' + (r*r) + ' = ' + S + '$')} см².`
+    };
+  }
+  // type === 6: ағыс
+  const v = randInt(15, 40), u = randInt(2, 8);
+  const dir = randChoice(['аг', 'карсы']);
+  if (dir === 'аг') {
+    const ans = v + u;
+    const w1 = v - u, w2 = v * u, w3 = ans + randChoice([-2, 2, 3]);
+    return {
+      q: `Кеменің меншікті жылдамдығы ${tex('$v = ' + v + '$ км/сағ')}, ағыс жылдамдығы ${tex('$u = ' + u + '$ км/сағ')}. Ағыспен жүзу жылдамдығын табыңыз.`,
+      opts: [tex('$' + w1 + '$ км/сағ'), tex('$' + ans + '$ км/сағ'), tex('$' + w2 + '$ км/сағ'), tex('$' + (w3 === ans ? w3 + 3 : w3) + '$ км/сағ')],
+      correct: 1,
+      solution: `Ағыспен жүзу: ${tex('$v_{\\text{ағ}} = v + u = ' + v + ' + ' + u + ' = ' + ans + '$')} км/сағ.`
+    };
+  } else {
+    const ans = v - u;
+    const w1 = v + u, w2 = v * u, w3 = ans + randChoice([-3, -1, 2, 4]);
+    return {
+      q: `Кеменің меншікті жылдамдығы ${tex('$v = ' + v + '$ км/сағ')}, ағыс жылдамдығы ${tex('$u = ' + u + '$ км/сағ')}. Ағысқа қарсы жүзу жылдамдығын табыңыз.`,
+      opts: [tex('$' + w1 + '$ км/сағ'), tex('$' + w2 + '$ км/сағ'), tex('$' + ans + '$ км/сағ'), tex('$' + (w3 === ans ? w3 + 5 : w3) + '$ км/сағ')],
+      correct: 2,
+      solution: `Ағысқа қарсы: ${tex('$v_{\\text{қ}} = v - u = ' + v + ' - ' + u + ' = ' + ans + '$')} км/сағ.`
+    };
+  }
+}
+
+// ── LEVEL 4: мәтінді есептер (формуланы құрап, мәнін табу) ──
+function genLevel4() {
+  const type = randInt(1, 6);
+  if (type === 1) {
+    const a = randInt(4, 18);
+    const S = a * a;
+    const name = rname();
+    return {
+      q: `${name} шаршы пішінді бөлменің еденін жуғысы келеді. Бөлменің қабырғасы ${tex('$' + a + '$ м')}. Еденнің ауданы неше шаршы метр?`,
+      opts: [tex('$' + S + '$ м²'), tex('$' + (4*a) + '$ м²'), tex('$' + (2*a) + '$ м²'), tex('$' + (S + randChoice([3, -3, 5, -5])) + '$ м²')],
+      correct: 0,
+      solution: `Бөлме шаршы пішінді, сондықтан ${tex('$S = a^2$')} формуласын қолданамыз:<br>${tex('$S = ' + a + '^2 = ' + S + '$')} м².`
+    };
+  }
+  if (type === 2) {
+    const a = randInt(5, 20), b = randInt(3, 15);
+    const P = 2 * (a + b);
+    const name = rname();
+    return {
+      q: `${name} тіктөртбұрыш пішінді бақшаның айналасына шарбақ қоймақ. Бақшаның ұзындығы ${tex('$' + a + '$ м')}, ені ${tex('$' + b + '$ м')}. Шарбақтың ұзындығы қанша метр?`,
+      opts: [tex('$' + (a*b) + '$ м'), tex('$' + (a+b) + '$ м'), tex('$' + P + '$ м'), tex('$' + (4*(a+b)) + '$ м')],
+      correct: 2,
+      solution: `Шарбақ = периметр. ${tex('$P = 2(a + b) = 2(' + a + ' + ' + b + ') = 2 \\times ' + (a+b) + ' = ' + P + '$')} м.`
+    };
+  }
+  if (type === 3) {
+    const r = randInt(2, 10);
+    const S = rndPi(3.14 * r * r);
+    const name = rname();
+    return {
+      q: `${name} дөңгелек пішінді гүлзарды суарады. Гүлзардың радиусы ${tex('$' + r + '$ м')}. Гүлзардың ауданын табыңыз. (${tex('$\\pi \\approx 3{,}14$')})`,
+      opts: [tex('$' + S + '$ м²'), tex('$' + rndPi(2*3.14*r) + '$ м²'), tex('$' + rndPi(3.14*r) + '$ м²'), tex('$' + rndPi(3.14*2*r*r) + '$ м²')],
+      correct: 0,
+      solution: `Дөңгелек = шеңбер. ${tex('$S = \\pi r^2 = 3{,}14 \\times ' + r + '^2 = 3{,}14 \\times ' + (r*r) + ' = ' + S + '$')} м².`
+    };
+  }
+  if (type === 4) {
+    const v = randInt(20, 50), u = randInt(2, 7);
+    const vDown = v + u, vUp = v - u;
+    const name = rname();
+    const dir = randChoice(['down', 'up']);
+    if (dir === 'down') {
+      return {
+        q: `${name} қайықпен өзен ағысымен жүзіп барады. Қайықтың меншікті жылдамдығы ${tex('$' + v + '$ км/сағ')}, ағыс жылдамдығы ${tex('$' + u + '$ км/сағ')}. Қайықтың нақты жылдамдығы қанша?`,
+        opts: [tex('$' + vDown + '$ км/сағ'), tex('$' + vUp + '$ км/сағ'), tex('$' + (v*u) + '$ км/сағ'), tex('$' + (vDown + randChoice([2, -2, 3])) + '$ км/сағ')],
+        correct: 0,
+        solution: `Ағыспен жүзу: ${tex('$v_{\\text{ағ}} = v + u = ' + v + ' + ' + u + ' = ' + vDown + '$')} км/сағ.`
+      };
+    } else {
+      return {
+        q: `${name} қайықпен ағысқа қарсы жүзіп барады. Қайықтың меншікті жылдамдығы ${tex('$' + v + '$ км/сағ')}, ағыс жылдамдығы ${tex('$' + u + '$ км/сағ')}. Қайықтың нақты жылдамдығы қанша?`,
+        opts: [tex('$' + vDown + '$ км/сағ'), tex('$' + (v*u) + '$ км/сағ'), tex('$' + (vUp + randChoice([2, -3, 4])) + '$ км/сағ'), tex('$' + vUp + '$ км/сағ')],
+        correct: 3,
+        solution: `Ағысқа қарсы: ${tex('$v_{\\text{қ}} = v - u = ' + v + ' - ' + u + ' = ' + vUp + '$')} км/сағ.`
+      };
+    }
+  }
+  if (type === 5) {
+    const a = randInt(3, 12), b = randInt(2, 10);
+    const S = a * b;
+    const name = rname();
+    return {
+      q: `${name} тіктөртбұрыш пішінді алаңды боялағысы келеді. Алаңның ұзындығы ${tex('$' + a + '$ м')}, ені ${tex('$' + b + '$ м')}. Бояу керек ауданды табыңыз.`,
+      opts: [tex('$' + (2*(a+b)) + '$ м²'), tex('$' + (a+b) + '$ м²'), tex('$' + S + '$ м²'), tex('$' + (S + randChoice([2, -2, 4])) + '$ м²')],
+      correct: 2,
+      solution: `Тіктөртбұрыш ауданы: ${tex('$S = a \\cdot b = ' + a + ' \\times ' + b + ' = ' + S + '$')} м².`
+    };
+  }
+  // type === 6
+  const a = randInt(5, 25);
+  const P = 4 * a;
+  const name = rname();
+  return {
+    q: `${name} шаршы пішінді алаңның айналасына жүгіреді. Алаңның қабырғасы ${tex('$' + a + '$ м')}. Бір айналым — қанша метр?`,
+    opts: [tex('$' + (a*a) + '$ м'), tex('$' + P + '$ м'), tex('$' + (2*a) + '$ м'), tex('$' + (P + randChoice([4, -4, 8])) + '$ м')],
+    correct: 1,
+    solution: `Бір айналым = периметр. ${tex('$P = 4a = 4 \\times ' + a + ' = ' + P + '$')} м.`
+  };
+}
+
+// ── LEVEL 5: күрделі есептер (кері есептеу, қосынды, салыстыру) ──
+function genLevel5() {
+  const type = randInt(1, 7);
+  if (type === 1) {
+    // Шаршы: ауданнан қабырға
+    const a = randInt(3, 15);
+    const S = a * a;
+    return {
+      q: `Шаршының ауданы ${tex('$S = ' + S + '$ см²')}. Қабырғасын табыңыз.`,
+      opts: [tex('$' + a + '$ см'), tex('$' + (S/4) + '$ см'), tex('$' + (a+1) + '$ см'), tex('$' + (a*2) + '$ см')],
+      correct: 0,
+      solution: `${tex('$S = a^2$')}, сондықтан ${tex('$a = \\sqrt{S} = \\sqrt{' + S + '} = ' + a + '$')} см.`
+    };
+  }
+  if (type === 2) {
+    // Тіктөртбұрыш: аудан + периметр бірге
+    const a = randInt(4, 12), b = randInt(2, 8);
+    const S = a * b, P = 2 * (a + b);
+    const name = rname();
+    return {
+      q: `${name} тіктөртбұрыш пішінді бөлменің ұзындығы ${tex('$' + a + '$ м')}, ені ${tex('$' + b + '$ м')}. Ауданы мен периметрінің қосындысы неге тең?`,
+      opts: [tex('$' + (S + P) + '$'), tex('$' + (S * P) + '$'), tex('$' + (S - P) + '$'), tex('$' + (S + P + randChoice([3, -3, 5])) + '$')],
+      correct: 0,
+      solution: `${tex('$S = ' + a + ' \\times ' + b + ' = ' + S + '$')}<br>${tex('$P = 2(' + a + ' + ' + b + ') = ' + P + '$')}<br>${tex('$S + P = ' + S + ' + ' + P + ' = ' + (S+P) + '$')}`
+    };
+  }
+  if (type === 3) {
+    // Ағыспен / ағысқа қарсы жылдамдықтар айырмасы
+    const v = randInt(20, 45), u = randInt(2, 8);
+    const vD = v + u, vU = v - u, diff = vD - vU;
+    return {
+      q: `Кеменің меншікті жылдамдығы ${tex('$' + v + '$ км/сағ')}, ағыс ${tex('$' + u + '$ км/сағ')}. Ағыспен және ағысқа қарсы жылдамдықтар айырмасы қанша?`,
+      opts: [tex('$' + diff + '$ км/сағ'), tex('$' + u + '$ км/сағ'), tex('$' + (diff + 2) + '$ км/сағ'), tex('$' + v + '$ км/сағ')],
+      correct: 0,
+      solution: `${tex('$v_{\\text{ағ}} = ' + v + ' + ' + u + ' = ' + vD + '$')}<br>${tex('$v_{\\text{қ}} = ' + v + ' - ' + u + ' = ' + vU + '$')}<br>Айырмасы: ${tex('$' + vD + ' - ' + vU + ' = ' + diff + ' = 2u = 2 \\times ' + u + '$')} км/сағ.`
+    };
+  }
+  if (type === 4) {
+    // Шеңбер аудан салыстыру
+    const r1 = randInt(2, 5), r2 = r1 * 2;
+    const S1 = rndPi(3.14 * r1 * r1), S2 = rndPi(3.14 * r2 * r2);
+    const ratio = Math.round(S2 / S1);
+    return {
+      q: `Бірінші шеңбердің радиусы ${tex('$' + r1 + '$ см')}, екіншісінің радиусы ${tex('$' + r2 + '$ см')}. Екінші шеңбердің ауданы біріншісінен неше есе үлкен?`,
+      opts: [tex('$2$') + ' есе', tex('$' + ratio + '$') + ' есе', tex('$3$') + ' есе', tex('$' + (ratio + 2) + '$') + ' есе'],
+      correct: 1,
+      solution: `${tex('$S_1 = \\pi \\times ' + r1 + '^2 = ' + S1 + '$')} см²<br>${tex('$S_2 = \\pi \\times ' + r2 + '^2 = ' + S2 + '$')} см²<br>Қатынасы: ${tex('$\\dfrac{S_2}{S_1} = \\dfrac{' + S2 + '}{' + S1 + '} = ' + ratio + '$')} есе. Радиус 2 есе артса, аудан 4 есе артады.`
+    };
+  }
+  if (type === 5) {
+    // Периметрден қабырғаны табу (тіктөртбұрыш, бірі белгілі)
+    const a = randInt(5, 20), b = randInt(3, 12);
+    const P = 2 * (a + b);
+    const name = rname();
+    return {
+      q: `${name} тіктөртбұрыштың периметрі ${tex('$P = ' + P + '$ см')}, бір қабырғасы ${tex('$a = ' + a + '$ см')}. Екінші қабырғасын табыңыз.`,
+      opts: [tex('$' + b + '$ см'), tex('$' + (P - a) + '$ см'), tex('$' + (P/2) + '$ см'), tex('$' + (b + randChoice([2, -2, 3])) + '$ см')],
+      correct: 0,
+      solution: `${tex('$P = 2(a + b)$')} формуласынан:<br>${tex('$' + P + ' = 2(' + a + ' + b)$')}<br>${tex('$' + (P/2) + ' = ' + a + ' + b$')}<br>${tex('$b = ' + (P/2) + ' - ' + a + ' = ' + b + '$')} см.`
+    };
+  }
+  if (type === 6) {
+    // Кеме меншікті жылдамдығын табу
+    const v = randInt(15, 40), u = randInt(2, 7);
+    const vD = v + u;
+    const name = rname();
+    return {
+      q: `${name} кемесінің ағыспен жүзу жылдамдығы ${tex('$' + vD + '$ км/сағ')}, ағыс жылдамдығы ${tex('$' + u + '$ км/сағ')}. Кеменің меншікті жылдамдығын табыңыз.`,
+      opts: [tex('$' + (vD + u) + '$ км/сағ'), tex('$' + v + '$ км/сағ'), tex('$' + (vD * u) + '$ км/сағ'), tex('$' + (v + randChoice([2, -2, 3])) + '$ км/сағ')],
+      correct: 1,
+      solution: `${tex('$v_{\\text{ағ}} = v + u$')} формуласынан:<br>${tex('$' + vD + ' = v + ' + u + '$')}<br>${tex('$v = ' + vD + ' - ' + u + ' = ' + v + '$')} км/сағ.`
+    };
+  }
+  // type === 7: Шаршы қабырғасын периметрден табу
+  const a = randInt(3, 25);
+  const P = 4 * a;
+  return {
+    q: `Шаршының периметрі ${tex('$P = ' + P + '$ см')}. Қабырғасын табыңыз.`,
+    opts: [tex('$' + (P/2) + '$ см'), tex('$' + a + '$ см'), tex('$' + (a*a) + '$ см'), tex('$' + (a + randChoice([1, 2, -1])) + '$ см')],
+    correct: 1,
+    solution: `${tex('$P = 4a$')} формуласынан:<br>${tex('$' + P + ' = 4a$')}<br>${tex('$a = \\dfrac{' + P + '}{4} = ' + a + '$')} см.`
+  };
+}
+
+// ══════════════════════════════════════════════════════════
+//  LEVEL MANAGEMENT
+// ══════════════════════════════════════════════════════════
+function generateLevelQuestions() {
+  levelQuestions = [];
+  for (let i = 0; i < QS_PER_LEVEL; i++) {
+    levelQuestions.push(generateQuestion(currentLevel));
+  }
+}
+
+function renderQuestion() {
+  if (levelQIndex >= QS_PER_LEVEL) {
+    showLevelComplete();
+    return;
+  }
+  updateLevelBar();
+  const q = levelQuestions[levelQIndex];
+  quiz = { selected: null, answered: false, currentQ: q };
+
+  // Shuffle options while tracking correct index
+  const labels = ['A', 'B', 'C', 'D'];
+  const indices = [0, 1, 2, 3];
+  const shuffled = shuffleArray(indices);
+  const newCorrect = shuffled.indexOf(q.correct);
+
+  const area = document.getElementById('quiz-area');
+  area.innerHTML = `
+    <div class="q-badge"><span>📝</span><span>Деңгей ${currentLevel} · Есеп ${levelQIndex + 1}/${QS_PER_LEVEL}</span></div>
+    <div class="q-text">${q.q}</div>
+    <div class="opts" id="opts">
+      ${shuffled.map((origIdx, i) => `
+        <div class="opt" data-idx="${i}" data-correct="${i === newCorrect}" onclick="selectOpt(${i})">
+          <span class="opt-label">${labels[i]}</span>
+          <span class="opt-text">${q.opts[origIdx]}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+    <div class="solution-box hidden" id="solution-box">
+      <div class="sol-title">📝 Шешуі</div>
+      <div id="solution-text"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()" disabled>✓ Тексеру</button>
+      <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Келесі →</button>
+    </div>
+  `;
+  quiz.correctIdx = newCorrect;
+  quiz.solution = q.solution;
+}
+
+function selectOpt(idx) {
+  if (quiz.answered) return;
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+  document.querySelector(`.opt[data-idx="${idx}"]`).classList.add('selected');
+  quiz.selected = idx;
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer() {
+  if (quiz.selected === null || quiz.answered) return;
+  quiz.answered = true;
+  const opts = document.querySelectorAll('.opt');
+  const sel = opts[quiz.selected];
+  const isCorrect = sel.dataset.correct === 'true';
+  opts.forEach(o => {
+    o.style.pointerEvents = 'none';
+    if (o.dataset.correct === 'true') o.classList.add('correct');
+    else if (o === sel) o.classList.add('wrong');
+  });
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('hidden', 'correct', 'wrong');
+  if (isCorrect) {
+    stats.correct++; stats.streak++; levelCorrect++;
+    fb.classList.add('correct'); fb.textContent = '✓ Дұрыс!';
+  } else {
+    stats.wrong++; stats.streak = 0; levelWrong++;
+    fb.classList.add('wrong'); fb.textContent = '✗ Қате!';
+  }
+  // Show solution
+  const solBox = document.getElementById('solution-box');
+  document.getElementById('solution-text').innerHTML = quiz.solution;
+  solBox.classList.remove('hidden');
+
+  updateStats(); saveState(); sendScore();
+  document.getElementById('check-btn').classList.add('hidden');
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+  levelQIndex++;
+  if (levelQIndex >= QS_PER_LEVEL) {
+    showLevelComplete();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showLevelComplete() {
+  const pct = Math.round(levelCorrect / QS_PER_LEVEL * 100);
+  const passed = pct >= PASS_THRESHOLD * 100;
+  const isLastLevel = currentLevel >= TOTAL_LEVELS;
+
+  const area = document.getElementById('quiz-area');
+  area.innerHTML = `
+    <div class="level-complete">
+      <div class="lc-icon">${passed ? (isLastLevel ? '🏆' : '🎉') : '🔄'}</div>
+      <div class="lc-title">${passed ? (isLastLevel ? 'Барлық деңгейлер аяқталды!' : 'Деңгей ' + currentLevel + ' өтілді!') : 'Деңгей өтілмеді'}</div>
+      <div class="lc-sub">${passed ? (isLastLevel ? 'Сіз барлық 5 деңгейді сәтті аяқтадыңыз!' : 'Келесі деңгейге өтуге дайынсыз!') : 'Қайталап көріңіз (70% қажет)'}</div>
+      <div class="lc-stats">
+        <div class="lc-stat"><div class="lc-stat-val" style="color:var(--green)">${levelCorrect}</div><div class="lc-stat-lbl">Дұрыс</div></div>
+        <div class="lc-stat"><div class="lc-stat-val" style="color:var(--red)">${levelWrong}</div><div class="lc-stat-lbl">Қате</div></div>
+        <div class="lc-stat"><div class="lc-stat-val" style="color:var(--primary)">${pct}%</div><div class="lc-stat-lbl">Пайыз</div></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="handleLevelResult(${passed}, ${isLastLevel})">${passed ? (isLastLevel ? '🏆 Нәтижелерді көру' : '→ Келесі деңгей') : '🔄 Қайталау'}</button>
+    </div>
+  `;
+  if (passed) spawnConfetti();
+}
+
+function handleLevelResult(passed, isLastLevel) {
+  if (passed && isLastLevel) {
+    sendScore(true);
+    showEnd();
+    return;
+  }
+  if (passed) {
+    currentLevel++;
+  }
+  levelQIndex = 0;
+  levelCorrect = 0;
+  levelWrong = 0;
+  generateLevelQuestions();
+  renderQuestion();
+  updateLevelBar();
+  saveState();
+}
+</script>
+</body>
+</html>
