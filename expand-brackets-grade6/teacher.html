@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Жақшаны ашу — Мұғалім</title>
+<style>
+:root {
+  --primary:#4f46e5;--primary-d:#3730a3;--primary-light:#ede9fe;
+  --green:#059669;--green-light:#d1fae5;
+  --red:#dc2626;--red-light:#fee2e2;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --bg:#f8f7ff;--bg2:#ffffff;--bg3:#e5e7eb;
+  --text:#1e1b4b;--text2:#6b7280;
+  --border:#e0ddf7;--radius:14px;
+  --shadow:0 2px 12px rgba(79,70,229,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.screen{display:none;min-height:100vh;padding:24px 20px;flex-direction:column;align-items:center;justify-content:center}
+.screen.active{display:flex}
+
+/* SETUP */
+.setup-card{background:var(--bg2);border-radius:20px;padding:36px 32px;max-width:420px;width:100%;box-shadow:var(--shadow);text-align:center}
+.setup-icon{font-size:3rem;margin-bottom:12px}
+.setup-title{font-size:1.5rem;font-weight:800;color:var(--primary);margin-bottom:4px}
+.setup-sub{color:var(--text2);font-size:.9rem;margin-bottom:28px}
+.err{color:var(--red);font-size:.85rem;min-height:18px;margin-bottom:10px}
+.btn-create{width:100%;padding:15px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:1.05rem;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-create:hover{background:var(--primary-d)}
+
+/* LOBBY */
+.lobby-wrap{width:100%;max-width:700px}
+.lobby-header{text-align:center;margin-bottom:24px}
+.lobby-title{font-size:1.3rem;font-weight:800;color:var(--primary)}
+.lobby-sub{color:var(--text2);font-size:.85rem;margin-top:4px}
+.lobby-main{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;background:var(--bg2);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.qr-area{display:flex;flex-direction:column;align-items:center;gap:8px}
+#qr-canvas{border:4px solid var(--primary);border-radius:10px;image-rendering:pixelated}
+.join-url{font-size:.72rem;color:var(--text2);text-align:center;word-break:break-all;max-width:160px}
+.code-big{font-size:2rem;font-weight:900;letter-spacing:.2em;color:var(--primary);text-align:center;margin-bottom:4px}
+.code-lbl{font-size:.75rem;color:var(--text2);text-align:center;margin-bottom:16px}
+.students-list{background:var(--bg);border-radius:10px;padding:10px 12px;min-height:80px;max-height:200px;overflow-y:auto}
+.stu-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.stu-row:last-child{border:none}
+.stu-av{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0}
+.stu-name{font-size:.88rem;font-weight:600}
+.count-badge{display:inline-flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 12px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+.btn-start{width:100%;padding:14px;border:none;border-radius:12px;background:var(--green);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-start:hover{background:#047857}
+.btn-start:disabled{background:var(--bg3);color:var(--text2);cursor:default}
+
+/* LIVE */
+.live-wrap{width:100%;max-width:1100px;padding:0}
+.live-top{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg2);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10}
+.live-title{font-size:1rem;font-weight:800;color:var(--primary)}
+.live-stats{display:flex;gap:16px;align-items:center}
+.live-stat{text-align:center}
+.live-stat-val{font-size:1.1rem;font-weight:800;color:var(--primary)}
+.live-stat-lbl{font-size:.62rem;color:var(--text2);text-transform:uppercase}
+.timer-box{background:var(--primary-light);color:var(--primary);border-radius:8px;padding:4px 12px;font-weight:800;font-size:.95rem}
+.btn-end{padding:8px 16px;border:2px solid var(--red);background:#fff;color:var(--red);border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .15s}
+.btn-end:hover{background:var(--red);color:#fff}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:16px 20px}
+
+/* CARDS */
+.s-card{background:var(--bg2);border-radius:12px;padding:14px 12px;box-shadow:var(--shadow);border:2px solid transparent;transition:border-color .3s}
+.s-card[data-rank="1"]{border-color:#fbbf24}
+.s-card[data-rank="2"]{border-color:#9ca3af}
+.s-card[data-rank="3"]{border-color:#d97706}
+.s-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.s-card-rank{font-size:1.1rem;min-width:26px}
+.s-card-av{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0}
+.s-card-name{font-weight:700;font-size:.88rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s-card-pct{font-weight:800;font-size:.9rem;margin-left:auto}
+.s-stats-row{display:flex;gap:6px;margin-bottom:8px}
+.s-stat-box{flex:1;background:var(--bg);border-radius:8px;padding:5px 4px;text-align:center}
+.s-stat-val{font-size:1.1rem;font-weight:800;line-height:1}
+.s-stat-val.g{color:var(--green)}
+.s-stat-val.r{color:var(--red)}
+.s-stat-val.a{color:var(--amber)}
+.s-stat-lbl{font-size:.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:.03em}
+.s-bar{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.s-bar-fill{height:100%;border-radius:3px;transition:width .4s ease,background .4s}
+.s-footer{display:flex;align-items:center;justify-content:space-between;font-size:.72rem}
+.s-focus{display:flex;align-items:center;gap:4px}
+.s-focus-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.s-focus-dot.on{background:var(--green)}
+.s-focus-dot.off{background:var(--red)}
+.s-focus-text{font-size:.72rem;color:var(--text2)}
+.s-focus-text.away{color:var(--red)}
+.tab-warn{background:var(--red-light);color:var(--red);border-radius:4px;padding:2px 5px;font-size:.68rem;font-weight:700}
+
+/* FLASH */
+@keyframes flashOk{0%{background:#d1fae5}50%{background:#a7f3d0}100%{background:var(--bg2)}}
+@keyframes flashErr{0%{background:#fee2e2}50%{background:#fca5a5}100%{background:var(--bg2)}}
+.flash-ok{animation:flashOk .8s ease}
+.flash-err{animation:flashErr .8s ease}
+
+/* RESULTS */
+.results-wrap{width:100%;max-width:700px}
+.results-header{text-align:center;margin-bottom:24px}
+.results-title{font-size:1.5rem;font-weight:800;color:var(--primary)}
+.results-sub{color:var(--text2);font-size:.9rem}
+.results-table{background:var(--bg2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.rt-head{display:grid;grid-template-columns:40px 1fr 60px 60px 60px 70px;gap:0;background:var(--primary);color:#fff;padding:10px 14px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.rt-row{display:grid;grid-template-columns:40px 1fr 60px 60px 60px 70px;gap:0;padding:10px 14px;border-bottom:1px solid var(--border);font-size:.85rem;align-items:center}
+.rt-row:last-child{border:none}
+.rt-row:nth-child(odd){background:var(--bg)}
+.rt-medal{font-size:1.1rem}
+.rt-pct{font-weight:800;color:var(--primary)}
+
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:999}
+.cc{position:absolute;width:8px;height:8px;border-radius:50%;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+@media(max-width:600px){
+  .lobby-main{grid-template-columns:1fr}
+  .live-stats{gap:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div class="screen active" id="s-setup">
+  <div class="setup-card">
+    <div class="setup-icon">📐</div>
+    <div class="setup-title">Жақшаны ашу</div>
+    <div class="setup-sub">Өрнекті ықшамдау · 7-сынып · 84 тапсырма (№2991–3074)</div>
+    <div class="err" id="setup-err"></div>
+    <button class="btn-create" id="create-btn" onclick="createRoom()">🚀 Бөлме құру</button>
+  </div>
+</div>
+
+<!-- LOBBY -->
+<div class="screen" id="s-lobby" style="padding:20px;justify-content:flex-start;padding-top:40px">
+  <div class="lobby-wrap">
+    <div class="lobby-header">
+      <div class="lobby-title">📐 Жақшаны ашу — Лобби</div>
+      <div class="lobby-sub">Оқушылар QR кодты сканерлесін немесе кодты теруін күтіңіз</div>
+    </div>
+    <div class="lobby-main">
+      <div class="qr-area">
+        <canvas id="qr-canvas" width="160" height="160"></canvas>
+        <div class="join-url" id="join-url-label"></div>
+      </div>
+      <div>
+        <div class="code-big" id="lobby-code">----</div>
+        <div class="code-lbl">Бөлме коды</div>
+        <div class="count-badge">👥 <span id="lobby-count">0</span> оқушы қосылды</div>
+        <div class="students-list" id="lobby-list">
+          <div style="color:var(--text2);font-size:.8rem;text-align:center;padding:20px 0">Оқушылар күтілуде...</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-start" id="start-btn" onclick="startSession()" disabled>▶ Бастау</button>
+  </div>
+</div>
+
+<!-- LIVE -->
+<div class="screen" id="s-live" style="padding:0;align-items:stretch;justify-content:flex-start">
+  <div class="live-top">
+    <div class="live-title">📐 Жақшаны ашу — Live</div>
+    <div class="live-stats">
+      <div class="live-stat"><div class="live-stat-val" id="live-count">0</div><div class="live-stat-lbl">Оқушы</div></div>
+      <div class="timer-box" id="timer-box">45:00</div>
+    </div>
+    <button class="btn-end" onclick="endSession()">⏹ Аяқтау</button>
+  </div>
+  <div class="cards-grid" id="cards-grid"></div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="s-results" style="padding:24px 20px;align-items:center;justify-content:flex-start;padding-top:40px">
+  <div class="confetti-wrap" id="confetti"></div>
+  <div class="results-wrap">
+    <div class="results-header">
+      <div class="results-title">🏆 Нәтижелер</div>
+      <div class="results-sub" id="res-summary">Тест аяқталды</div>
+    </div>
+    <div class="results-table">
+      <div class="rt-head">
+        <div>#</div><div>Оқушы</div><div style="text-align:center">Дұрыс</div>
+        <div style="text-align:center">Қате</div><div style="text-align:center">Барлығы</div>
+        <div style="text-align:center">%</div>
+      </div>
+      <div id="results-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ───── CONFIG ─────
+const BACKEND = 'https://mathsabaq.online';
+const BASE_URL = 'https://sultan19235.github.io/mathsabaq-apps/expand-brackets-grade6/student.html';
+const MEDALS = ['🥇','🥈','🥉'];
+
+// ───── STATE ─────
+let sessionCode = '';
+let students = new Map();  // id → {studentId, name, score, total, focused, tabSwitches, awaySeconds}
+let prevSnapshot = new Map();
+let lastSortOrder = '';
+let sseSource = null;
+let timerInterval = null;
+let sessionEndTime = null;
+let lobbyPoll = null;
+
+// ───── SETUP ─────
+async function createRoom() {
+  const btn = document.getElementById('create-btn');
+  const errEl = document.getElementById('setup-err');
+  btn.disabled = true; btn.textContent = '...';
+  errEl.textContent = '';
+  try {
+    const res = await jFetch(`${BACKEND}/session`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({quizId:'expand-brackets-grade6'})
+    });
+    sessionCode = res.code;
+    document.getElementById('lobby-code').textContent = sessionCode;
+    const joinUrl = BASE_URL + '?code=' + sessionCode;
+    document.getElementById('join-url-label').textContent = joinUrl;
+    drawQR(joinUrl);
+    show('s-lobby');
+    startLobbyPoll();
+  } catch(e) {
+    errEl.textContent = 'Қате: ' + e.message;
+    btn.disabled = false; btn.textContent = '🚀 Бөлме құру';
+  }
+}
+
+// ───── LOBBY POLL ─────
+function startLobbyPoll() {
+  clearInterval(lobbyPoll);
+  lobbyPoll = setInterval(doLobbyPoll, 2000);
+}
+
+async function doLobbyPoll() {
+  try {
+    const res = await jFetch(`${BACKEND}/status?code=${sessionCode}`);
+    if (res.students) {
+      res.students.forEach(s => {
+        if (!students.has(s.studentId)) students.set(s.studentId, s);
+      });
+      renderLobbyList();
+    }
+  } catch(e) {}
+}
+
+function renderLobbyList() {
+  const arr = Array.from(students.values());
+  const el = document.getElementById('lobby-list');
+  document.getElementById('lobby-count').textContent = arr.length;
+  document.getElementById('start-btn').disabled = arr.length === 0;
+  if (arr.length === 0) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:.8rem;text-align:center;padding:20px 0">Оқушылар күтілуде...</div>';
+    return;
+  }
+  el.innerHTML = arr.map(s => `
+    <div class="stu-row">
+      <div class="stu-av">${esc(s.name)[0].toUpperCase()}</div>
+      <div class="stu-name">${esc(s.name)}</div>
+    </div>`).join('');
+}
+
+// ───── START ─────
+async function startSession() {
+  clearInterval(lobbyPoll);
+  document.getElementById('start-btn').disabled = true;
+  try {
+    await jFetch(`${BACKEND}/start`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({code: sessionCode})
+    });
+    sessionEndTime = Date.now() + 45*60*1000;
+    show('s-live');
+    startTimer();
+    startSSE();
+    renderCards(true);
+  } catch(e) {
+    alert('Қате: ' + e.message);
+    document.getElementById('start-btn').disabled = false;
+  }
+}
+
+// ───── END ─────
+async function endSession() {
+  if (!confirm('Тестті аяқтайсыз ба?')) return;
+  clearInterval(timerInterval);
+  if (sseSource) { sseSource.close(); sseSource = null; }
+  try { await jFetch(`${BACKEND}/end`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:sessionCode})}); } catch(e) {}
+  showResults();
+}
+
+// ───── SSE ─────
+function startSSE() {
+  if (sseSource) sseSource.close();
+  sseSource = new EventSource(`${BACKEND}/live?code=${sessionCode}`);
+  sseSource.addEventListener('update', e => {
+    try {
+      const data = JSON.parse(e.data);
+      if (data.students) {
+        data.students.forEach(s => {
+          const prev = students.get(s.studentId);
+          prevSnapshot.set(s.studentId, prev ? {...prev} : null);
+          students.set(s.studentId, s);
+        });
+        renderCards();
+        data.students.forEach(s => flashCard(s.studentId, prevSnapshot.get(s.studentId)));
+      }
+    } catch(err) {}
+  });
+  sseSource.addEventListener('started', () => {});
+  sseSource.addEventListener('ended', () => {
+    clearInterval(timerInterval);
+    if (sseSource) { sseSource.close(); sseSource = null; }
+    showResults();
+  });
+  sseSource.onerror = () => {
+    setTimeout(() => { if (sseSource && sseSource.readyState === EventSource.CLOSED) startSSE(); }, 3000);
+  };
+}
+
+// ───── NO-BLINK CARD RENDER ─────
+function renderCards(force = false) {
+  const arr = Array.from(students.values());
+  const sorted = arr.sort((a, b) => {
+    const pA = a.total > 0 ? a.score / a.total : 0;
+    const pB = b.total > 0 ? b.score / b.total : 0;
+    return pB !== pA ? pB - pA : (b.score||0) - (a.score||0);
+  });
+
+  const newOrder = sorted.map(s => s.studentId).join(',');
+  const orderChanged = (newOrder !== lastSortOrder);
+
+  if (force || orderChanged) {
+    lastSortOrder = newOrder;
+    document.getElementById('cards-grid').innerHTML = sorted.map((s, i) => buildCard(s, i)).join('');
+    document.getElementById('live-count').textContent = arr.length;
+  } else {
+    sorted.forEach((s, i) => patchCard(s, i));
+    document.getElementById('live-count').textContent = arr.length;
+  }
+}
+
+function buildCard(s, i) {
+  const id = s.studentId;
+  const total = s.total || 0, score = s.score || 0, wrong = total - score;
+  const pct = total > 0 ? Math.round(score / total * 100) : 0;
+  const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
+  const barBg = pct >= 70 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
+  const isFocused = s.focused !== false;
+  const tabSw = s.tabSwitches || 0, awaySec = s.awaySeconds || 0;
+  const avColor = strToColor(s.name || '?');
+  const warn = tabSw > 0 ? `<span class="tab-warn">👀 ${tabSw}× · ${Math.round(awaySec)}с</span>` : '';
+  return `
+  <div class="s-card" id="card-${id}" data-rank="${i+1}">
+    <div class="s-card-header">
+      <span class="s-card-rank">${MEDALS[i] || (i+1)}</span>
+      <div class="s-card-av" style="background:${avColor}">${esc(s.name||'?')[0].toUpperCase()}</div>
+      <span class="s-card-name" title="${esc(s.name)}">${esc(s.name)}</span>
+      <span class="s-card-pct" id="pct-${id}" style="color:${col}">${pct}%</span>
+    </div>
+    <div class="s-stats-row">
+      <div class="s-stat-box"><div class="s-stat-val g" id="score-${id}">${score}</div><div class="s-stat-lbl">Дұрыс</div></div>
+      <div class="s-stat-box"><div class="s-stat-val r" id="wrong-${id}">${wrong}</div><div class="s-stat-lbl">Қате</div></div>
+      <div class="s-stat-box"><div class="s-stat-val a" id="total-${id}">${total}</div><div class="s-stat-lbl">Барлығы</div></div>
+    </div>
+    <div class="s-bar"><div class="s-bar-fill" id="bar-${id}" style="width:${pct}%;background:${barBg}"></div></div>
+    <div class="s-footer">
+      <div class="s-focus">
+        <span class="s-focus-dot ${isFocused?'on':'off'}" id="fdot-${id}"></span>
+        <span class="s-focus-text${isFocused?'':' away'}" id="ftxt-${id}">${isFocused?'Экранда':'Сыртта'}</span>
+      </div>
+      <div id="warn-${id}">${warn}</div>
+    </div>
+  </div>`;
+}
+
+function patchCard(s, i) {
+  const id = s.studentId;
+  const total = s.total || 0, score = s.score || 0, wrong = total - score;
+  const pct = total > 0 ? Math.round(score / total * 100) : 0;
+  const col = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
+  const barBg = pct >= 70 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
+  const isFocused = s.focused !== false;
+  const tabSw = s.tabSwitches || 0, awaySec = s.awaySeconds || 0;
+
+  const el = id => document.getElementById(id);
+
+  const pE = el(`pct-${id}`);   if (pE)  { pE.textContent = pct + '%'; pE.style.color = col; }
+  const sE = el(`score-${id}`); if (sE)  sE.textContent = score;
+  const wE = el(`wrong-${id}`); if (wE)  wE.textContent = wrong;
+  const tE = el(`total-${id}`); if (tE)  tE.textContent = total;
+  const bE = el(`bar-${id}`);   if (bE)  { bE.style.width = pct + '%'; bE.style.background = barBg; }
+
+  const dotE = el(`fdot-${id}`); if (dotE) dotE.className = `s-focus-dot ${isFocused ? 'on' : 'off'}`;
+  const txtE = el(`ftxt-${id}`); if (txtE) { txtE.textContent = isFocused ? 'Экранда' : 'Сыртта'; txtE.className = `s-focus-text${isFocused ? '' : ' away'}`; }
+
+  const warnE = el(`warn-${id}`);
+  if (warnE) warnE.innerHTML = tabSw > 0 ? `<span class="tab-warn">👀 ${tabSw}× · ${Math.round(awaySec)}с</span>` : '';
+}
+
+function flashCard(studentId, prev) {
+  const curr = students.get(studentId);
+  if (!prev || !curr) return;
+  if ((curr.total || 0) === (prev.total || 0)) return; // No new answer, don't flash
+  const wasCorrect = (curr.score || 0) > (prev.score || 0);
+  setTimeout(() => {
+    const card = document.getElementById('card-' + studentId);
+    if (!card) return;
+    const cls = wasCorrect ? 'flash-ok' : 'flash-err';
+    card.classList.add(cls);
+    setTimeout(() => card.classList.remove(cls), 800);
+  }, 30);
+}
+
+// ───── TIMER ─────
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    const left = Math.max(0, sessionEndTime - Date.now());
+    const m = Math.floor(left / 60000);
+    const s = Math.floor((left % 60000) / 1000);
+    document.getElementById('timer-box').textContent = pad(m) + ':' + pad(s);
+    if (left === 0) { clearInterval(timerInterval); showResults(); }
+  }, 1000);
+}
+
+// ───── RESULTS ─────
+function showResults() {
+  show('s-results');
+  const arr = Array.from(students.values()).sort((a, b) => {
+    const pA = a.total > 0 ? a.score / a.total : 0;
+    const pB = b.total > 0 ? b.score / b.total : 0;
+    return pB - pA || (b.score||0) - (a.score||0);
+  });
+  const total = arr.length;
+  document.getElementById('res-summary').textContent = `${total} оқушы қатысты · Тест аяқталды`;
+  const body = arr.map((s, i) => {
+    const pct = s.total > 0 ? Math.round(s.score / s.total * 100) : 0;
+    return `<div class="rt-row">
+      <div class="rt-medal">${MEDALS[i] || (i+1)}</div>
+      <div><b>${esc(s.name)}</b></div>
+      <div style="text-align:center;color:var(--green);font-weight:700">${s.score||0}</div>
+      <div style="text-align:center;color:var(--red);font-weight:700">${(s.total||0)-(s.score||0)}</div>
+      <div style="text-align:center;color:var(--amber);font-weight:700">${s.total||0}</div>
+      <div class="rt-pct" style="text-align:center">${pct}%</div>
+    </div>`;
+  }).join('');
+  document.getElementById('results-body').innerHTML = body || '<div style="padding:20px;text-align:center;color:var(--text2)">Деректер жоқ</div>';
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const wrap = document.getElementById('confetti');
+  const colors = ['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+  for (let i = 0; i < 80; i++) {
+    const cc = document.createElement('div');
+    cc.className = 'cc';
+    cc.style.cssText = `left:${Math.random()*100}%;top:-20px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1.5+Math.random()*2.5}s;animation-delay:${Math.random()*1.5}s;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    wrap.appendChild(cc);
+  }
+  setTimeout(() => { wrap.innerHTML=''; }, 8000);
+}
+
+// ───── QR CODE (micro qr generator) ─────
+function drawQR(url) {
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  // Simple placeholder QR using QR server API
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => { ctx.clearRect(0,0,160,160); ctx.drawImage(img,0,0,160,160); };
+  img.onerror = () => {
+    // Fallback: just show the URL text
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,160,160);
+    ctx.fillStyle = '#4f46e5'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('QR: scan to join', 80, 80);
+  };
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}`;
+}
+
+// ───── UTILS ─────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+async function jFetch(url, opts) {
+  const text = await fetch(url, opts).then(r => r.text());
+  return JSON.parse(text);
+}
+function strToColor(name) {
+  const colors = ['#4f46e5','#7c3aed','#0891b2','#059669','#d97706','#dc2626','#db2777'];
+  let h = 0;
+  for (let i=0;i<name.length;i++) h = (h<<5)-h+name.charCodeAt(i);
+  return colors[Math.abs(h)%colors.length];
+}
+</script>
+</body>
+</html>
