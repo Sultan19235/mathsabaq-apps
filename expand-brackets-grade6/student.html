@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Жақшаны ашу — Оқушы</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root {
+  --primary:#4f46e5;--primary-d:#3730a3;--primary-light:#ede9fe;
+  --green:#059669;--green-light:#d1fae5;
+  --red:#dc2626;--red-light:#fee2e2;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --bg:#f8f7ff;--bg2:#ffffff;--bg3:#e5e7eb;
+  --text:#1e1b4b;--text2:#6b7280;
+  --border:#e0ddf7;--radius:14px;
+  --shadow:0 2px 12px rgba(79,70,229,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.screen{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.screen.active{display:flex}
+
+/* JOIN */
+.join-card{background:var(--bg2);border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:var(--shadow);text-align:center}
+.join-logo{font-size:2.6rem;margin-bottom:8px}
+.join-title{font-size:1.25rem;font-weight:700;color:var(--primary);margin-bottom:4px}
+.join-sub{color:var(--text2);font-size:.85rem;margin-bottom:24px}
+.inp{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:10px;font-size:1rem;outline:none;transition:border .15s;background:var(--bg2);color:var(--text);margin-bottom:12px}
+.inp:focus{border-color:var(--primary)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-d)}
+.err{color:var(--red);font-size:.85rem;min-height:20px;margin-bottom:8px;text-align:center}
+
+/* WAIT */
+.wait-box{background:var(--bg2);border-radius:20px;padding:32px;width:100%;max-width:380px;box-shadow:var(--shadow);text-align:center}
+.wait-icon{font-size:3rem;margin-bottom:12px;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.wait-title{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:6px}
+.wait-sub{color:var(--text2);font-size:.85rem}
+.wait-code{margin-top:16px;background:var(--primary-light);border-radius:10px;padding:10px;font-family:monospace;font-size:1.3rem;font-weight:700;color:var(--primary);letter-spacing:.1em}
+
+/* QUIZ SCREEN */
+.quiz-wrapper{width:100%;max-width:520px;display:flex;flex-direction:column;gap:0;padding-bottom:24px}
+.stats-bar{display:flex;gap:8px;margin-bottom:10px}
+.stat-chip{flex:1;background:var(--bg2);border-radius:10px;padding:8px 6px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.stat-val{font-size:1.25rem;font-weight:800;line-height:1}
+.stat-lbl{font-size:.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.stat-val.g{color:var(--green)}
+.stat-val.r{color:var(--red)}
+.stat-val.a{color:var(--amber)}
+
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.progress-txt{font-size:.8rem;color:var(--text2);white-space:nowrap;font-weight:600}
+.progress-bar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),#818cf8);border-radius:3px;transition:width .4s ease}
+
+.q-card{background:var(--bg2);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow);margin-bottom:10px}
+.q-instr{font-size:.75rem;color:var(--text2);margin-bottom:6px;font-weight:500}
+.q-num{font-size:.72rem;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:20px;display:inline-block;margin-bottom:10px;font-weight:700;letter-spacing:.04em}
+.q-expr{font-size:1.2rem;text-align:center;padding:10px 4px;min-height:52px;display:flex;align-items:center;justify-content:center;overflow-x:auto}
+.q-expr .katex{font-size:1.15rem}
+
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.opt-btn{border:2px solid var(--border);border-radius:12px;padding:12px 6px;min-height:58px;cursor:pointer;background:var(--bg2);text-align:center;display:flex;align-items:center;justify-content:center;transition:border .12s,background .12s,transform .1s;overflow:hidden}
+.opt-btn:active{transform:scale(.97)}
+.opt-btn.selected{border-color:var(--primary);background:var(--primary-light);box-shadow:0 0 0 3px rgba(79,70,229,.15)}
+.opt-btn.correct{border-color:var(--green);background:var(--green-light)}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-light)}
+.opt-btn.dimmed{opacity:.45}
+.opt-btn .katex{font-size:.95rem}
+
+.feedback{text-align:center;font-weight:700;padding:10px;border-radius:10px;font-size:1rem;margin-bottom:10px;display:none}
+.feedback.correct{background:var(--green-light);color:var(--green);display:block}
+.feedback.wrong{background:var(--red-light);color:var(--red);display:block}
+.action-row{display:flex;gap:8px}
+.btn-check{flex:1;padding:13px;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;background:var(--primary);color:#fff;transition:background .15s}
+.btn-check:disabled{background:var(--bg3);color:var(--text2);cursor:default}
+.btn-next{flex:1;padding:13px;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;background:var(--green);color:#fff;transition:background .15s;display:none}
+
+/* RESULTS */
+.results-card{background:var(--bg2);border-radius:20px;padding:28px 24px;width:100%;max-width:400px;box-shadow:var(--shadow);text-align:center}
+.results-icon{font-size:3rem;margin-bottom:12px}
+.results-title{font-size:1.3rem;font-weight:800;color:var(--primary);margin-bottom:6px}
+.results-score{font-size:3rem;font-weight:900;color:var(--green);margin:12px 0 4px}
+.results-sub{color:var(--text2);font-size:.9rem;margin-bottom:20px}
+.results-row{display:flex;gap:10px;justify-content:center}
+.results-chip{flex:1;background:var(--bg);border-radius:10px;padding:12px;max-width:120px}
+.results-chip-val{font-size:1.5rem;font-weight:800}
+.results-chip-lbl{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
+.results-chip-val.g{color:var(--green)}
+.results-chip-val.r{color:var(--red)}
+.end-note{margin-top:18px;color:var(--text2);font-size:.82rem;background:var(--bg);padding:10px;border-radius:8px}
+
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:999}
+.cc{position:absolute;width:8px;height:8px;border-radius:50%;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- JOIN -->
+<div class="screen active" id="s-join">
+  <div class="join-card">
+    <div class="join-logo">📐</div>
+    <div class="join-title">Жақшаны ашу</div>
+    <div class="join-sub">Өрнекті ықшамдаңыз · 84 тапсырма</div>
+    <div class="err" id="join-err"></div>
+    <input class="inp" id="code-inp" placeholder="Бөлме коды" maxlength="8" autocomplete="off" autocapitalize="characters">
+    <input class="inp" id="name-inp" placeholder="Аты-жөніңіз" maxlength="40" autocomplete="off">
+    <button class="btn btn-primary" id="join-btn" onclick="doJoin()">Кіру →</button>
+  </div>
+</div>
+
+<!-- WAIT -->
+<div class="screen" id="s-wait">
+  <div class="wait-box">
+    <div class="wait-icon">⏳</div>
+    <div class="wait-title">Сабақ басталуын күтіңіз</div>
+    <div class="wait-sub">Мұғалім сабақты бастағанда автоматты түрде өтесіз</div>
+    <div class="wait-code" id="wait-code-display"></div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="s-quiz" style="justify-content:flex-start;padding-top:16px">
+  <div class="quiz-wrapper">
+    <div class="stats-bar">
+      <div class="stat-chip"><div class="stat-val g" id="st-correct">0</div><div class="stat-lbl">Дұрыс</div></div>
+      <div class="stat-chip"><div class="stat-val r" id="st-wrong">0</div><div class="stat-lbl">Қате</div></div>
+      <div class="stat-chip"><div class="stat-val a" id="st-streak">0</div><div class="stat-lbl">Серия</div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-txt"><span id="q-num">1</span> / 84</div>
+      <div class="progress-bar"><div class="progress-fill" id="q-prog" style="width:0%"></div></div>
+    </div>
+    <div class="q-card">
+      <div class="q-instr">Жақшаны ашып, өрнекті ықшамдаңыз:</div>
+      <div class="q-num" id="q-label">№ 2991</div>
+      <div class="q-expr" id="q-expr"></div>
+    </div>
+    <div class="opts-grid" id="opts-grid"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="action-row">
+      <button class="btn-check" id="check-btn" onclick="checkAnswer()" disabled>Тексеру</button>
+      <button class="btn-next" id="next-btn" onclick="nextQuestion()">Келесі →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="s-results">
+  <div class="confetti-wrap" id="confetti"></div>
+  <div class="results-card">
+    <div class="results-icon" id="res-icon">🎉</div>
+    <div class="results-title">Тест аяқталды!</div>
+    <div class="results-score" id="res-pct">0%</div>
+    <div class="results-sub" id="res-sub">Нәтижеңіз</div>
+    <div class="results-row">
+      <div class="results-chip"><div class="results-chip-val g" id="res-correct">0</div><div class="results-chip-lbl">Дұрыс</div></div>
+      <div class="results-chip"><div class="results-chip-val r" id="res-wrong">0</div><div class="results-chip-lbl">Қате</div></div>
+      <div class="results-chip"><div class="results-chip-val" id="res-total" style="color:var(--primary)">0</div><div class="results-chip-lbl">Барлығы</div></div>
+    </div>
+    <div class="end-note" id="end-note">Нәтижеңіз мұғалімге жіберілді.</div>
+  </div>
+</div>
+
+<script>
+// ───── CONFIG ─────
+const BACKEND = 'https://mathsabaq.online';
+const SK = 'ms_expand_';
+const TOTAL_Q = 84;
+
+// ───── ALL 84 QUESTIONS ─────
+// q = LaTeX of the expression, a = correct answer (LaTeX), w = 5 wrong answers (LaTeX)
+const QUESTIONS = [
+  {n:'2991',q:'-3(x-6)',a:'-3x+18',w:['3x-18','-3x-18','3x+18','-3x+6','-6x+18']},
+  {n:'2992',q:'-2(x+3)',a:'-2x-6',w:['2x+6','-2x+6','2x-6','-2x-3','-x-6']},
+  {n:'2993',q:'3(-2-x)',a:'-3x-6',w:['3x+6','3x-6','-3x+6','-6x+3','-3x+3']},
+  {n:'2994',q:'-4(6x-5)',a:'-24x+20',w:['24x-20','-24x-20','24x+20','-4x+20','-24x+5']},
+  {n:'2995',q:'5(2x-3)',a:'10x-15',w:['-10x+15','10x+15','-10x-15','5x-15','10x-3']},
+  {n:'2996',q:'-2(1-3x)',a:'6x-2',w:['-6x+2','6x+2','-6x-2','3x-2','6x-4']},
+  {n:'2997',q:'3(2x-2)',a:'6x-6',w:['-6x+6','6x+6','-6x-6','6x-2','3x-6']},
+  {n:'2998',q:'-2(x-5)',a:'-2x+10',w:['2x-10','-2x-10','2x+10','-2x+5','-x+10']},
+  {n:'2999',q:'-3(2x-5)',a:'-6x+15',w:['6x-15','-6x-15','6x+15','-3x+15','-6x+5']},
+  {n:'3000',q:'2(-3x-2)',a:'-6x-4',w:['6x+4','-6x+4','6x-4','-3x-4','-6x-2']},
+  {n:'3001',q:'-4(5-3x)',a:'12x-20',w:['-12x+20','12x+20','-12x-20','-4x-20','12x-5']},
+  {n:'3002',q:'-2(3x-5)',a:'-6x+10',w:['6x-10','-6x-10','6x+10','-3x+10','-6x+5']},
+  {n:'3003',q:'-3(-3x-4)',a:'9x+12',w:['-9x-12','9x-12','-9x+12','3x+12','9x+4']},
+  {n:'3004',q:'-2(-5+5x)',a:'-10x+10',w:['10x-10','-10x-10','10x+10','-2x+10','-10x+5']},
+  {n:'3005',q:'3(-3x+5)',a:'-9x+15',w:['9x-15','-9x-15','9x+15','-3x+15','-9x+5']},
+  {n:'3006',q:'5(a-b)',a:'5a-5b',w:['-5a+5b','5a+5b','-5a-5b','5a-b','a-5b']},
+  {n:'3007',q:'3(x+y)',a:'3x+3y',w:['-3x-3y','3x-3y','-3x+3y','3x+y','x+3y']},
+  {n:'3008',q:'15(z-200)',a:'15z-3000',w:['-15z+3000','15z+3000','-15z-3000','15z-200','15z-2000']},
+  {n:'3009',q:'(a-b+c)\\cdot 5',a:'5a-5b+5c',w:['-5a+5b-5c','5a+5b+5c','5a+5b-5c','5a-5b-5c','a-b+c']},
+  {n:'3010',q:'(-3)\\cdot(3m-2k+2)',a:'-9m+6k-6',w:['9m-6k+6','-9m-6k-6','-9m+6k+6','-9m-6k+6','9m+6k-6']},
+  {n:'3011',q:'-15(m-n+c)',a:'-15m+15n-15c',w:['15m-15n+15c','-15m-15n-15c','-15m+15n+15c','-15m-15n+15c','15m+15n-15c']},
+  {n:'3012',q:'(-8)\\cdot(a+2b+9)',a:'-8a-16b-72',w:['8a+16b+72','-8a+16b-72','-8a-16b+72','-8a+16b+72','8a-16b-72']},
+  {n:'3013',q:'-6(2+c+d)',a:'-12-6c-6d',w:['12+6c+6d','-12+6c+6d','-12-6c+6d','-12+6c-6d','12-6c-6d']},
+  {n:'3014',q:'(-7)\\cdot(a+b+6)',a:'-7a-7b-42',w:['7a+7b+42','-7a+7b-42','-7a-7b+42','-7a+7b+42','7a-7b-42']},
+  {n:'3015',q:'-4\\cdot(x+y+8)',a:'-4x-4y-32',w:['4x+4y+32','-4x+4y-32','-4x-4y+32','-4x+4y+32','4x-4y-32']},
+  {n:'3016',q:'(-10)\\cdot(2+x+y)',a:'-10x-10y-20',w:['10x+10y+20','-10x+10y+20','-10x-10y+20','-10x+10y-20','10x-10y-20']},
+  {n:'3017',q:'-9\\cdot(x+7+y)',a:'-9x-9y-63',w:['9x+9y+63','-9x+9y-63','-9x-9y+63','-9x+9y+63','9x-9y-63']},
+  {n:'3018',q:'(-3)\\cdot(a+10-2b)',a:'-3a+6b-30',w:['3a-6b+30','-3a-6b-30','-3a+6b+30','-3a-6b+30','3a+6b-30']},
+  {n:'3019',q:'(-12)\\cdot(-x-y+3)',a:'12x+12y-36',w:['-12x-12y+36','12x-12y-36','-12x+12y-36','12x+12y+36','-12x-12y-36']},
+  {n:'3020',q:'a(b-m+n)',a:'ab-am+an',w:['-ab+am-an','ab+am+an','ab-am-an','ab+am-an','-ab-am+an']},
+  {n:'3021',q:'-a(6b-3c+5)',a:'-6ab+3ac-5a',w:['6ab-3ac+5a','-6ab-3ac-5a','-6ab+3ac+5a','6ab+3ac-5a','-6ab-3ac+5a']},
+  {n:'3022',q:'-2b(b+2c-3a)',a:'-2b^2-4bc+6ab',w:['2b^2+4bc-6ab','-2b^2+4bc+6ab','-2b^2-4bc-6ab','2b^2-4bc+6ab','-2b^2+4bc-6ab']},
+  {n:'3023',q:'-a(3m+n-c)',a:'-3am-an+ac',w:['3am+an-ac','-3am+an+ac','-3am-an-ac','3am-an-ac','-3am+an-ac']},
+  {n:'3024',q:'4m(-2a+3b+6c)',a:'-8am+12bm+24cm',w:['8am-12bm-24cm','-8am-12bm+24cm','8am+12bm+24cm','-8am+12bm-24cm','8am-12bm+24cm']},
+  {n:'3025',q:'16\\cdot(7-b)-90',a:'-16b+22',w:['16b-22','-16b-22','16b+22','22-b','-16b+112']},
+  {n:'3026',q:'-35-4(b-3)',a:'-4b-23',w:['4b+23','-4b+23','4b-23','-b-23','-4b-47']},
+  {n:'3027',q:'40-6(7+y)',a:'-6y-2',w:['6y+2','-6y+2','6y-2','-6y-42','-y-2']},
+  {n:'3028',q:'2x-(2x+y)+2y',a:'y',w:['x','2y','-y','x+y','2x-y']},
+  {n:'3029',q:'7-(2b+12)-2b',a:'-4b-5',w:['4b+5','-4b+5','4b-5','-2b-5','-4b+19']},
+  {n:'3030',q:'16-4(3+2a)',a:'-8a+4',w:['8a-4','-8a-4','8a+4','16-8a','-8a+16']},
+  {n:'3031',q:'-16+8(3-2x)',a:'-16x+8',w:['16x-8','-16x-8','16x+8','-16x-16','-16x+24']},
+  {n:'3032',q:'29-3(x-8)',a:'-3x+53',w:['3x-53','-3x-53','3x+53','29-3x','-3x+5']},
+  {n:'3033',q:'2a-(7-2a)',a:'4a-7',w:['-4a+7','4a+7','-4a-7','2a-7','4a-2']},
+  {n:'3034',q:'-2a-2(-2a+8)+14',a:'2a-2',w:['-2a+2','2a+2','-2a-2','4a-2','2a-14']},
+  {n:'3035',q:'-a+(2a-b)+3b',a:'a+2b',w:['-a-2b','a-2b','-a+2b','2a+2b','a+b']},
+  {n:'3036',q:'3b-(18+2b)+18',a:'b',w:['2b','-b','3b','b+36','b-36']},
+  {n:'3037',q:'-4(2y+10)+(12-y)',a:'-9y-28',w:['9y+28','-9y+28','9y-28','-8y-28','-9y-40']},
+  {n:'3038',q:'-(7-x)+4(x-10)',a:'5x-47',w:['-5x+47','5x+47','-5x-47','4x-47','5x-40']},
+  {n:'3039',q:'-9(y-8)-(12+y)',a:'-10y+60',w:['10y-60','-10y-60','10y+60','-9y+60','-10y+72']},
+  {n:'3040',q:'2(6x-4)-4(2x-1)',a:'4x-4',w:['-4x+4','4x+4','-4x-4','4x-8','8x-4']},
+  {n:'3041',q:'5(2y-3)-5(2+6y)',a:'-20y-25',w:['20y+25','-20y+25','20y-25','-20y-15','-10y-25']},
+  {n:'3042',q:'2(x+3y)-3(2x-10y)',a:'-4x+36y',w:['4x-36y','-4x-36y','4x+36y','-4x+6y','2x+36y']},
+  {n:'3043',q:'3(-2x-2)+2(3x+7)+2x',a:'2x+8',w:['-2x-8','2x-8','-2x+8','8x+8','2x+14']},
+  {n:'3044',q:'3(6-5x)+16x-10',a:'x+8',w:['-x-8','x-8','-x+8','11x+8','x+18']},
+  {n:'3045',q:'3(x-2)-3(3-7x)',a:'24x-15',w:['-24x+15','24x+15','-24x-15','24x-6','3x-15']},
+  {n:'3046',q:'4(15y+5)-25(3-6y)',a:'210y-55',w:['-210y+55','210y+55','-210y-55','10y-55','210y-75']},
+  {n:'3047',q:'7(2x-5)+4(4x-2)',a:'30x-43',w:['-30x+43','30x+43','-30x-43','30x-35','22x-43']},
+  {n:'3048',q:'-2(4x+8)-3\\cdot 5x',a:'-23x-16',w:['23x+16','-23x+16','23x-16','-23x-8','-7x-16']},
+  {n:'3049',q:'-8(2-4y)+4(3-5y)',a:'12y-4',w:['-12y+4','12y+4','-12y-4','12y+8','32y-4']},
+  {n:'3050',q:'(3x-11)\\cdot 3-5(5-3x)',a:'24x-58',w:['-24x+58','24x+58','-24x-58','24x-33','9x-58']},
+  {n:'3051',q:'-5\\cdot(-2x+5)-(10-x)',a:'11x-35',w:['-11x+35','11x+35','-11x-35','11x-25','10x-35']},
+  {n:'3052',q:'3(3y+5)-4(2y-5)',a:'y+35',w:['-y-35','y-35','-y+35','17y+35','y+15']},
+  {n:'3053',q:'2x-3-(3x-2)-6x',a:'-7x-1',w:['7x+1','-7x+1','7x-1','-7x-3','-x-1']},
+  {n:'3054',q:'4(7-5x)-(12-20x)',a:'16',w:['0','-16','8','4x+16','-4x+16']},
+  {n:'3055',q:'(8a-2)\\cdot(-3)+(3a-7)\\cdot(-5)',a:'-39a+41',w:['39a-41','-39a-41','39a+41','-39a+6','-24a+41']},
+  {n:'3056',q:'-5(2x+3)+4(2x-2)-6(2x+2)',a:'-14x-35',w:['14x+35','-14x+35','14x-35','-14x-15','-20x-35']},
+  {n:'3057',q:'-5(x+5)+4(2x-2)-6(3x+2)',a:'-15x-45',w:['15x+45','-15x+45','15x-45','-15x-25','-15x-12']},
+  {n:'3058',q:'12x\\cdot(5-4x)-(34x+521)+(8x-6)',a:'-48x^2+34x-527',w:['48x^2+34x-527','-48x^2-34x-527','48x^2-34x-527','-48x^2+34x+527','-48x^2+60x-527']},
+  {n:'3059',q:'-3(x-2)-(-2x+3)-(5-x)-(-(-(-2x)))',a:'2x-2',w:['-2x+2','2x+2','-2x-2','2x-4','4x-2']},
+  {n:'3060',q:'-7x-5+(-(-(-3)))-3(2-3x)-5-6',a:'2x-25',w:['-2x+25','2x+25','-2x-25','2x-5','2x-19']},
+  {n:'3061',q:'-3(-2x+5)-(-3x+3)-7-(-5x)-6+(-3x)',a:'11x-31',w:['-11x+31','11x+31','-11x-31','11x-15','6x-31']},
+  {n:'3062',q:'-7(8-x)-(-(-(-2x)))+(-3x-5)-2(x-3)+3(2x-1)',a:'10x-58',w:['-10x+58','10x+58','-10x-58','6x-58','10x-56']},
+  {n:'3063',q:'-14(m-150n)-((5n-2018m)+6(2m+17n))',a:'1992m+1993n',w:['-1992m-1993n','1992m-1993n','-1992m+1993n','2006m+2100n','-14m+2100n']},
+  {n:'3064',q:'(-1.4+7.5x)-(-(2.25x+2.001)+(x-5))',a:'8.75x+5.601',w:['-8.75x-5.601','8.75x-5.601','-8.75x+5.601','7.5x+5.601','8.75x+2.001']},
+  {n:'3065',q:'(1.6y+5.08x)-25y+0.9x-2018y',a:'5.98x-2041.4y',w:['-5.98x+2041.4y','5.98x+2041.4y','-5.98x-2041.4y','5.98x-2043y','6.48x-2041.4y']},
+  {n:'3066',q:'9a-(10a-(11a-(12a-13)))',a:'-2a+13',w:['2a-13','-2a-13','2a+13','-a+13','-2a+9']},
+  {n:'3067',q:'-50(4-a)+3(-5a-4)-7(-1+2a)',a:'21a-205',w:['-21a+205','21a+205','-21a-205','21a-200','50a-205']},
+  {n:'3068',q:'-58(4-0.5b)+5(-2b-20)-4(-8+0.05b)',a:'18.8b-300',w:['-18.8b+300','18.8b+300','-18.8b-300','29b-300','18.8b-232']},
+  {n:'3069',q:'4(12a-1)-(-(-6(2-3a)))-2(8a+5)',a:'50a-26',w:['-50a+26','50a+26','-50a-26','14a-2','48a-26']},
+  {n:'3070',q:'-25(4b+3)-(3(18+b)+(-10(1+2b)))',a:'-83b-119',w:['83b+119','-83b+119','83b-119','-83b-75','-100b-119']},
+  {n:'3071',q:'(-3(4.5+k)+(-6(7.8+c)))+9k-10c',a:'6k-16c-60.3',w:['-6k+16c+60.3','6k+16c-60.3','-6k-16c-60.3','6k-16c+60.3','-3k-6c-60.3']},
+  {n:'3072',q:'-1.4(50p+x)-((-23x-7p)+11(3x-2p))',a:'-41p-11.4x',w:['41p+11.4x','-41p+11.4x','41p-11.4x','-70p-11.4x','-41p-1.4x']},
+  {n:'3073',q:'3.25(4x-6y)-(12y-3x)\\cdot 2.4',a:'20.2x-48.3y',w:['-20.2x+48.3y','20.2x+48.3y','-20.2x-48.3y','13x-48.3y','20.2x-19.5y']},
+  {n:'3074',q:'(-5(2.5+5x)-2(-x+4y)+3(-2y-17x)-3(-9x-3y))',a:'-47x-5y-12.5',w:['47x+5y+12.5','-47x+5y-12.5','47x-5y-12.5','-47x-5y+12.5','-25x-5y-12.5']},
+];
+
+// ───── STATE ─────
+let sessionCode = '', studentId = '', studentName = '';
+let currentQ = 0;
+let selectedBtn = null, answered = false;
+let stats = {correct:0, wrong:0, streak:0};
+let tabSwitches = 0, awaySeconds = 0, awayStart = null;
+let focused = true;
+let submitTimer = null;
+let shuffledOpts = [];
+let quizStarted = false;
+let pollTimer = null;
+
+// ───── KaTeX helper ─────
+function tex(s) {
+  if (typeof katex === 'undefined') return '<span>' + s + '</span>';
+  try { return katex.renderToString(s, {throwOnError:false, displayMode:false}); }
+  catch(e) { return '<span>' + s + '</span>'; }
+}
+
+// ───── INIT ─────
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(location.search);
+  const codeParam = params.get('code');
+  if (codeParam) {
+    document.getElementById('code-inp').value = codeParam.toUpperCase();
+    document.getElementById('code-inp').style.display = 'none';
+  }
+  tryReconnect();
+});
+
+function tryReconnect() {
+  const params = new URLSearchParams(location.search);
+  const codeParam = params.get('code');
+  const saveKey = SK + (codeParam || '');
+  if (!codeParam) return;
+  try {
+    const saved = JSON.parse(localStorage.getItem(saveKey) || 'null');
+    if (saved && saved.studentId && Date.now() - saved.ts < 1800000) {
+      sessionCode = codeParam.toUpperCase();
+      studentId = saved.studentId;
+      studentName = saved.name || '';
+      stats.correct = saved.correct || 0;
+      stats.wrong = saved.wrong || 0;
+      stats.streak = saved.streak || 0;
+      tabSwitches = saved.tabSwitches || 0;
+      awaySeconds = saved.awaySeconds || 0;
+      currentQ = saved.currentQ || 0;
+      if (currentQ >= TOTAL_Q) { showResults(); return; }
+      checkStatusAndJoin();
+      return;
+    }
+  } catch(e) {}
+}
+
+// ───── JOIN ─────
+async function doJoin() {
+  const code = document.getElementById('code-inp').value.trim().toUpperCase();
+  const name = document.getElementById('name-inp').value.trim();
+  const errEl = document.getElementById('join-err');
+  errEl.textContent = '';
+  if (!code) { errEl.textContent = 'Бөлме кодын енгізіңіз'; return; }
+  if (!name) { errEl.textContent = 'Атыңызды енгізіңіз'; return; }
+  document.getElementById('join-btn').disabled = true;
+  try {
+    const res = await jFetch(`${BACKEND}/status?code=${code}`);
+    if (res.status === 'not_found') { errEl.textContent = 'Бөлме табылмады'; document.getElementById('join-btn').disabled=false; return; }
+    sessionCode = code;
+    studentName = name;
+    studentId = 'stu_' + Math.random().toString(36).slice(2,9);
+    saveState();
+    if (res.status === 'active') { startQuiz(); }
+    else { show('s-wait'); document.getElementById('wait-code-display').textContent = sessionCode; startPoll(); }
+  } catch(e) {
+    errEl.textContent = 'Қосылу қатесі: ' + e.message;
+    document.getElementById('join-btn').disabled = false;
+  }
+}
+
+async function checkStatusAndJoin() {
+  try {
+    const res = await jFetch(`${BACKEND}/status?code=${sessionCode}`);
+    if (res.status === 'active') { startQuiz(); }
+    else if (res.status === 'ended') { showResults(); }
+    else { show('s-wait'); document.getElementById('wait-code-display').textContent = sessionCode; startPoll(); }
+  } catch(e) { show('s-wait'); document.getElementById('wait-code-display').textContent = sessionCode; startPoll(); }
+}
+
+// ───── POLL ─────
+function startPoll() {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(doPoll, 2000);
+}
+
+async function doPoll() {
+  try {
+    const res = await jFetch(`${BACKEND}/status?code=${sessionCode}`);
+    if (res.status === 'active') { clearInterval(pollTimer); startQuiz(); }
+    else if (res.status === 'ended') { clearInterval(pollTimer); showResults(); }
+  } catch(e) {}
+}
+
+// ───── QUIZ ─────
+function startQuiz() {
+  quizStarted = true;
+  show('s-quiz');
+  updateStats();
+  loadQuestion();
+  startFocusTracking();
+  startSubmitTimer();
+}
+
+function loadQuestion() {
+  if (currentQ >= TOTAL_Q) { sendScore(true); showResults(); return; }
+  const q = QUESTIONS[currentQ];
+  answered = false;
+  selectedBtn = null;
+
+  // Update header
+  document.getElementById('q-num').textContent = currentQ + 1;
+  document.getElementById('q-prog').style.width = ((currentQ / TOTAL_Q) * 100) + '%';
+  document.getElementById('q-label').textContent = '№ ' + q.n;
+  document.getElementById('q-expr').innerHTML = tex(q.q);
+
+  // Shuffle options
+  const opts = [{val:q.a, correct:true}, ...q.w.map(w => ({val:w, correct:false}))];
+  shuffleArray(opts);
+  shuffledOpts = opts;
+
+  // Build grid
+  const grid = document.getElementById('opts-grid');
+  grid.innerHTML = '';
+  opts.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'opt-btn';
+    btn.dataset.correct = opt.correct;
+    btn.dataset.idx = i;
+    btn.innerHTML = tex(opt.val);
+    btn.addEventListener('click', () => selectOpt(btn));
+    grid.appendChild(btn);
+  });
+
+  // Reset UI
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('check-btn').style.display = '';
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('next-btn').textContent = currentQ >= TOTAL_Q - 1 ? '🏁 Аяқтау' : 'Келесі →';
+}
+
+function selectOpt(btn) {
+  if (answered) return;
+  document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedBtn = btn;
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer() {
+  if (!selectedBtn || answered) return;
+  answered = true;
+
+  const isCorrect = selectedBtn.dataset.correct === 'true';
+
+  // Style all buttons
+  document.querySelectorAll('.opt-btn').forEach(btn => {
+    btn.style.pointerEvents = 'none';
+    if (btn.dataset.correct === 'true') btn.classList.add('correct');
+    else if (btn === selectedBtn) btn.classList.add('wrong');
+    else btn.classList.add('dimmed');
+  });
+
+  if (isCorrect) { stats.correct++; stats.streak++; }
+  else { stats.wrong++; stats.streak = 0; }
+
+  updateStats();
+  saveState();
+  sendScore(false);
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+  fb.textContent = isCorrect ? '✓ Дұрыс!' : '✗ Қате!';
+
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').style.display = '';
+}
+
+function nextQuestion() {
+  currentQ++;
+  saveState();
+  if (currentQ >= TOTAL_Q) { sendScore(true); showResults(); return; }
+  loadQuestion();
+}
+
+function updateStats() {
+  document.getElementById('st-correct').textContent = stats.correct;
+  document.getElementById('st-wrong').textContent = stats.wrong;
+  document.getElementById('st-streak').textContent = stats.streak;
+}
+
+function updateProgress() {
+  document.getElementById('q-prog').style.width = ((currentQ / TOTAL_Q) * 100) + '%';
+}
+
+// ───── RESULTS ─────
+function showResults() {
+  clearSubmitTimer();
+  const total = stats.correct + stats.wrong || currentQ;
+  const pct = total > 0 ? Math.round(stats.correct / total * 100) : 0;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-correct').textContent = stats.correct;
+  document.getElementById('res-wrong').textContent = stats.wrong;
+  document.getElementById('res-total').textContent = total;
+  document.getElementById('res-icon').textContent = pct >= 80 ? '🏆' : pct >= 60 ? '🎉' : '📝';
+  document.getElementById('res-sub').textContent = pct >= 80 ? 'Керемет нәтиже!' : pct >= 60 ? 'Жақсы жұмыс!' : 'Үздіксіз жаттық!';
+  show('s-results');
+  if (pct >= 50) launchConfetti();
+}
+
+function launchConfetti() {
+  const wrap = document.getElementById('confetti');
+  const colors = ['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+  for (let i = 0; i < 60; i++) {
+    const cc = document.createElement('div');
+    cc.className = 'cc';
+    cc.style.cssText = `left:${Math.random()*100}%;top:-20px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*1}s;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    wrap.appendChild(cc);
+  }
+  setTimeout(() => { wrap.innerHTML = ''; }, 5000);
+}
+
+// ───── SUBMIT ─────
+function startSubmitTimer() {
+  clearSubmitTimer();
+  submitTimer = setInterval(() => sendScore(false), 5000);
+}
+function clearSubmitTimer() { if (submitTimer) { clearInterval(submitTimer); submitTimer = null; } }
+
+async function sendScore(finished = false) {
+  if (!sessionCode || !studentId) return;
+  const payload = {
+    code: sessionCode, studentId, name: studentName,
+    score: stats.correct,
+    total: stats.correct + stats.wrong,
+    focused, tabSwitches,
+    awaySeconds: Math.round(awaySeconds),
+    finished: !!finished
+  };
+  try {
+    const text = await fetch(`${BACKEND}/submit`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+    }).then(r => r.text());
+    const data = JSON.parse(text);
+    if (data.status === 'ended' && !finished) showResults();
+  } catch(e) {}
+}
+
+// ───── FOCUS TRACKING ─────
+function startFocusTracking() {
+  document.addEventListener('visibilitychange', onVisibility);
+  window.addEventListener('blur', onBlur);
+  window.addEventListener('focus', onFocus);
+}
+
+function onVisibility() {
+  if (document.hidden) { focused = false; awayStart = Date.now(); tabSwitches++; saveState(); sendScore(); }
+  else { if (awayStart) { awaySeconds += (Date.now()-awayStart)/1000; awayStart=null; } focused = true; saveState(); sendScore(); }
+}
+function onBlur() { if (!document.hidden) { focused=false; awayStart=Date.now(); saveState(); sendScore(); } }
+function onFocus() { if (awayStart) { awaySeconds+=(Date.now()-awayStart)/1000; awayStart=null; } focused=true; saveState(); sendScore(); }
+
+// ───── STORAGE ─────
+function saveState() {
+  if (!sessionCode) return;
+  try {
+    localStorage.setItem(SK + sessionCode, JSON.stringify({
+      studentId, name:studentName, correct:stats.correct, wrong:stats.wrong, streak:stats.streak,
+      tabSwitches, awaySeconds:Math.round(awaySeconds), currentQ, ts:Date.now()
+    }));
+  } catch(e) {}
+}
+
+// ───── UTILS ─────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function shuffleArray(arr) {
+  for (let i=arr.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+}
+async function jFetch(url, opts) {
+  const text = await fetch(url, opts).then(r=>r.text());
+  return JSON.parse(text);
+}
+</script>
+</body>
+</html>
