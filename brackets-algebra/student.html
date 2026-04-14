@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Жақша ашу — Оқушы</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
+  --shadow-lg:0 8px 30px rgba(20,24,38,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+.screen{display:none;min-height:100vh;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.container{max-width:500px;margin:0 auto;padding:1rem;padding-bottom:2rem}
+.join-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.join-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.join-logo{text-align:center;margin-bottom:20px}
+.join-icon{font-size:2.4rem;margin-bottom:6px}
+.join-title{font-size:1.3rem;font-weight:800;margin-bottom:2px}
+.join-sub{color:var(--muted);font-size:.82rem}
+.field{margin-bottom:12px}
+.field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px}
+.field input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;outline:none;transition:border-color .15s;background:var(--bg)}
+.field input:focus{border-color:var(--primary)}
+.field input.code-input{font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:6px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
+.err.on{display:block}
+.wait-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.wait-icon{font-size:3.5rem;margin-bottom:12px}
+.wait-title{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+.wait-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.wait-name{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.82rem;font-weight:700;margin-top:8px}
+.dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-top:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.6rem .4rem;text-align:center;box-shadow:var(--shadow-sm)}
+.stat-card.hl{background:var(--primary-light);border-color:rgba(67,56,202,.25)}
+.stat-icon{font-size:1rem;margin-bottom:.15rem}
+.stat-value{font-size:1.25rem;font-weight:800;color:var(--primary)}
+.stat-card.g .stat-value{color:var(--green)}
+.stat-card.r .stat-value{color:var(--red)}
+.stat-card.a .stat-value{color:var(--amber)}
+.stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow)}
+.q-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-light);color:var(--primary);padding:.3rem .7rem;border-radius:16px;font-size:.72rem;font-weight:700;margin-bottom:.75rem}
+.expr-display{font-size:1.3rem;font-weight:700;color:var(--primary-dark);text-align:center;padding:1rem 1.2rem;background:linear-gradient(135deg,var(--primary-light) 0%,#f0f2ff 100%);border:2px solid rgba(67,56,202,.2);border-radius:16px;margin-bottom:1rem;min-height:64px;display:flex;align-items:center;justify-content:center;line-height:1.5}
+.task-hint{text-align:center;font-size:.78rem;color:var(--muted);margin-bottom:.85rem;font-weight:500}
+.answer-display{background:var(--bg);border:2px solid var(--border);border-radius:14px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--text);min-height:54px;text-align:center;margin-bottom:.75rem;transition:border-color .2s;position:relative;letter-spacing:.5px;overflow-x:auto;white-space:nowrap}
+.answer-display.focused{border-color:var(--primary)}
+.answer-display.correct-inp{border-color:var(--green);background:var(--green-light)}
+.answer-display.wrong-inp{border-color:var(--red);background:var(--red-light)}
+.answer-display .cursor{display:inline-block;width:2px;height:1.2em;background:var(--primary);vertical-align:middle;margin-left:1px;animation:pulse .8s infinite}
+.keypad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:.85rem}
+.kbtn{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:0;height:50px;font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;color:var(--text);cursor:pointer;transition:all .12s;touch-action:manipulation;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none}
+.kbtn:active{transform:scale(.93);background:var(--primary-light);border-color:var(--primary)}
+.kbtn.kvar{background:var(--primary-light);border-color:rgba(67,56,202,.3);color:var(--primary)}
+.kbtn.kvar:active{background:var(--primary);color:#fff}
+.kbtn.kminus{background:#fff8f0;border-color:rgba(217,119,6,.3);color:var(--amber)}
+.kbtn.kminus:active{background:var(--amber);color:#fff}
+.kbtn.kdel{background:#fff0f0;border-color:rgba(220,38,38,.3);color:var(--red);font-size:1rem}
+.kbtn.kdel:active{background:var(--red);color:#fff}
+.kbtn.kclear{background:#fafafa;border-color:var(--border);color:var(--muted);font-size:.72rem;font-weight:800}
+.kbtn.kdecimal{background:#f0fff8;border-color:rgba(5,150,105,.3);color:var(--green)}
+.kbtn.kzero{grid-column:span 2}
+.feedback{text-align:center;padding:.85rem;border-radius:12px;margin-bottom:1rem;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:.4rem;flex-direction:column}
+.feedback.correct{background:var(--green-light);color:var(--green);border:1px solid var(--green)}
+.feedback.wrong{background:var(--red-light);color:var(--red);border:1px solid var(--red)}
+.feedback-expected{font-size:.78rem;font-weight:600;opacity:.85;margin-top:2px}
+.btn-group{display:flex;gap:.6rem;justify-content:center;align-items:center;flex-wrap:wrap}
+.hidden{display:none!important}
+.res-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.res-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg)}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.res-stat{background:var(--bg);border-radius:12px;padding:12px 8px}
+.res-val{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.res-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+.cfw{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.cfp{position:absolute;animation:cfFall linear forwards}
+</style>
+</head>
+<body>
+<div class="cfw" id="confetti"></div>
+<div class="screen active" id="s-join">
+  <div class="join-wrap"><div class="join-card">
+    <div class="join-logo"><div class="join-icon">🔢</div><div class="join-title">Жақша ашу</div><div class="join-sub">Өрнекті жеңілдету тесті</div></div>
+    <div class="err" id="join-err"></div>
+    <div class="field"><label>Аты-жөні</label><input type="text" id="sname" placeholder="Атыңызды жазыңыз" maxlength="20" autocomplete="off" autocorrect="off"></div>
+    <div class="field" id="code-wrap"><label>Бөлме коды</label><input type="text" id="scode" class="code-input" placeholder="------" maxlength="6" autocomplete="off"></div>
+    <button class="btn btn-primary btn-block" id="join-btn" style="margin-top:4px" onclick="joinQuiz()">🚀 Кіру</button>
+  </div></div>
+</div>
+<div class="screen" id="s-wait">
+  <div class="wait-wrap"><div class="wait-icon">✅</div><div class="wait-title">Қосылдыңыз!</div><div class="wait-sub">Мұғалім сабақты бастағанша күтіңіз</div><div class="wait-name" id="wait-name"></div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+</div>
+<div class="screen" id="s-quiz">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-card hl"><div class="stat-icon">📊</div><div class="stat-value" id="st-total">0</div><div class="stat-label">Жауап</div></div>
+      <div class="stat-card g"><div class="stat-icon">✓</div><div class="stat-value" id="st-correct">0</div><div class="stat-label">Дұрыс</div></div>
+      <div class="stat-card r"><div class="stat-icon">✗</div><div class="stat-value" id="st-wrong">0</div><div class="stat-label">Қате</div></div>
+      <div class="stat-card a"><div class="stat-icon">🔥</div><div class="stat-value" id="st-streak">0</div><div class="stat-label">Қатарынан</div></div>
+    </div>
+    <div class="quiz-card">
+      <div class="q-badge"><span>✏️</span><span>Ықшамдаңыз</span></div>
+      <div class="expr-display" id="expr-display"></div>
+      <div class="task-hint">Жауапты теріңіз (мысалы: <b>3x−5</b> немесе <b>−2y+7</b>)</div>
+      <div class="answer-display" id="answer-display"><span class="cursor" id="cursor"></span></div>
+      <div class="keypad" id="keypad">
+        <button class="kbtn kminus" onclick="kp('-')">−</button>
+        <button class="kbtn kvar" onclick="kp('x')">x</button>
+        <button class="kbtn kvar" onclick="kp('y')">y</button>
+        <button class="kbtn kdel" onclick="kpDel()">⌫</button>
+        <button class="kbtn" onclick="kp('7')">7</button>
+        <button class="kbtn" onclick="kp('8')">8</button>
+        <button class="kbtn" onclick="kp('9')">9</button>
+        <button class="kbtn kclear" onclick="kpClear()">CLR</button>
+        <button class="kbtn" onclick="kp('4')">4</button>
+        <button class="kbtn" onclick="kp('5')">5</button>
+        <button class="kbtn" onclick="kp('6')">6</button>
+        <button class="kbtn kvar" onclick="kp('+')">+</button>
+        <button class="kbtn" onclick="kp('1')">1</button>
+        <button class="kbtn" onclick="kp('2')">2</button>
+        <button class="kbtn" onclick="kp('3')">3</button>
+        <button class="kbtn kdecimal" onclick="kp(',')">&#44;</button>
+        <button class="kbtn kzero" onclick="kp('0')">0</button>
+        <button class="kbtn" onclick="checkAnswer()" style="background:var(--primary);color:#fff;border-color:var(--primary);font-size:.82rem;font-family:'DM Sans',sans-serif;letter-spacing:0" id="check-kbtn">✓</button>
+        <button class="kbtn" onclick="nextQuestion()" id="next-kbtn" style="display:none;background:var(--green);color:#fff;border-color:var(--green);font-size:.82rem;font-family:'DM Sans',sans-serif;letter-spacing:0">→</button>
+      </div>
+      <div class="feedback hidden" id="feedback"></div>
+      <div class="btn-group" id="main-btns">
+        <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()">✓ Тексеру</button>
+        <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Келесі →</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="screen" id="s-results">
+  <div class="res-wrap"><div class="res-card">
+    <div style="font-size:3rem;margin-bottom:8px" id="res-emoji">🏆</div>
+    <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px">Тест аяқталды!</div>
+    <div style="color:var(--muted);font-size:.86rem">Нәтижелеріңіз</div>
+    <div class="res-stats">
+      <div class="res-stat"><div class="res-val" id="res-correct" style="color:var(--green)">0</div><div class="res-lbl">Дұрыс</div></div>
+      <div class="res-stat"><div class="res-val" id="res-wrong" style="color:var(--red)">0</div><div class="res-lbl">Қате</div></div>
+      <div class="res-stat"><div class="res-val" id="res-pct" style="color:var(--primary)">0%</div><div class="res-lbl">Пайыз</div></div>
+    </div>
+    <p style="color:var(--muted);margin-top:16px;font-size:.82rem">Нәтижелер мұғалімге жіберілді ✓</p>
+  </div></div>
+</div>
+<script>
+const BACKEND='https://mathsabaq.online';
+const STORAGE_KEY_PREFIX='ms_brackets_';
+const urlParams=new URLSearchParams(location.search);
+const urlCode=(urlParams.get('code')||'').toUpperCase();
+let sessionCode='',studentId='',studentName='';
+let stats={correct:0,wrong:0,streak:0};
+let currentAnswer='',currentCorrect='',answered=false;
+let submitInterval=null,statusPollInterval=null,quizStarted=false;
+let isFocused=true,tabSwitches=0,awaySeconds=0,awayStart=null;
+function markAway(){if(!isFocused)return;isFocused=false;tabSwitches++;awayStart=Date.now();saveState();sendScore();}
+function markBack(){if(isFocused)return;isFocused=true;if(awayStart){awaySeconds+=Math.round((Date.now()-awayStart)/1000);awayStart=null;}sendScore();}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)markAway();else markBack();});
+window.addEventListener('blur',markAway);window.addEventListener('focus',markBack);
+function saveState(){if(!sessionCode)return;let ca=awaySeconds;if(awayStart)ca+=Math.round((Date.now()-awayStart)/1000);try{localStorage.setItem(STORAGE_KEY_PREFIX+sessionCode,JSON.stringify({studentId,name:studentName,correct:stats.correct,wrong:stats.wrong,streak:stats.streak,tabSwitches,awaySeconds:ca,ts:Date.now()}));}catch(_){}}
+function loadState(code){try{const r=localStorage.getItem(STORAGE_KEY_PREFIX+code);if(!r)return null;const d=JSON.parse(r);if(Date.now()-d.ts>3*60*60*1000){localStorage.removeItem(STORAGE_KEY_PREFIX+code);return null;}return d;}catch(_){return null;}}
+function clearState(){if(sessionCode)try{localStorage.removeItem(STORAGE_KEY_PREFIX+sessionCode);}catch(_){}}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function spawnConfetti(){const w=document.getElementById('confetti');w.innerHTML='';const cols=['#4338ca','#2563eb','#d97706','#059669','#dc2626'];for(let i=0;i<60;i++){const e=document.createElement('div');e.className='cfp';const s=5+Math.random()*9;e.style.cssText=`left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`;w.appendChild(e);}setTimeout(()=>w.innerHTML='',6000);}
+if(urlCode){sessionCode=urlCode;document.getElementById('scode').value=urlCode;document.getElementById('code-wrap').style.display='none';}
+(async function tryReconnect(){if(!urlCode)return;const saved=loadState(urlCode);if(!saved)return;try{const res=await fetch(`${BACKEND}/status?code=${urlCode}`);const data=await res.json();if(data.status==='not_found'||data.status==='ended'){clearState();return;}sessionCode=urlCode;studentId=saved.studentId;studentName=saved.name;stats={correct:saved.correct||0,wrong:saved.wrong||0,streak:saved.streak||0};tabSwitches=saved.tabSwitches||0;awaySeconds=saved.awaySeconds||0;if(data.status==='active')startQuiz();else if(data.status==='waiting')showWait();}catch(_){}})();
+async function joinQuiz(){const name=document.getElementById('sname').value.trim();const code=(urlCode||document.getElementById('scode').value.trim()).toUpperCase();const errEl=document.getElementById('join-err');if(!name){errEl.textContent='Атыңызды жазыңыз';errEl.classList.add('on');return;}if(code.length<4){errEl.textContent='Бөлме кодын енгізіңіз';errEl.classList.add('on');return;}errEl.classList.remove('on');const btn=document.getElementById('join-btn');btn.disabled=true;btn.textContent='⏳ Қосылуда...';sessionCode=code;studentName=name;studentId='stu_'+Math.random().toString(36).substr(2,9);try{const res=await fetch(`${BACKEND}/status?code=${code}`);const data=await res.json();if(data.status==='not_found'){errEl.textContent='Бөлме табылмады.';errEl.classList.add('on');btn.disabled=false;btn.textContent='🚀 Кіру';return;}if(data.status==='ended'){errEl.textContent='Бұл сабақ аяқталған.';errEl.classList.add('on');btn.disabled=false;btn.textContent='🚀 Кіру';return;}stats={correct:0,wrong:0,streak:0};await sendScore();saveState();btn.disabled=false;btn.textContent='🚀 Кіру';if(data.status==='active')startQuiz();else showWait();}catch(e){errEl.textContent='Серверге қосылу мүмкін болмады.';errEl.classList.add('on');btn.disabled=false;btn.textContent='🚀 Кіру';}}
+document.addEventListener('keydown',e=>{if(document.getElementById('s-join').classList.contains('active')&&e.key==='Enter')joinQuiz();});
+function showWait(){document.getElementById('wait-name').textContent=studentName;show('s-wait');if(statusPollInterval)clearInterval(statusPollInterval);statusPollInterval=setInterval(pollStatus,2000);}
+async function pollStatus(){try{const res=await fetch(`${BACKEND}/status?code=${sessionCode}`);const data=await res.json();if(data.status==='active'){clearInterval(statusPollInterval);statusPollInterval=null;startQuiz();}else if(data.status==='ended'||data.status==='not_found'){clearInterval(statusPollInterval);statusPollInterval=null;showEnd();}}catch(_){}}
+function startQuiz(){if(quizStarted)return;quizStarted=true;updateStats();show('s-quiz');loadQuestion();sendScore();if(submitInterval)clearInterval(submitInterval);submitInterval=setInterval(sendScore,5000);}
+async function sendScore(finished){if(!sessionCode||!studentName)return;let ca=awaySeconds;if(awayStart)ca+=Math.round((Date.now()-awayStart)/1000);try{const res=await fetch(`${BACKEND}/submit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:sessionCode,studentId,name:studentName,score:stats.correct,total:stats.correct+stats.wrong,finished:finished===true,focused:isFocused,tabSwitches,awaySeconds:ca})});const txt=await res.text();let data;try{data=JSON.parse(txt);}catch(_){return;}if(data.status==='ended'||data.status==='not_found'){setTimeout(showEnd,50);}}catch(_){}}
+
+// ══════════════════════════════════════════════════════════
+//  KEYPAD — x, y, digits, +, -, comma
+// ══════════════════════════════════════════════════════════
+function updateDisplay(){const disp=document.getElementById('answer-display');let tn=disp.querySelector('.ans-text'),cs=disp.querySelector('.cursor');if(!tn){disp.innerHTML='';tn=document.createElement('span');tn.className='ans-text';cs=document.createElement('span');cs.className='cursor';disp.appendChild(tn);disp.appendChild(cs);}tn.textContent=currentAnswer.replace(/-/g,'−');disp.classList.add('focused');disp.classList.remove('correct-inp','wrong-inp');}
+
+function kp(ch){
+  if(answered)return;
+  const last=currentAnswer.slice(-1);
+  if(ch==='-'){
+    if(currentAnswer===''||last==='+'){if(last==='+')currentAnswer=currentAnswer.slice(0,-1);currentAnswer+='-';}
+    else if(last==='-')return;
+    else currentAnswer+='-';
+  }else if(ch==='+'){
+    if(last==='+'||currentAnswer==='')return;
+    if(last==='-'){currentAnswer=currentAnswer.slice(0,-1)+'+';return;}
+    currentAnswer+='+';
+  }else if(ch===','){
+    const parts=currentAnswer.split(/[+\-]/);const lp=parts[parts.length-1];
+    if(lp.includes(',')||lp===''||lp==='x'||lp==='y')return;
+    currentAnswer+=',';
+  }else if(ch==='x'||ch==='y'){
+    if(last==='x'||last==='y'||last===',')return;
+    currentAnswer+=ch;
+  }else if(/[0-9]/.test(ch)){currentAnswer+=ch;}
+  updateDisplay();
+}
+function kpDel(){if(answered)return;if(currentAnswer.length>0){currentAnswer=currentAnswer.slice(0,-1);updateDisplay();}}
+function kpClear(){if(answered)return;currentAnswer='';updateDisplay();}
+
+// ══════════════════════════════════════════════════════════
+//  ANSWER PARSING — x, y, constants (safe regex, no infinite loop)
+// ══════════════════════════════════════════════════════════
+function parseExpr(s){
+  s=s.replace(/−/g,'-').replace(/,/g,'.').replace(/\s+/g,'');
+  if(s===''||s==='+'||s==='-')return null;
+  let xC=0,yC=0,cV=0,matched=false;
+  let cl=s.replace(/([+-]?)(\d*\.?\d*)(x)/g,function(_f,sign,numStr){
+    const sg=sign==='-'?-1:1;const num=numStr===''?1:parseFloat(numStr);
+    if(!isNaN(num)){xC+=sg*num;matched=true;}return '';
+  });
+  cl=cl.replace(/([+-]?)(\d*\.?\d*)(y)/g,function(_f,sign,numStr){
+    const sg=sign==='-'?-1:1;const num=numStr===''?1:parseFloat(numStr);
+    if(!isNaN(num)){yC+=sg*num;matched=true;}return '';
+  });
+  const numRe=/([+-]?)(\d+\.?\d*)/g;let m;
+  while((m=numRe.exec(cl))!==null){const sg=m[1]==='-'?-1:1;const num=parseFloat(m[2]);if(!isNaN(num)){cV+=sg*num;matched=true;}}
+  if(!matched)return null;
+  return{x:Math.round(xC*10)/10,y:Math.round(yC*10)/10,c:Math.round(cV*10)/10};
+}
+
+function buildCanonical(xCoef,yCoef,cVal){
+  xCoef=Math.round(xCoef*10)/10;yCoef=Math.round(yCoef*10)/10;cVal=Math.round(cVal*10)/10;
+  let parts=[];
+  function addV(coef,v){if(coef===0)return;const abs=Math.abs(coef);const sign=coef<0?'-':(parts.length>0?'+':'');const cs=abs===1?'':(Number.isInteger(abs)?String(abs):abs.toFixed(1).replace('.',','));parts.push(sign+cs+v);}
+  function addC(c){if(c===0)return;const abs=Math.abs(c);const sign=c<0?'-':(parts.length>0?'+':'');const cs=Number.isInteger(abs)?String(abs):abs.toFixed(1).replace('.',',');parts.push(sign+cs);}
+  addV(xCoef,'x');addV(yCoef,'y');addC(cVal);
+  return parts.length===0?'0':parts.join('');
+}
+
+function K(s){return katex.renderToString(s,{throwOnError:false});}
+
+// ══════════════════════════════════════════════════════════
+//  QUESTION GENERATION — 21 types
+// ══════════════════════════════════════════════════════════
+function rInt(min,max,nz){let n,t=0;do{n=Math.floor(Math.random()*(max-min+1))+min;t++;}while(nz&&n===0&&t<20);return n;}
+function outerCoef(a){if(a===1)return'';if(a===-1)return'-';return String(a);}
+function outerDec(a){return a.toFixed(1).replace('.','{,}');}
+function coefVar(b,v){if(b===1)return v;if(b===-1)return'-'+v;return b+v;}
+function coefVarDec(b,v){return b.toFixed(1).replace('.','{,}')+v;}
+function signNum(c){return c>0?'+'+c:String(c);}
+function varTermStr(a,v,isFirst){if(a===1)return isFirst?v:'+'+v;if(a===-1)return'-'+v;if(a>0)return isFirst?a+v:'+'+a+v;return a+v;}
+function constStr(c,isFirst){if(c>0)return isFirst?String(c):'+'+c;return String(c);}
+
+const PROBLEM_TYPES=[
+  // 1: a(bx+c)
+  function(){const a=rInt(-4,4,true),b=rInt(-4,4,true),c=rInt(-8,8,true);return{latex:`${outerCoef(a)}(${coefVar(b,'x')}${signNum(c)})`,xCoef:a*b,yCoef:0,cVal:a*c};},
+  // 2: ax-b(cx+d)
+  function(){const a=rInt(-5,5,true),b=rInt(1,4,true),c=rInt(-4,4,true),d=rInt(-6,6,true);const bS='-'+(b===1?'':b);return{latex:`${varTermStr(a,'x',true)}${bS}(${coefVar(c,'x')}${signNum(d)})`,xCoef:a-b*c,yCoef:0,cVal:-b*d};},
+  // 3: a(bx+c)+d(ex+f)
+  function(){const a=rInt(-3,3,true),b=rInt(-3,3,true),c=rInt(-5,5,true),d=rInt(-3,3,true),e=rInt(-3,3,true),f=rInt(-5,5,true);const dP=d>0?(d===1?'+':'+'+d):(d===-1?'-':String(d));return{latex:`${outerCoef(a)}(${coefVar(b,'x')}${signNum(c)})${dP}(${coefVar(e,'x')}${signNum(f)})`,xCoef:a*b+d*e,yCoef:0,cVal:a*c+d*f};},
+  // 4: ax-(bx+c)
+  function(){const a=rInt(-5,5,true),b=rInt(-4,4,true),c=rInt(-8,8,true);return{latex:`${varTermStr(a,'x',true)}-(${coefVar(b,'x')}${signNum(c)})`,xCoef:a-b,yCoef:0,cVal:-c};},
+  // 5: a(bx+c)+dx
+  function(){const a=rInt(-4,4,true),b=rInt(-3,3,true),c=rInt(-6,6,true),d=rInt(-5,5,true);return{latex:`${outerCoef(a)}(${coefVar(b,'x')}${signNum(c)})${varTermStr(d,'x',false)}`,xCoef:a*b+d,yCoef:0,cVal:a*c};},
+  // 6: decimal outer
+  function(){const aO=[0.5,1.5,2.5,3.5,-0.5,-1.5,-2.5];const a=aO[rInt(0,aO.length-1,false)],b=rInt(-4,4,true),c=rInt(-6,6,true);return{latex:`${outerDec(a)}(${coefVar(b,'x')}${signNum(c)})`,xCoef:Math.round(a*b*10)/10,yCoef:0,cVal:Math.round(a*c*10)/10};},
+  // 7: decimal inner
+  function(){const a=rInt(2,4,true),bO=[0.5,1.5,2.5,-0.5,-1.5];const b=bO[rInt(0,bO.length-1,false)],c=rInt(-5,5,true);return{latex:`${a}(${coefVarDec(b,'x')}${signNum(c)})`,xCoef:Math.round(a*b*10)/10,yCoef:0,cVal:a*c};},
+  // 8: -a(bx+c)+d
+  function(){const a=rInt(1,4,true),b=rInt(-4,4,true),c=rInt(-6,6,true),d=rInt(-8,8,true);const aS=a===1?'':String(a);return{latex:`-${aS}(${coefVar(b,'x')}${signNum(c)})${constStr(d,false)}`,xCoef:-a*b,yCoef:0,cVal:-a*c+d};},
+  // 9: ax+b-(cx+d) — subtract bracket
+  function(){const a=rInt(-5,5,true),b=rInt(-8,8,true),c=rInt(-4,4,true),d=rInt(-6,6,true);return{latex:`${varTermStr(a,'x',true)}${constStr(b,false)}-(${coefVar(c,'x')}${signNum(d)})`,xCoef:a-c,yCoef:0,cVal:b-d};},
+  // 10: a(bx+c)-(dx+e) — bracket minus bracket
+  function(){const a=rInt(2,5,true),b=rInt(-4,4,true),c=rInt(-6,6,true),d=rInt(-4,4,true),e=rInt(-6,6,true);return{latex:`${a}(${coefVar(b,'x')}${signNum(c)})-(${coefVar(d,'x')}${signNum(e)})`,xCoef:a*b-d,yCoef:0,cVal:a*c-e};},
+  // 11: a(by+c) — y bracket
+  function(){const a=rInt(-4,4,true),b=rInt(-4,4,true),c=rInt(-8,8,true);return{latex:`${outerCoef(a)}(${coefVar(b,'y')}${signNum(c)})`,xCoef:0,yCoef:a*b,cVal:a*c};},
+  // 12: a(by+c)-d(ey+f) — two y-brackets
+  function(){const a=rInt(-3,3,true),b=rInt(-3,3,true),c=rInt(-5,5,true),d=rInt(1,4,true),e=rInt(-3,3,true),f=rInt(-5,5,true);const dS='-'+(d===1?'':d);return{latex:`${outerCoef(a)}(${coefVar(b,'y')}${signNum(c)})${dS}(${coefVar(e,'y')}${signNum(f)})`,xCoef:0,yCoef:a*b-d*e,cVal:a*c-d*f};},
+  // 13: ax+by+cx+d — mixed
+  function(){const a=rInt(-4,4,true),b=rInt(-3,3,true),c=rInt(-4,4,true),d=rInt(-8,8,true);return{latex:`${varTermStr(a,'x',true)}${varTermStr(b,'y',false)}${varTermStr(c,'x',false)}${constStr(d,false)}`,xCoef:a+c,yCoef:b,cVal:d};},
+  // 14: ax+b+cx+dy — four-term
+  function(){const a=rInt(-5,5,true),b=rInt(-8,8,true),c=rInt(-5,5,true),d=rInt(-4,4,true);return{latex:`${varTermStr(a,'x',true)}${constStr(b,false)}${varTermStr(c,'x',false)}${varTermStr(d,'y',false)}`,xCoef:a+c,yCoef:d,cVal:b};},
+  // 15: ax-(-bx)-cx — subtract negative
+  function(){const a=rInt(-5,5,true),b=rInt(1,6,true),c=rInt(1,8,true);const bI=b===1?'x':b+'x';return{latex:`${varTermStr(a,'x',true)}-(-${bI})${varTermStr(-c,'x',false)}`,xCoef:a+b-c,yCoef:0,cVal:0};},
+  // 16: ax-(bx+cx) — subtract bracket sum
+  function(){const a=rInt(2,8,true),b=rInt(-5,5,true),c=rInt(-5,5,true);return{latex:`${varTermStr(a,'x',true)}-(${coefVar(b,'x')}${varTermStr(c,'x',false)})`,xCoef:a-b-c,yCoef:0,cVal:0};},
+  // 17: ax-(bx+cx)-(-dx) — complex subtract
+  function(){const a=rInt(3,12,true),b=rInt(-5,5,true),c=rInt(-5,5,true),d=rInt(1,8,true);const dI=d===1?'x':d+'x';return{latex:`${varTermStr(a,'x',true)}-(${coefVar(b,'x')}${varTermStr(c,'x',false)})-(-${dI})`,xCoef:a-b-c+d,yCoef:0,cVal:0};},
+  // 18: ay-(-by)+cy+dy — y with negation
+  function(){const a=rInt(-6,6,true),b=rInt(1,8,true),c=rInt(-8,8,true),d=rInt(-6,6,true);const bI=b===1?'y':b+'y';return{latex:`${varTermStr(a,'y',true)}-(-${bI})${varTermStr(c,'y',false)}${varTermStr(d,'y',false)}`,xCoef:0,yCoef:a+b+c+d,cVal:0};},
+  // 19: ax+by+cx+d — another mixed variant
+  function(){const x1=rInt(-5,5,true),y1=rInt(-4,4,true),x2=rInt(-5,5,true),c1=rInt(-8,8,true);return{latex:`${varTermStr(x1,'x',true)}${varTermStr(y1,'y',false)}${varTermStr(x2,'x',false)}${constStr(c1,false)}`,xCoef:x1+x2,yCoef:y1,cVal:c1};},
+  // 20: ax+bx+cx-(-dx) — four x-terms
+  function(){const a=rInt(-6,6,true),b=rInt(-6,6,true),c=rInt(-6,6,true),d=rInt(1,8,true);const dI=d===1?'x':d+'x';return{latex:`${varTermStr(a,'x',true)}${varTermStr(b,'x',false)}${varTermStr(c,'x',false)}-(-${dI})`,xCoef:a+b+c+d,yCoef:0,cVal:0};},
+  // 21: ax+bx+c — simple two x + const
+  function(){const a=rInt(-5,5,true),b=rInt(-8,8,true),c=rInt(-8,8,true);return{latex:`${varTermStr(a,'x',true)}${varTermStr(b,'x',false)}${constStr(c,false)}`,xCoef:a+b,yCoef:0,cVal:c};}
+];
+
+let currentQ=null;
+function loadQuestion(){
+  answered=false;currentAnswer='';
+  let q,tries=0;
+  do{q=PROBLEM_TYPES[Math.floor(Math.random()*PROBLEM_TYPES.length)]();tries++;}
+  while(tries<15&&((q.xCoef===0&&(q.yCoef||0)===0&&q.cVal===0)||Math.abs(q.xCoef)>30||Math.abs(q.yCoef||0)>30||Math.abs(q.cVal)>50));
+  currentQ=q;currentCorrect=buildCanonical(q.xCoef,q.yCoef||0,q.cVal);
+  document.getElementById('expr-display').innerHTML=K(q.latex);
+  updateDisplay();
+  document.getElementById('check-btn').classList.remove('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+  document.getElementById('check-kbtn').style.display='';
+  document.getElementById('next-kbtn').style.display='none';
+  document.getElementById('feedback').classList.add('hidden');
+  document.getElementById('feedback').className='feedback hidden';
+  document.getElementById('answer-display').classList.remove('correct-inp','wrong-inp');
+}
+
+let _checking=false;
+function checkAnswer(){
+  if(_checking||answered||!currentQ)return;
+  if(!currentAnswer.trim())return;
+  _checking=true;answered=true;
+  const userP=parseExpr(currentAnswer),correctP=parseExpr(currentCorrect);
+  let isCorrect=false;
+  if(userP&&correctP){isCorrect=Math.abs(userP.x-correctP.x)<0.01&&Math.abs(userP.y-correctP.y)<0.01&&Math.abs(userP.c-correctP.c)<0.01;}
+  const disp=document.getElementById('answer-display'),fb=document.getElementById('feedback');
+  fb.classList.remove('hidden','correct','wrong');
+  if(isCorrect){stats.correct++;stats.streak++;disp.classList.add('correct-inp');fb.classList.add('correct');fb.textContent='✓ Дұрыс!';}
+  else{stats.wrong++;stats.streak=0;disp.classList.add('wrong-inp');fb.classList.add('wrong');fb.innerHTML=`✗ Қате! <span class="feedback-expected">Дұрыс жауап: <b>${currentCorrect.replace(/-/g,'−')}</b></span>`;}
+  document.getElementById('check-btn').classList.add('hidden');document.getElementById('next-btn').classList.remove('hidden');
+  document.getElementById('check-kbtn').style.display='none';document.getElementById('next-kbtn').style.display='';
+  updateStats();saveState();sendScore();_checking=false;
+}
+function nextQuestion(){loadQuestion();}
+function updateStats(){document.getElementById('st-total').textContent=stats.correct+stats.wrong;document.getElementById('st-correct').textContent=stats.correct;document.getElementById('st-wrong').textContent=stats.wrong;document.getElementById('st-streak').textContent=stats.streak;}
+function showEnd(){if(submitInterval){clearInterval(submitInterval);submitInterval=null;}if(statusPollInterval){clearInterval(statusPollInterval);statusPollInterval=null;}const total=stats.correct+stats.wrong;const pct=total>0?Math.round(stats.correct/total*100):0;document.getElementById('res-correct').textContent=stats.correct;document.getElementById('res-wrong').textContent=stats.wrong;document.getElementById('res-pct').textContent=pct+'%';document.getElementById('res-emoji').textContent=pct>=70?'🎉':pct>=40?'👍':'💪';show('s-results');if(pct>=70)spawnConfetti();clearState();}
+</script>
+</body>
+</html>
