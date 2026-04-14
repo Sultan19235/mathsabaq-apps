@@ -168,7 +168,7 @@ body{overflow-x:hidden}
       <div class="stat-card a"><div class="stat-icon">🔥</div><div class="stat-value" id="st-streak">0</div><div class="stat-label">Қатарынан</div></div>
     </div>
     <div class="quiz-card">
-      <div class="q-badge"><span>✏️</span><span>Жеңілдетіңіз</span></div>
+      <div class="q-badge"><span>✏️</span><span>Ықшамдаңыз</span></div>
       <div class="expr-display" id="expr-display"></div>
       <div class="task-hint">Жауапты теріңіз (мысалы: <b>3x−5</b> немесе <b>−2x+7</b>)</div>
       <div class="answer-display" id="answer-display"><span class="cursor" id="cursor"></span></div>
@@ -416,13 +416,20 @@ async function sendScore(finished) {
 // ══════════════════════════════════════════════════════════
 function updateDisplay() {
   const disp = document.getElementById('answer-display');
-  if (!currentAnswer) {
-    disp.innerHTML = '<span class="cursor" id="cursor"></span>';
-  } else {
-    // Format for display: show minus as proper minus sign
-    const display = currentAnswer.replace(/-/g, '−');
-    disp.innerHTML = display + '<span class="cursor" id="cursor"></span>';
+  // Use a separate text node and a permanent cursor span to avoid reflow on every keypress
+  let textNode = disp.querySelector('.ans-text');
+  let cursorSpan = disp.querySelector('.cursor');
+  if (!textNode) {
+    disp.innerHTML = '';
+    textNode = document.createElement('span');
+    textNode.className = 'ans-text';
+    cursorSpan = document.createElement('span');
+    cursorSpan.className = 'cursor';
+    disp.appendChild(textNode);
+    disp.appendChild(cursorSpan);
   }
+  // Show − instead of - for display only
+  textNode.textContent = currentAnswer.replace(/-/g, '−');
   disp.classList.add('focused');
   disp.classList.remove('correct-inp', 'wrong-inp');
 }
@@ -485,10 +492,10 @@ function kpClear() {
 //  QUESTION GENERATION
 // ══════════════════════════════════════════════════════════
 
-// Random integer in range [a, b] excluding 0
+// Random integer in range [a, b], optionally nonzero
 function rInt(min, max, nonzero) {
-  let n;
-  do { n = Math.floor(Math.random() * (max - min + 1)) + min; } while (nonzero && n === 0);
+  let n, tries = 0;
+  do { n = Math.floor(Math.random() * (max - min + 1)) + min; tries++; } while (nonzero && n === 0 && tries < 20);
   return n;
 }
 
@@ -597,46 +604,70 @@ function buildCanonical(xCoef, cVal) {
 // ── KaTeX render ─────────────────────────────────────────
 function K(s) { return katex.renderToString(s, { throwOnError: false }); }
 
-// Format expression for KaTeX display
-function exprToLatex(s) {
-  // s uses standard - and plain numbers
-  // Replace patterns like 3x → 3x, -x → -x, etc.
-  // Convert decimal comma to dot for latex
-  return s.replace(/,/g, '{,}').replace(/(\d)x/g, '$1x').replace(/\*/, '\\cdot ');
+// ── Expression builder helpers ────────────────────────────
+// Format outer multiplier: 1→'', -1→'-', 2→'2', etc.
+function outerCoef(a) {
+  if (a === 1) return '';
+  if (a === -1) return '-';
+  return String(a);
+}
+// Format decimal outer multiplier (e.g. 1.5 → '1{,}5')
+function outerDec(a) {
+  return a.toFixed(1).replace('.', '{,}');
+}
+// Format term INSIDE brackets: coefficient * x
+// e.g. coefX(2) → '2x', coefX(1) → 'x', coefX(-1) → '-x', coefX(-3) → '-3x'
+function coefX(b) {
+  if (b === 1) return 'x';
+  if (b === -1) return '-x';
+  return String(b) + 'x';
+}
+// Format decimal term inside brackets: e.g. 1.5 → '1{,}5x'
+function coefXDec(b) {
+  const s = b.toFixed(1).replace('.', '{,}');
+  return s + 'x';
+}
+// Sign+number for constant inside brackets: e.g. sign(3)→'+3', sign(-2)→'-2'
+function signNum(c) {
+  return c > 0 ? '+' + c : String(c);
+}
+// Format a standalone x-term (outside brackets): e.g. xtermStr(1)→'x', xtermStr(-1)→'-x', xtermStr(3)→'3x'
+// isFirst: true if it's the first token in the expression
+function xtermStr(a, isFirst) {
+  if (a === 1) return isFirst ? 'x' : '+x';
+  if (a === -1) return '-x';
+  if (a > 0) return isFirst ? a + 'x' : '+' + a + 'x';
+  return String(a) + 'x'; // negative
+}
+// Format constant term outside brackets
+function constStr(c, isFirst) {
+  if (c > 0) return isFirst ? String(c) : '+' + c;
+  return String(c); // negative already has sign
 }
 
 // ── Problem types ─────────────────────────────────────────
 const PROBLEM_TYPES = [
-  // Type 1: a(bx + c) → abx + ac  (e.g. 3(2x+5))
+  // Type 1: a(bx + c)  e.g. 3(2x+5), -(x-4)
   function genType1() {
     const a = rInt(-4, 4, true);
     const b = rInt(-4, 4, true);
     const c = rInt(-8, 8, true);
-    // a*(b*x + c)
-    const xCoef = a * b;
-    const cVal = a * c;
-    const aStr = a === 1 ? '' : a === -1 ? '-' : String(a);
-    const bStr = b > 0 ? String(b) : String(b);
-    const cSign = c > 0 ? '+' : '';
-    const expr = `${aStr}(${bStr}x${cSign}${c})`;
-    const exprLatex = expr;
-    return { latex: exprLatex, xCoef, cVal };
+    const xCoef = a * b, cVal = a * c;
+    const latex = `${outerCoef(a)}(${coefX(b)}${signNum(c)})`;
+    return { latex, xCoef, cVal };
   },
 
-  // Type 2: ax - b(cx + d)  (e.g. 5x - 2(3x+1))
+  // Type 2: ax - b(cx + d)  e.g. 5x-2(3x+1)
   function genType2() {
     const a = rInt(-5, 5, true);
-    const b = rInt(-4, 4, true);
+    const b = rInt(1, 4, true); // keep b positive, sign is explicit
     const c = rInt(-4, 4, true);
     const d = rInt(-6, 6, true);
-    const xCoef = a - b * c;
-    const cVal = -b * d;
-    const aStr = a === 1 ? '' : a === -1 ? '-' : String(a);
-    const bStr = b > 0 ? '-' + (b === 1 ? '' : b) : '+' + (b === -1 ? '' : Math.abs(b));
-    const cStr = String(c);
-    const dSign = d > 0 ? '+' : '';
-    const expr = `${aStr}x${bStr}(${cStr}x${dSign}${d})`;
-    return { latex: expr, xCoef, cVal };
+    const xCoef = a - b * c, cVal = -b * d;
+    // second bracket sign depends on context: always written as -b(...)
+    const bSign = '-' + (b === 1 ? '' : b);
+    const latex = `${xtermStr(a, true)}${bSign}(${coefX(c)}${signNum(d)})`;
+    return { latex, xCoef, cVal };
   },
 
   // Type 3: a(bx+c) + d(ex+f)
@@ -647,86 +678,68 @@ const PROBLEM_TYPES = [
     const d = rInt(-3, 3, true);
     const e = rInt(-3, 3, true);
     const f = rInt(-5, 5, true);
-    const xCoef = a*b + d*e;
-    const cVal = a*c + d*f;
-    const aStr = a === 1 ? '' : a === -1 ? '-' : String(a);
-    const cSign = c > 0 ? '+' : '';
-    const dSign = d > 0 ? '+' + (d === 1 ? '' : d) : d === -1 ? '-' : String(d);
-    const eStr = String(e);
-    const fSign = f > 0 ? '+' : '';
-    const expr = `${aStr}(${b}x${cSign}${c})${dSign}(${eStr}x${fSign}${f})`;
-    return { latex: expr, xCoef, cVal };
+    const xCoef = a*b + d*e, cVal = a*c + d*f;
+    // second bracket prefix: +d or -|d| when d<0
+    const dPre = d > 0 ? (d === 1 ? '+' : '+' + d) : (d === -1 ? '-' : String(d));
+    const latex = `${outerCoef(a)}(${coefX(b)}${signNum(c)})${dPre}(${coefX(e)}${signNum(f)})`;
+    return { latex, xCoef, cVal };
   },
 
-  // Type 4: from textbook style — ax - (bx + c)  (e.g. 2x-(3x+4))
+  // Type 4: ax - (bx + c)  e.g. 2x-(3x+4)
   function genType4() {
     const a = rInt(-5, 5, true);
     const b = rInt(-4, 4, true);
     const c = rInt(-8, 8, true);
-    const xCoef = a - b;
-    const cVal = -c;
-    const aStr = a === 1 ? '' : a === -1 ? '-' : String(a);
-    const cSign = c > 0 ? '+' : '';
-    const expr = `${aStr}x-(${b}x${cSign}${c})`;
-    return { latex: expr, xCoef, cVal };
+    const xCoef = a - b, cVal = -c;
+    const latex = `${xtermStr(a, true)}-(${coefX(b)}${signNum(c)})`;
+    return { latex, xCoef, cVal };
   },
 
-  // Type 5: a(bx+c) + dx  (e.g. 3(2x-1)+4x)
+  // Type 5: a(bx+c) + dx  e.g. 3(2x-1)+4x
   function genType5() {
     const a = rInt(-4, 4, true);
     const b = rInt(-3, 3, true);
     const c = rInt(-6, 6, true);
     const d = rInt(-5, 5, true);
-    const xCoef = a*b + d;
-    const cVal = a*c;
-    const aStr = a === 1 ? '' : a === -1 ? '-' : String(a);
-    const cSign = c > 0 ? '+' : '';
-    const dStr = d > 0 ? '+' + (d === 1 ? '' : d) : d === -1 ? '-' : String(d);
-    const expr = `${aStr}(${b}x${cSign}${c})${dStr}x`;
-    return { latex: expr, xCoef, cVal };
+    const xCoef = a*b + d, cVal = a*c;
+    const latex = `${outerCoef(a)}(${coefX(b)}${signNum(c)})${xtermStr(d, false)}`;
+    return { latex, xCoef, cVal };
   },
 
-  // Type 6: with decimals — a(bx+c) where a or c is decimal
+  // Type 6: decimal outer — a(bx+c) where a is decimal like 1.5, 2.5
   function genType6() {
-    const aOptions = [0.5, 1.5, 2.5, 3.5, -0.5, -1.5, -2.5];
-    const a = aOptions[Math.floor(Math.random() * aOptions.length)];
+    const aOpts = [0.5, 1.5, 2.5, 3.5, -0.5, -1.5, -2.5];
+    const a = aOpts[rInt(0, aOpts.length - 1, false)];
     const b = rInt(-4, 4, true);
     const c = rInt(-6, 6, true);
     const xCoef = Math.round(a * b * 10) / 10;
-    const cVal = Math.round(a * c * 10) / 10;
-    const aStr = a < 0 ? a.toFixed(1).replace('.', ',') : a.toFixed(1).replace('.', ',');
-    const cSign = c > 0 ? '+' : '';
-    const expr = `${aStr}(${b}x${cSign}${c})`;
-    return { latex: expr, xCoef, cVal };
+    const cVal  = Math.round(a * c * 10) / 10;
+    const latex = `${outerDec(a)}(${coefX(b)}${signNum(c)})`;
+    return { latex, xCoef, cVal };
   },
 
-  // Type 7: decimal coef on x term — e.g. 2(1,5x + 3)
+  // Type 7: decimal inner coef — a(b.5·x + c) e.g. 2(1{,}5x+3)
   function genType7() {
     const a = rInt(2, 4, true);
-    const bOptions = [0.5, 1.5, 2.5, -0.5, -1.5];
-    const b = bOptions[Math.floor(Math.random() * bOptions.length)];
+    const bOpts = [0.5, 1.5, 2.5, -0.5, -1.5];
+    const b = bOpts[rInt(0, bOpts.length - 1, false)];
     const c = rInt(-5, 5, true);
     const xCoef = Math.round(a * b * 10) / 10;
-    const cVal = a * c;
-    const bStr = b.toFixed(1).replace('.', ',');
-    const cSign = c > 0 ? '+' : '';
-    const expr = `${a}(${bStr}x${cSign}${c})`;
-    return { latex: expr, xCoef, cVal };
+    const cVal  = a * c;
+    const latex = `${a}(${coefXDec(b)}${signNum(c)})`;
+    return { latex, xCoef, cVal };
   },
 
-  // Type 8: textbook style negative leading — -a(bx+c) + d
+  // Type 8: negative leading — -a(bx+c) + d  e.g. -3(2x-1)+5
   function genType8() {
     const a = rInt(1, 4, true);
     const b = rInt(-4, 4, true);
     const c = rInt(-6, 6, true);
     const d = rInt(-8, 8, true);
-    const xCoef = -a * b;
-    const cVal = -a * c + d;
+    const xCoef = -a * b, cVal = -a * c + d;
     const aStr = a === 1 ? '' : String(a);
-    const cSign = c > 0 ? '+' : '';
-    const dSign = d > 0 ? '+' : '';
-    const expr = `-${aStr}(${b}x${cSign}${c})${dSign}${d}`;
-    return { latex: expr, xCoef, cVal };
+    const latex = `-${aStr}(${coefX(b)}${signNum(c)})${constStr(d, false)}`;
+    return { latex, xCoef, cVal };
   }
 ];
 
@@ -736,34 +749,27 @@ function loadQuestion() {
   answered = false;
   currentAnswer = '';
 
-  // Pick random problem type
-  let q = null;
-  let attempts = 0;
-  while (!q && attempts < 20) {
-    attempts++;
-    try {
-      const type = PROBLEM_TYPES[Math.floor(Math.random() * PROBLEM_TYPES.length)];
-      const candidate = type();
-      // Ensure result isn't trivially zero and is a valid linear expression
-      if (Math.abs(candidate.xCoef) > 10 || Math.abs(candidate.cVal) > 30) continue;
-      if (candidate.xCoef === 0 && candidate.cVal === 0) continue;
-      q = candidate;
-    } catch(e) { continue; }
-  }
-  if (!q) q = { latex: '2(3x+1)', xCoef: 6, cVal: 2 };
+  // Generate a question — single attempt, no retry loop to avoid lag
+  let q;
+  let tries = 0;
+  do {
+    const type = PROBLEM_TYPES[rInt(0, PROBLEM_TYPES.length - 1, false)];
+    q = type();
+    tries++;
+  } while (tries < 8 && (
+    (q.xCoef === 0 && q.cVal === 0) ||
+    Math.abs(q.xCoef) > 12 ||
+    Math.abs(q.cVal) > 30
+  ));
 
   currentQ = q;
   currentCorrect = buildCanonical(q.xCoef, q.cVal);
 
-  // Display expression
+  // Render KaTeX expression
   const display = document.getElementById('expr-display');
-  try {
-    display.innerHTML = K(q.latex);
-  } catch(e) {
-    display.textContent = q.latex;
-  }
+  display.innerHTML = K(q.latex);
 
-  // Reset input
+  // Reset input display
   updateDisplay();
 
   // Reset buttons
