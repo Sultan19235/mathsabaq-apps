@@ -30,7 +30,6 @@ body{overflow-x:hidden}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
-@keyframes shakeX{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 
 .container{max-width:500px;margin:0 auto;padding:1rem;padding-bottom:2rem}
 
@@ -85,7 +84,7 @@ body{overflow-x:hidden}
 .answer-display{background:var(--bg);border:2px solid var(--border);border-radius:14px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--text);min-height:54px;text-align:center;margin-bottom:.75rem;transition:border-color .2s;position:relative;letter-spacing:.5px;overflow-x:auto;white-space:nowrap}
 .answer-display.focused{border-color:var(--primary)}
 .answer-display.correct-inp{border-color:var(--green);background:var(--green-light)}
-.answer-display.wrong-inp{border-color:var(--red);background:var(--red-light);animation:shakeX .4s ease}
+.answer-display.wrong-inp{border-color:var(--red);background:var(--red-light)}
 .answer-display .cursor{display:inline-block;width:2px;height:1.2em;background:var(--primary);vertical-align:middle;margin-left:1px;animation:pulse .8s infinite}
 
 /* KEYPAD */
@@ -406,8 +405,12 @@ async function sendScore(finished) {
         awaySeconds: currentAway
       })
     });
-    const data = await res.json();
-    if (data.status === 'ended' || data.status === 'not_found') showEnd();
+    const txt = await res.text();
+    let data; try { data = JSON.parse(txt); } catch(_) { return; }
+    // Defer showEnd so it never fires mid-checkAnswer execution
+    if (data.status === 'ended' || data.status === 'not_found') {
+      setTimeout(showEnd, 50);
+    }
   } catch (_) {}
 }
 
@@ -783,9 +786,11 @@ function loadQuestion() {
 }
 
 // ── CHECK ANSWER ──────────────────────────────────────────
+let _checking = false; // guard against double-tap
 function checkAnswer() {
-  if (answered || !currentQ) return;
+  if (_checking || answered || !currentQ) return;
   if (!currentAnswer.trim()) return;
+  _checking = true;
 
   answered = true;
 
@@ -806,22 +811,26 @@ function checkAnswer() {
     stats.correct++; stats.streak++;
     disp.classList.add('correct-inp');
     fb.classList.add('correct');
-    fb.innerHTML = '✓ Дұрыс!';
+    fb.textContent = '✓ Дұрыс!';
   } else {
     stats.wrong++; stats.streak = 0;
     disp.classList.add('wrong-inp');
     fb.classList.add('wrong');
-    // Show correct answer
     const correctDisplay = currentCorrect.replace(/-/g, '−');
     fb.innerHTML = `✗ Қате! <span class="feedback-expected">Дұрыс жауап: <b>${correctDisplay}</b></span>`;
   }
 
-  updateStats(); saveState(); sendScore();
-
+  // Swap buttons immediately — all sync DOM work done before any async
   document.getElementById('check-btn').classList.add('hidden');
   document.getElementById('next-btn').classList.remove('hidden');
   document.getElementById('check-kbtn').style.display = 'none';
   document.getElementById('next-kbtn').style.display = '';
+
+  updateStats();
+  saveState();
+  sendScore(); // async, fire-and-forget — won't block UI
+
+  _checking = false;
 }
 
 function nextQuestion() { loadQuestion(); }
