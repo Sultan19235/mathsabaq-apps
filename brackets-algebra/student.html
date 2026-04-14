@@ -562,20 +562,23 @@ function parseLinear(s) {
   s = s.replace(/−/g, '-').replace(/,/g, '.').replace(/\s+/g, '');
   if (s === '' || s === '+' || s === '-') return null;
   let xCoef = 0, cVal = 0;
-  // Match terms: optional sign, optional number, optional 'x'
-  const termRe = /([+-]?)(\d*\.?\d*)(x?)/g;
-  let m;
+  // Match terms: each term must contain at least a digit or 'x' to avoid empty matches
+  const termRe = /([+-]?)(\d*\.?\d*)(x)/g;   // terms with x
+  const numRe  = /([+-]?)(\d+\.?\d*)/g;       // pure number terms
   let matched = false;
-  while ((m = termRe.exec(s)) !== null) {
-    if (m[0] === '') continue;
-    const sign = m[1] === '-' ? -1 : 1;
-    const numStr = m[2];
-    const hasX = m[3] === 'x';
-    let num = numStr === '' ? 1 : parseFloat(numStr);
-    if (isNaN(num)) continue;
-    matched = true;
-    if (hasX) xCoef += sign * num;
-    else cVal += sign * num;
+  // First pass: extract all x-terms
+  let cleaned = s.replace(termRe, function(full, sign, numStr) {
+    const sg = sign === '-' ? -1 : 1;
+    const num = numStr === '' ? 1 : parseFloat(numStr);
+    if (!isNaN(num)) { xCoef += sg * num; matched = true; }
+    return ''; // remove matched x-term from string
+  });
+  // Second pass: extract remaining pure numbers
+  let m2;
+  while ((m2 = numRe.exec(cleaned)) !== null) {
+    const sg = m2[1] === '-' ? -1 : 1;
+    const num = parseFloat(m2[2]);
+    if (!isNaN(num)) { cVal += sg * num; matched = true; }
   }
   if (!matched) return null;
   return { x: Math.round(xCoef * 10) / 10, c: Math.round(cVal * 10) / 10 };
