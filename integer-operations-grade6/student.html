@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Бүтін сандар амалдары — Оқушы</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
+  --shadow-lg:0 8px 30px rgba(20,24,38,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+
+.screen{display:none;min-height:100vh;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+
+.container{max-width:500px;margin:0 auto;padding:1rem;padding-bottom:2rem}
+
+/* ── JOIN ── */
+.join-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.join-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.join-logo{text-align:center;margin-bottom:20px}
+.join-icon{font-size:2.4rem;margin-bottom:6px}
+.join-title{font-size:1.3rem;font-weight:800;margin-bottom:2px}
+.join-sub{color:var(--muted);font-size:.82rem}
+.field{margin-bottom:12px}
+.field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px}
+.field input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;outline:none;transition:border-color .15s;background:var(--bg)}
+.field input:focus{border-color:var(--primary)}
+.field input.code-input{font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:6px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
+.err.on{display:block}
+
+/* ── WAIT ── */
+.wait-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.wait-icon{font-size:3.5rem;margin-bottom:12px}
+.wait-title{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+.wait-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.wait-name{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.82rem;font-weight:700;margin-top:8px}
+.dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-top:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+
+/* ── QUIZ ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.6rem .4rem;text-align:center;box-shadow:var(--shadow-sm)}
+.stat-card.hl{background:var(--primary-light);border-color:rgba(67,56,202,.25)}
+.stat-icon{font-size:1rem;margin-bottom:.15rem}
+.stat-value{font-size:1.25rem;font-weight:800;color:var(--primary)}
+.stat-card.g .stat-value{color:var(--green)}
+.stat-card.r .stat-value{color:var(--red)}
+.stat-card.a .stat-value{color:var(--amber)}
+.stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow)}
+.q-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-light);color:var(--primary);padding:.3rem .7rem;border-radius:16px;font-size:.72rem;font-weight:700;margin-bottom:.75rem}
+.q-num{font-size:.72rem;color:var(--muted);font-weight:600;float:right;margin-top:.3rem}
+
+.problem-display{font-size:1.6rem;font-weight:700;color:var(--text);text-align:center;padding:1.2rem .8rem;background:linear-gradient(135deg,var(--primary-light) 0%,#f0f2ff 100%);border:2px solid rgba(67,56,202,.2);border-radius:16px;margin-bottom:1rem;min-height:60px;display:flex;align-items:center;justify-content:center;line-height:1.4}
+.problem-display .katex{font-size:1.5rem}
+
+/* ── ANSWER DISPLAY ── */
+.answer-area{margin-bottom:1rem}
+.answer-display{min-height:56px;padding:12px 16px;border:2.5px solid var(--border);border-radius:14px;background:var(--bg);font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;text-align:center;display:flex;align-items:center;justify-content:center;gap:4px;transition:border-color .2s;cursor:default;-webkit-user-select:none;user-select:none;position:relative;overflow:hidden}
+.answer-display.focused{border-color:var(--primary)}
+.answer-display.correct-border{border-color:var(--green);background:var(--green-light)}
+.answer-display.wrong-border{border-color:var(--red);background:var(--red-light);animation:shake .4s ease}
+.answer-cursor{display:inline-block;width:2px;height:1.3em;background:var(--primary);animation:pulse 1s infinite;vertical-align:middle}
+.answer-display .katex{font-size:1.2rem}
+
+/* ── FRACTION INPUT VISUAL ── */
+.frac-input-visual{display:inline-flex;flex-direction:column;align-items:center;gap:0}
+.frac-num,.frac-den{min-width:20px;text-align:center;padding:0 4px;font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700}
+.frac-line{width:100%;height:2px;background:var(--text);min-width:20px}
+.frac-num.active,.frac-den.active{color:var(--primary)}
+
+/* ── KEYPAD ── */
+.keypad{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:1rem;max-width:320px;margin-left:auto;margin-right:auto}
+.key{height:52px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg2);font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.key:active{transform:scale(.94);background:var(--bg3)}
+.key.accent{background:var(--primary-light);border-color:rgba(67,56,202,.25);color:var(--primary)}
+.key.danger{background:var(--red-light);border-color:var(--red-border);color:var(--red)}
+.key.frac-key{font-size:.9rem;flex-direction:column;gap:0;line-height:1}
+.key.frac-key .fk-num{font-size:.7rem;border-bottom:1.5px solid currentColor;padding:0 4px;line-height:1.2}
+.key.frac-key .fk-den{font-size:.7rem;padding:0 4px;line-height:1.2}
+.key:disabled{opacity:.3;cursor:not-allowed;transform:none!important}
+
+/* Mode toggle */
+.mode-toggle{display:flex;gap:4px;margin-bottom:8px;justify-content:center}
+.mode-btn{padding:6px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg2);font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;color:var(--muted)}
+.mode-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+.feedback{text-align:center;padding:.85rem;border-radius:12px;margin-bottom:1rem;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.feedback.correct{background:var(--green-light);color:var(--green);border:1px solid var(--green)}
+.feedback.wrong{background:var(--red-light);color:var(--red);border:1px solid var(--red)}
+.btn-group{display:flex;gap:.6rem;justify-content:center;align-items:center;flex-wrap:wrap}
+.hidden{display:none!important}
+
+/* ── RESULTS ── */
+.res-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.res-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg)}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.res-stat{background:var(--bg);border-radius:12px;padding:12px 8px}
+.res-val{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.res-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+.cfw{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.cfp{position:absolute;animation:cfFall linear forwards}
+</style>
+</head>
+<body>
+<div class="cfw" id="confetti"></div>
+
+<!-- ════ JOIN ════ -->
+<div class="screen active" id="s-join">
+  <div class="join-wrap">
+    <div class="join-card">
+      <div class="join-logo">
+        <div class="join-icon">🔢</div>
+        <div class="join-title">Бүтін сандар амалдары</div>
+        <div class="join-sub">Қосу, азайту, бөлшектер, өрнектер</div>
+      </div>
+      <div class="err" id="join-err"></div>
+      <div class="field">
+        <label>Аты-жөні</label>
+        <input type="text" id="sname" placeholder="Атыңызды жазыңыз" maxlength="20" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="field" id="code-wrap">
+        <label>Бөлме коды</label>
+        <input type="text" id="scode" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
+      </div>
+      <button class="btn btn-primary btn-block" id="join-btn" style="margin-top:4px" onclick="joinQuiz()">🚀 Кіру</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WAIT ════ -->
+<div class="screen" id="s-wait">
+  <div class="wait-wrap">
+    <div class="wait-icon">✅</div>
+    <div class="wait-title">Қосылдыңыз!</div>
+    <div class="wait-sub">Мұғалім сабақты бастағанша күтіңіз</div>
+    <div class="wait-name" id="wait-name"></div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div class="screen" id="s-quiz">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-card hl"><div class="stat-icon">📊</div><div class="stat-value" id="st-total">0</div><div class="stat-label">Жауап</div></div>
+      <div class="stat-card g"><div class="stat-icon">✓</div><div class="stat-value" id="st-correct">0</div><div class="stat-label">Дұрыс</div></div>
+      <div class="stat-card r"><div class="stat-icon">✗</div><div class="stat-value" id="st-wrong">0</div><div class="stat-label">Қате</div></div>
+      <div class="stat-card a"><div class="stat-icon">🔥</div><div class="stat-value" id="st-streak">0</div><div class="stat-label">Қатарынан</div></div>
+    </div>
+    <div class="quiz-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="q-badge"><span>📝</span><span id="sec-label">Есептеңіз</span></div>
+        <span class="q-num" id="q-num">#1</span>
+      </div>
+      <div class="problem-display" id="problem-display"></div>
+      <div class="answer-area">
+        <div class="answer-display focused" id="answer-display"><span class="answer-cursor"></span></div>
+      </div>
+      <div class="mode-toggle" id="mode-toggle">
+        <button class="mode-btn active" data-mode="number" onclick="switchMode('number')">123</button>
+        <button class="mode-btn" data-mode="fraction" onclick="switchMode('fraction')">▫/▫</button>
+      </div>
+      <div id="keypad-number" class="keypad">
+        <button class="key" onclick="kp('7')">7</button>
+        <button class="key" onclick="kp('8')">8</button>
+        <button class="key" onclick="kp('9')">9</button>
+        <button class="key danger" onclick="kpClear()">C</button>
+        <button class="key" onclick="kp('4')">4</button>
+        <button class="key" onclick="kp('5')">5</button>
+        <button class="key" onclick="kp('6')">6</button>
+        <button class="key accent" onclick="kpBack()">⌫</button>
+        <button class="key" onclick="kp('1')">1</button>
+        <button class="key" onclick="kp('2')">2</button>
+        <button class="key" onclick="kp('3')">3</button>
+        <button class="key accent" onclick="kp('-')">−</button>
+        <button class="key" onclick="kp(',')">，</button>
+        <button class="key" onclick="kp('0')">0</button>
+        <button class="key accent" id="var-key" onclick="kpVar()" style="display:none">x</button>
+        <button class="key accent" id="check-key" onclick="checkAnswer()" style="font-size:1.4rem">✓</button>
+      </div>
+      <div id="keypad-fraction" class="keypad hidden">
+        <button class="key" onclick="kp('7')">7</button>
+        <button class="key" onclick="kp('8')">8</button>
+        <button class="key" onclick="kp('9')">9</button>
+        <button class="key danger" onclick="kpClear()">C</button>
+        <button class="key" onclick="kp('4')">4</button>
+        <button class="key" onclick="kp('5')">5</button>
+        <button class="key" onclick="kp('6')">6</button>
+        <button class="key accent" onclick="kpBack()">⌫</button>
+        <button class="key" onclick="kp('1')">1</button>
+        <button class="key" onclick="kp('2')">2</button>
+        <button class="key" onclick="kp('3')">3</button>
+        <button class="key accent" onclick="kp('-')">−</button>
+        <button class="key accent" onclick="fracSwitch()">▲▼</button>
+        <button class="key" onclick="kp('0')">0</button>
+        <button class="key accent" onclick="fracWhole()">W</button>
+        <button class="key accent" onclick="checkAnswer()" style="font-size:1.4rem">✓</button>
+      </div>
+      <div class="feedback hidden" id="feedback"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Келесі →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RESULTS ════ -->
+<div class="screen" id="s-results">
+  <div class="res-wrap">
+    <div class="res-card">
+      <div style="font-size:3rem;margin-bottom:8px" id="res-emoji">🏆</div>
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px">Тест аяқталды!</div>
+      <div style="color:var(--muted);font-size:.86rem">Нәтижелеріңіз</div>
+      <div class="res-stats">
+        <div class="res-stat"><div class="res-val" id="res-correct" style="color:var(--green)">0</div><div class="res-lbl">Дұрыс</div></div>
+        <div class="res-stat"><div class="res-val" id="res-wrong" style="color:var(--red)">0</div><div class="res-lbl">Қате</div></div>
+        <div class="res-stat"><div class="res-val" id="res-pct" style="color:var(--primary)">0%</div><div class="res-lbl">Пайыз</div></div>
+      </div>
+      <p style="color:var(--muted);margin-top:16px;font-size:.82rem">Нәтижелер мұғалімге жіберілді ✓</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const STORAGE_KEY_PREFIX = 'ms_intops6_';
+// ═══════════════════════════════════════════════════════════════
+
+const tex = s => katex.renderToString(s, { throwOnError: false });
+
+// ── URL params ──────────────────────────────────────────
+const urlParams = new URLSearchParams(location.search);
+const urlCode = (urlParams.get('code') || '').toUpperCase();
+const secParam = urlParams.get('sec');
+
+// ── State ───────────────────────────────────────────────
+let sessionCode = '';
+let studentId = '';
+let studentName = '';
+let sections = secParam ? secParam.split(',') : ['sec1','sec2','sec3','sec4','sec5','sec6'];
+let stats = { correct: 0, wrong: 0, streak: 0 };
+let quiz = { answered: false, correctAnswer: null, questionNum: 0, currentSec: '' };
+let submitInterval = null;
+let statusPollInterval = null;
+let quizStarted = false;
+
+// ── Input state ─────────────────────────────────────────
+let inputMode = 'number'; // 'number' or 'fraction'
+let numberBuffer = '';     // for number/decimal/variable answers
+// Fraction state: whole, numerator, denominator
+let fracWholeBuf = '';
+let fracNumBuf = '';
+let fracDenBuf = '';
+let fracField = 'num'; // 'whole', 'num', 'den'
+let needsFractionAnswer = false;
+let needsVarAnswer = false;
+
+// ── Anti-paste: block all native input ──────────────────
+document.addEventListener('paste', e => e.preventDefault());
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+
+// ── Focus tracking ──────────────────────────────────────
+let isFocused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let awayStart = null;
+
+function markAway() {
+  if (!isFocused) return;
+  isFocused = false;
+  tabSwitches++;
+  awayStart = Date.now();
+  saveState();
+  sendScore();
+}
+function markBack() {
+  if (isFocused) return;
+  isFocused = true;
+  if (awayStart) {
+    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
+    awayStart = null;
+  }
+  sendScore();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) markAway(); else markBack();
+});
+window.addEventListener('blur', markAway);
+window.addEventListener('focus', markBack);
+
+// ── localStorage helpers ────────────────────────────────
+function saveState() {
+  if (!sessionCode) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + sessionCode, JSON.stringify({
+      studentId,
+      name: studentName,
+      correct: stats.correct,
+      wrong: stats.wrong,
+      streak: stats.streak,
+      tabSwitches,
+      awaySeconds: currentAway,
+      sections,
+      ts: Date.now()
+    }));
+  } catch (_) {}
+}
+function loadState(code) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + code);
+      return null;
+    }
+    return data;
+  } catch (_) { return null; }
+}
+function clearState() {
+  if (sessionCode) {
+    try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {}
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function randomInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; }
+function spawnConfetti() {
+  const w = document.getElementById('confetti'); w.innerHTML = '';
+  const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626'];
+  for (let i = 0; i < 60; i++) { const e = document.createElement('div'); e.className = 'cfp'; const s = 5 + Math.random() * 9; e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`; w.appendChild(e); }
+  setTimeout(() => w.innerHTML = '', 6000);
+}
+
+// ── Auto-fill code from URL ─────────────────────────────
+if (urlCode) {
+  sessionCode = urlCode;
+  document.getElementById('scode').value = urlCode;
+  document.getElementById('code-wrap').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════
+//  RECONNECTION: Check localStorage on page load
+// ══════════════════════════════════════════════════════════
+(async function tryReconnect() {
+  if (!urlCode) return;
+  const saved = loadState(urlCode);
+  if (!saved) return;
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${urlCode}`);
+    const data = await res.json();
+    if (data.status === 'not_found' || data.status === 'ended') {
+      clearState(); return;
+    }
+    sessionCode = urlCode;
+    studentId = saved.studentId;
+    studentName = saved.name;
+    stats = { correct: saved.correct || 0, wrong: saved.wrong || 0, streak: saved.streak || 0 };
+    tabSwitches = saved.tabSwitches || 0;
+    awaySeconds = saved.awaySeconds || 0;
+    if (saved.sections?.length) sections = saved.sections;
+    if (data.status === 'active') { startQuiz(); }
+    else if (data.status === 'waiting') { showWait(); }
+  } catch (_) {}
+})();
+
+// ══════════════════════════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════════════════════════
+async function joinQuiz() {
+  const name = document.getElementById('sname').value.trim();
+  const code = (urlCode || document.getElementById('scode').value.trim()).toUpperCase();
+  const errEl = document.getElementById('join-err');
+  if (!name) { errEl.textContent = 'Атыңызды жазыңыз'; errEl.classList.add('on'); return; }
+  if (code.length < 4) { errEl.textContent = 'Бөлме кодын енгізіңіз'; errEl.classList.add('on'); return; }
+  errEl.classList.remove('on');
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = '⏳ Қосылуда...';
+  sessionCode = code;
+  studentName = name;
+  studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${code}`);
+    const data = await res.json();
+    if (data.status === 'not_found') {
+      errEl.textContent = 'Бөлме табылмады. Кодты тексеріңіз.';
+      errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+    }
+    if (data.status === 'ended') {
+      errEl.textContent = 'Бұл сабақ аяқталған.';
+      errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return;
+    }
+    stats = { correct: 0, wrong: 0, streak: 0 };
+    await sendScore();
+    saveState();
+    btn.disabled = false; btn.textContent = '🚀 Кіру';
+    if (data.status === 'active') { startQuiz(); } else { showWait(); }
+  } catch (e) {
+    errEl.textContent = 'Серверге қосылу мүмкін болмады.';
+    errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру';
+  }
+}
+document.addEventListener('keydown', e => {
+  if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz();
+});
+
+// ══════════════════════════════════════════════════════════
+//  WAIT for teacher to start
+// ══════════════════════════════════════════════════════════
+function showWait() {
+  document.getElementById('wait-name').textContent = studentName;
+  show('s-wait');
+  if (statusPollInterval) clearInterval(statusPollInterval);
+  statusPollInterval = setInterval(pollStatus, 2000);
+}
+async function pollStatus() {
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
+    const data = await res.json();
+    if (data.status === 'active') { clearInterval(statusPollInterval); statusPollInterval = null; startQuiz(); }
+    else if (data.status === 'ended' || data.status === 'not_found') { clearInterval(statusPollInterval); statusPollInterval = null; showEnd(); }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  START QUIZ
+// ══════════════════════════════════════════════════════════
+function startQuiz() {
+  if (quizStarted) return;
+  quizStarted = true;
+  updateStats();
+  show('s-quiz');
+  loadQuestion();
+  sendScore();
+  if (submitInterval) clearInterval(submitInterval);
+  submitInterval = setInterval(sendScore, 5000);
+}
+
+// ══════════════════════════════════════════════════════════
+//  SEND SCORE
+// ══════════════════════════════════════════════════════════
+async function sendScore(finished) {
+  if (!sessionCode || !studentName) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    const res = await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: sessionCode,
+        studentId,
+        name: studentName,
+        score: stats.correct,
+        total: stats.correct + stats.wrong,
+        finished: finished === true,
+        focused: isFocused,
+        tabSwitches,
+        awaySeconds: currentAway
+      })
+    });
+    const txt = await res.text();
+    try {
+      const data = JSON.parse(txt);
+      if (data.status === 'ended' || data.status === 'not_found') { showEnd(); }
+    } catch (_) {}
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  END — show results
+// ══════════════════════════════════════════════════════════
+function showEnd() {
+  if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
+  if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+  const total = stats.correct + stats.wrong;
+  const pct = total > 0 ? Math.round(stats.correct / total * 100) : 0;
+  document.getElementById('res-correct').textContent = stats.correct;
+  document.getElementById('res-wrong').textContent = stats.wrong;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-emoji').textContent = pct >= 70 ? '🎉' : pct >= 40 ? '👍' : '💪';
+  show('s-results');
+  if (pct >= 70) spawnConfetti();
+  clearState();
+}
+
+function updateStats() {
+  document.getElementById('st-total').textContent = stats.correct + stats.wrong;
+  document.getElementById('st-correct').textContent = stats.correct;
+  document.getElementById('st-wrong').textContent = stats.wrong;
+  document.getElementById('st-streak').textContent = stats.streak;
+}
+
+// ══════════════════════════════════════════════════════════
+//  KEYPAD INPUT SYSTEM (anti-paste: no native input used)
+// ══════════════════════════════════════════════════════════
+function switchMode(mode) {
+  inputMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('keypad-number').classList.toggle('hidden', mode !== 'number');
+  document.getElementById('keypad-fraction').classList.toggle('hidden', mode !== 'fraction');
+  kpClear();
+}
+
+function kp(ch) {
+  if (quiz.answered) return;
+  if (inputMode === 'number') {
+    // Prevent multiple minus signs, only at start
+    if (ch === '-') {
+      if (numberBuffer.length > 0) return;
+      numberBuffer = '-';
+    } else if (ch === ',') {
+      if (numberBuffer.includes(',')) return;
+      if (numberBuffer === '' || numberBuffer === '-') numberBuffer += '0';
+      numberBuffer += ',';
+    } else {
+      // Digit
+      if (numberBuffer.length >= 12) return;
+      numberBuffer += ch;
+    }
+  } else {
+    // Fraction mode
+    let buf;
+    if (fracField === 'whole') buf = fracWholeBuf;
+    else if (fracField === 'num') buf = fracNumBuf;
+    else buf = fracDenBuf;
+
+    if (ch === '-') {
+      // Minus only in whole or numerator at position 0
+      if (fracField === 'den') return;
+      if (buf.length > 0) return;
+      buf = '-';
+    } else if (ch === ',') {
+      return; // No decimals in fractions
+    } else {
+      if (buf.length >= 6) return;
+      buf += ch;
+    }
+
+    if (fracField === 'whole') fracWholeBuf = buf;
+    else if (fracField === 'num') fracNumBuf = buf;
+    else fracDenBuf = buf;
+  }
+  renderAnswer();
+}
+
+function kpBack() {
+  if (quiz.answered) return;
+  if (inputMode === 'number') {
+    numberBuffer = numberBuffer.slice(0, -1);
+  } else {
+    if (fracField === 'whole') fracWholeBuf = fracWholeBuf.slice(0, -1);
+    else if (fracField === 'num') fracNumBuf = fracNumBuf.slice(0, -1);
+    else fracDenBuf = fracDenBuf.slice(0, -1);
+  }
+  renderAnswer();
+}
+
+function kpClear() {
+  numberBuffer = '';
+  fracWholeBuf = '';
+  fracNumBuf = '';
+  fracDenBuf = '';
+  fracField = 'num';
+  if (!quiz.answered) renderAnswer();
+}
+
+function kpVar() {
+  if (quiz.answered) return;
+  if (inputMode !== 'number') return;
+  // Add variable letter to buffer
+  const varLetter = quiz.varLetter || 'x';
+  if (numberBuffer.endsWith(varLetter)) return;
+  numberBuffer += varLetter;
+  renderAnswer();
+}
+
+function fracSwitch() {
+  if (quiz.answered) return;
+  // Toggle between numerator and denominator
+  if (fracField === 'num') fracField = 'den';
+  else fracField = 'num';
+  renderAnswer();
+}
+
+function fracWhole() {
+  if (quiz.answered) return;
+  // Toggle to whole number field
+  if (fracField === 'whole') fracField = 'num';
+  else fracField = 'whole';
+  renderAnswer();
+}
+
+function renderAnswer() {
+  const disp = document.getElementById('answer-display');
+  if (inputMode === 'number') {
+    const text = numberBuffer || '';
+    if (!text) {
+      disp.innerHTML = '<span class="answer-cursor"></span>';
+    } else {
+      // Show as KaTeX if it has a variable, otherwise plain
+      if (needsVarAnswer && /[a-z]/.test(text)) {
+        disp.innerHTML = tex(text.replace(/,/g, '{,}'));
+      } else {
+        disp.textContent = text;
+      }
+    }
+  } else {
+    // Fraction display
+    let html = '';
+    // Whole part
+    if (fracWholeBuf || fracField === 'whole') {
+      html += `<span style="font-size:1.3rem;font-weight:700;margin-right:4px;${fracField==='whole'?'color:var(--primary)':''}">${fracWholeBuf || (fracField==='whole'?'_':'')}</span>`;
+    }
+    html += '<span class="frac-input-visual">';
+    html += `<span class="frac-num${fracField==='num'?' active':''}">${fracNumBuf || (fracField==='num'?'_':'?')}</span>`;
+    html += '<span class="frac-line"></span>';
+    html += `<span class="frac-den${fracField==='den'?' active':''}">${fracDenBuf || (fracField==='den'?'_':'?')}</span>`;
+    html += '</span>';
+    disp.innerHTML = html;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  QUESTION GENERATION — 6 TYPES
+// ══════════════════════════════════════════════════════════
+const SEC_LABELS = {
+  sec1: 'Бүтін сандарды қосу',
+  sec2: 'Ондық бөлшектерді қосу',
+  sec3: 'Бөлшектерді қосу',
+  sec4: 'Бүтін сандарды азайту',
+  sec5: 'Көп амалды өрнектер',
+  sec6: 'Алгебралық өрнектер'
+};
+
+function generateQuestion(sec) {
+  if (sec === 'sec1') return genIntegerAdd();
+  if (sec === 'sec2') return genDecimalAdd();
+  if (sec === 'sec3') return genFractionAdd();
+  if (sec === 'sec4') return genIntegerSub();
+  if (sec === 'sec5') return genMultiStep();
+  if (sec === 'sec6') return genAlgebraic();
+}
+
+// ── SEC1: Integer addition ──────────────────────────────
+function genIntegerAdd() {
+  const difficulty = randomChoice(['easy','med','hard']);
+  let a, b, expr;
+  if (difficulty === 'easy') {
+    a = randomInt(-20, 20);
+    b = randomInt(-20, 20);
+  } else if (difficulty === 'med') {
+    a = randomInt(-100, 100);
+    b = randomInt(-100, 100);
+  } else {
+    a = randomInt(-500, 500);
+    b = randomInt(-500, 500);
+  }
+  // Format like the textbook: a + (b) or a + b
+  if (b < 0) {
+    expr = `${a} + (${b})`;
+  } else {
+    expr = `${a} + ${b}`;
+  }
+  return { expr, answer: a + b, type: 'integer' };
+}
+
+// ── SEC2: Decimal addition ──────────────────────────────
+function genDecimalAdd() {
+  const difficulty = randomChoice(['easy','med','hard']);
+  let a, b;
+  if (difficulty === 'easy') {
+    a = (randomInt(-100, 100)) / 10;
+    b = (randomInt(-100, 100)) / 10;
+  } else if (difficulty === 'med') {
+    a = (randomInt(-1000, 1000)) / 10;
+    b = (randomInt(-1000, 1000)) / 10;
+  } else {
+    a = (randomInt(-10000, 10000)) / 100;
+    b = (randomInt(-10000, 10000)) / 100;
+  }
+  // Use comma as decimal separator (KZ standard)
+  const fmtNum = n => {
+    let s = n.toString();
+    if (s.includes('.')) s = s.replace('.', ',');
+    else s = s; // integer
+    return s;
+  };
+  let expr;
+  if (b < 0) {
+    expr = `${fmtNum(a)} + (${fmtNum(b)})`;
+  } else {
+    expr = `${fmtNum(a)} + ${fmtNum(b)}`;
+  }
+  // Round to avoid floating point issues
+  const ans = Math.round((a + b) * 1000) / 1000;
+  return { expr, answer: ans, type: 'decimal' };
+}
+
+// ── SEC3: Fraction addition ─────────────────────────────
+function genFractionAdd() {
+  const difficulty = randomChoice(['simple','mixed']);
+  if (difficulty === 'simple') {
+    // Simple fractions: a/b + c/d
+    const d1 = randomChoice([2,3,4,5,6,7,8,9,10,11]);
+    const d2 = randomChoice([2,3,4,5,6,7,8,9,10,11].filter(x => x !== d1));
+    let n1 = randomInt(1, d1 - 1);
+    let n2 = randomInt(1, d2 - 1);
+    // Randomly negate one
+    if (Math.random() < 0.5) n1 = -n1;
+    if (Math.random() < 0.4) n2 = -n2;
+
+    let expr;
+    if (n2 < 0) {
+      expr = `\\dfrac{${n1}}{${d1}} + \\left(${n2 < 0 ? `-\\dfrac{${Math.abs(n2)}}{${d2}}` : `\\dfrac{${n2}}{${d2}}`}\\right)`;
+    } else {
+      expr = `${n1 < 0 ? `-\\dfrac{${Math.abs(n1)}}{${d1}}` : `\\dfrac{${n1}}{${d1}}`} + \\dfrac{${n2}}{${d2}}`;
+    }
+
+    // Compute answer as fraction
+    let ansNum = n1 * d2 + n2 * d1;
+    let ansDen = d1 * d2;
+    const g = gcd(Math.abs(ansNum), ansDen);
+    ansNum /= g;
+    ansDen /= g;
+
+    return { expr, answerNum: ansNum, answerDen: ansDen, type: 'fraction' };
+  } else {
+    // Mixed numbers
+    const w1 = randomInt(1, 5) * (Math.random() < 0.3 ? -1 : 1);
+    const d1 = randomChoice([2,3,4,5,7,8,9,10,13]);
+    const n1 = randomInt(1, d1 - 1);
+    const w2 = randomInt(1, 5) * (Math.random() < 0.5 ? -1 : 1);
+    const d2 = randomChoice([2,3,4,5,7,8,9,10,11]);
+    const n2 = randomInt(1, d2 - 1);
+
+    const fmtMixed = (w, n, d) => {
+      if (w < 0) return `-${Math.abs(w)}\\dfrac{${n}}{${d}}`;
+      return `${w}\\dfrac{${n}}{${d}}`;
+    };
+
+    let expr;
+    if (w2 < 0) {
+      expr = `${fmtMixed(w1, n1, d1)} + \\left(${fmtMixed(w2, n2, d2)}\\right)`;
+    } else {
+      expr = `${fmtMixed(w1, n1, d1)} + ${fmtMixed(w2, n2, d2)}`;
+    }
+
+    // Convert to improper fractions and add
+    const imp1 = (Math.abs(w1) * d1 + n1) * (w1 < 0 ? -1 : 1);
+    const imp2 = (Math.abs(w2) * d2 + n2) * (w2 < 0 ? -1 : 1);
+    let ansNum = imp1 * d2 + imp2 * d1;
+    let ansDen = d1 * d2;
+    const g = gcd(Math.abs(ansNum), ansDen);
+    ansNum /= g;
+    ansDen /= g;
+
+    return { expr, answerNum: ansNum, answerDen: ansDen, type: 'fraction' };
+  }
+}
+
+// ── SEC4: Integer subtraction ───────────────────────────
+function genIntegerSub() {
+  const style = randomChoice(['simple','paren','double_neg']);
+  let a, b, expr, answer;
+  if (style === 'simple') {
+    a = randomInt(-50, 70);
+    b = randomInt(1, 70);
+    expr = `${a} - ${b}`;
+    answer = a - b;
+  } else if (style === 'paren') {
+    a = randomInt(-30, 30);
+    b = randomInt(-30, -1);
+    expr = `${a} - (${b})`;
+    answer = a - b;
+  } else {
+    a = randomInt(-50, 50);
+    b = randomInt(1, 50);
+    expr = `${a} - ${b}`;
+    answer = a - b;
+  }
+  return { expr, answer, type: 'integer' };
+}
+
+// ── SEC5: Multi-step expressions ────────────────────────
+function genMultiStep() {
+  const style = randomChoice(['three_terms','with_parens','two_groups']);
+  let expr, answer;
+  if (style === 'three_terms') {
+    const a = randomInt(-30, 30), b = randomInt(-30, 30), c = randomInt(-30, 30);
+    // Format: a - b + c or a + b - c etc
+    const ops = ['+', '-'];
+    const op1 = randomChoice(ops), op2 = randomChoice(ops);
+    expr = `${a} ${op1} ${Math.abs(b)} ${op2} ${Math.abs(c)}`;
+    answer = a + (op1 === '+' ? Math.abs(b) : -Math.abs(b)) + (op2 === '+' ? Math.abs(c) : -Math.abs(c));
+    // Reformat with possible negatives
+    const terms = [a];
+    terms.push(op1 === '+' ? Math.abs(b) : -Math.abs(b));
+    terms.push(op2 === '+' ? Math.abs(c) : -Math.abs(c));
+    answer = terms.reduce((s, t) => s + t, 0);
+    // Build cleaner expression
+    let parts = [`${a}`];
+    if (op1 === '+') parts.push(`+ ${Math.abs(b)}`); else parts.push(`- ${Math.abs(b)}`);
+    if (op2 === '+') parts.push(`+ ${Math.abs(c)}`); else parts.push(`- ${Math.abs(c)}`);
+    expr = parts.join(' ');
+  } else if (style === 'with_parens') {
+    const a = randomInt(-30, 30), b = randomInt(-20, 20), c = randomInt(1, 20);
+    // a - (b + c) or a - (b - c)
+    const innerOp = randomChoice(['+', '-']);
+    const inner = innerOp === '+' ? b + c : b - c;
+    expr = `${a} - (${b} ${innerOp} ${c})`;
+    answer = a - inner;
+  } else {
+    // (a + b) - (c + d)
+    const a = randomInt(-20, 20), b = randomInt(-20, 20);
+    const c = randomInt(-20, 20), d = randomInt(-20, 20);
+    expr = `(${a} + ${b}) - (${c} + ${d})`;
+    answer = (a + b) - (c + d);
+  }
+  return { expr: expr.replace(/\+ -/g, '- '), answer, type: 'integer' };
+}
+
+// ── SEC6: Algebraic simplification ──────────────────────
+function genAlgebraic() {
+  const varLetter = randomChoice(['x','a','b','m','n','p','t','d','k','z','q','c','y']);
+  const numTerms = randomChoice([2, 3, 4]);
+  const coeffs = [];
+  for (let i = 0; i < numTerms; i++) {
+    let c = randomInt(-15, 15);
+    if (c === 0) c = randomChoice([-1, 1]);
+    coeffs.push(c);
+  }
+
+  // Build expression
+  const hasBrackets = Math.random() < 0.4 && numTerms >= 3;
+  let expr, answer;
+
+  if (!hasBrackets) {
+    // Simple: 3x - 5x + 2x
+    let parts = [];
+    coeffs.forEach((c, i) => {
+      const abs = Math.abs(c);
+      const cStr = abs === 1 ? '' : `${abs}`;
+      if (i === 0) {
+        parts.push(c < 0 ? `-${cStr}${varLetter}` : `${cStr}${varLetter}`);
+      } else {
+        parts.push(c < 0 ? `- ${cStr}${varLetter}` : `+ ${cStr}${varLetter}`);
+      }
+    });
+    expr = parts.join(' ');
+    answer = coeffs.reduce((s, c) => s + c, 0);
+  } else {
+    // With brackets: 4a + 11a - (-2a)
+    // Pick one or two terms to put in brackets with negation
+    const bracketIdx = randomInt(1, numTerms - 1);
+    let parts = [];
+    let totalCoeff = 0;
+    coeffs.forEach((c, i) => {
+      if (i === bracketIdx) {
+        // This term is negated bracket: -(-2a) means +2a
+        const innerC = -c; // what's inside bracket
+        const abs = Math.abs(innerC);
+        const cStr = abs === 1 ? '' : `${abs}`;
+        const sign = innerC < 0 ? `-${cStr}${varLetter}` : `${cStr}${varLetter}`;
+        parts.push(`- (${sign})`);
+        totalCoeff += c; // Original coefficient contributes
+      } else {
+        const abs = Math.abs(c);
+        const cStr = abs === 1 ? '' : `${abs}`;
+        if (i === 0) {
+          parts.push(c < 0 ? `-${cStr}${varLetter}` : `${cStr}${varLetter}`);
+        } else {
+          parts.push(c < 0 ? `- ${cStr}${varLetter}` : `+ ${cStr}${varLetter}`);
+        }
+        totalCoeff += c;
+      }
+    });
+    expr = parts.join(' ');
+    answer = totalCoeff;
+  }
+
+  return { expr, answer, type: 'algebraic', varLetter };
+}
+
+// ══════════════════════════════════════════════════════════
+//  LOAD & CHECK
+// ══════════════════════════════════════════════════════════
+function loadQuestion() {
+  quiz.answered = false;
+  quiz.questionNum++;
+  const sec = randomChoice(sections);
+  quiz.currentSec = sec;
+  const q = generateQuestion(sec);
+  quiz.currentQ = q;
+
+  needsFractionAnswer = (q.type === 'fraction');
+  needsVarAnswer = (q.type === 'algebraic');
+
+  // Show/hide fraction mode toggle
+  const modeToggle = document.getElementById('mode-toggle');
+  if (needsFractionAnswer) {
+    modeToggle.classList.remove('hidden');
+    switchMode('fraction');
+  } else {
+    modeToggle.classList.remove('hidden');
+    switchMode('number');
+    if (q.type === 'algebraic') {
+      // Show number mode only, but no fraction toggle needed
+      modeToggle.classList.add('hidden');
+    } else {
+      modeToggle.classList.add('hidden');
+    }
+  }
+
+  // Show/hide variable key
+  const varKey = document.getElementById('var-key');
+  if (needsVarAnswer) {
+    varKey.style.display = '';
+    varKey.textContent = q.varLetter;
+    quiz.varLetter = q.varLetter;
+  } else {
+    varKey.style.display = 'none';
+  }
+
+  // Section label
+  document.getElementById('sec-label').textContent = SEC_LABELS[sec] || 'Есептеңіз';
+  document.getElementById('q-num').textContent = '#' + quiz.questionNum;
+
+  // Render problem with KaTeX
+  document.getElementById('problem-display').innerHTML = tex(q.expr + ' =');
+
+  // Clear answer
+  kpClear();
+  renderAnswer();
+
+  // Reset UI
+  const disp = document.getElementById('answer-display');
+  disp.classList.remove('correct-border', 'wrong-border');
+  disp.classList.add('focused');
+  document.getElementById('feedback').classList.add('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+  enableKeypad(true);
+}
+
+function enableKeypad(on) {
+  document.querySelectorAll('.key').forEach(k => k.disabled = !on);
+}
+
+function checkAnswer() {
+  if (quiz.answered) return;
+  const q = quiz.currentQ;
+  let isCorrect = false;
+
+  if (q.type === 'fraction') {
+    // Check fraction answer
+    if (inputMode === 'fraction') {
+      const wh = parseInt(fracWholeBuf) || 0;
+      const num = parseInt(fracNumBuf);
+      const den = parseInt(fracDenBuf);
+      if (isNaN(num) || isNaN(den) || den === 0) {
+        shakeAnswer(); return;
+      }
+      // Convert student answer to improper fraction
+      let studentNum;
+      if (wh === 0) {
+        studentNum = num;
+      } else {
+        studentNum = (Math.abs(wh) * den + Math.abs(num)) * (wh < 0 || num < 0 ? -1 : 1);
+        // Handle sign properly
+        if (wh < 0) studentNum = -(Math.abs(wh) * den + Math.abs(num));
+        else if (num < 0) studentNum = Math.abs(wh) * den - Math.abs(num);
+        else studentNum = wh * den + num;
+      }
+      const studentDen = den;
+      // Compare by cross multiplication
+      isCorrect = (studentNum * q.answerDen === q.answerNum * studentDen);
+    } else {
+      // Number mode — check if decimal approximation matches
+      const userVal = parseFloat(numberBuffer.replace(',', '.'));
+      if (isNaN(userVal)) { shakeAnswer(); return; }
+      const correctVal = q.answerNum / q.answerDen;
+      isCorrect = Math.abs(userVal - correctVal) < 0.001;
+    }
+  } else if (q.type === 'algebraic') {
+    // Parse algebraic answer: format like "5x" or "-3a" or "0"
+    const input = numberBuffer.trim();
+    if (!input) { shakeAnswer(); return; }
+    const v = q.varLetter;
+    let userCoeff;
+    if (input === '0') {
+      userCoeff = 0;
+    } else if (input === v) {
+      userCoeff = 1;
+    } else if (input === `-${v}`) {
+      userCoeff = -1;
+    } else if (input.endsWith(v)) {
+      const numPart = input.slice(0, -1);
+      userCoeff = parseFloat(numPart.replace(',', '.'));
+    } else {
+      // Maybe they just typed the coefficient number
+      userCoeff = parseFloat(input.replace(',', '.'));
+    }
+    if (isNaN(userCoeff)) { shakeAnswer(); return; }
+    isCorrect = (userCoeff === q.answer);
+  } else {
+    // Integer or decimal
+    if (!numberBuffer) { shakeAnswer(); return; }
+    const userVal = parseFloat(numberBuffer.replace(',', '.'));
+    if (isNaN(userVal)) { shakeAnswer(); return; }
+    isCorrect = Math.abs(userVal - q.answer) < 0.001;
+  }
+
+  quiz.answered = true;
+  enableKeypad(false);
+  const disp = document.getElementById('answer-display');
+  disp.classList.remove('focused');
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('hidden', 'correct', 'wrong');
+
+  if (isCorrect) {
+    stats.correct++;
+    stats.streak++;
+    disp.classList.add('correct-border');
+    fb.classList.add('correct');
+    fb.textContent = '✓ Дұрыс!';
+  } else {
+    stats.wrong++;
+    stats.streak = 0;
+    disp.classList.add('wrong-border');
+    fb.classList.add('wrong');
+    // Show correct answer
+    let correctStr;
+    if (q.type === 'fraction') {
+      const an = q.answerNum, ad = q.answerDen;
+      if (ad === 1) correctStr = `${an}`;
+      else if (Math.abs(an) > ad) {
+        const w = Math.trunc(an / ad);
+        const r = Math.abs(an) % ad;
+        if (r === 0) correctStr = `${w}`;
+        else correctStr = `${w} ${r}/${ad}`;
+      } else {
+        correctStr = `${an}/${ad}`;
+      }
+    } else if (q.type === 'algebraic') {
+      const c = q.answer;
+      if (c === 0) correctStr = '0';
+      else if (c === 1) correctStr = q.varLetter;
+      else if (c === -1) correctStr = '-' + q.varLetter;
+      else correctStr = c + q.varLetter;
+    } else if (q.type === 'decimal') {
+      correctStr = q.answer.toString().replace('.', ',');
+    } else {
+      correctStr = q.answer.toString();
+    }
+    fb.textContent = `✗ Қате! Дұрыс жауап: ${correctStr}`;
+  }
+
+  updateStats();
+  saveState();
+  sendScore();
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function shakeAnswer() {
+  const disp = document.getElementById('answer-display');
+  disp.style.animation = 'none';
+  disp.offsetHeight; // Trigger reflow
+  disp.style.animation = 'shake .4s ease';
+}
+
+function nextQuestion() { loadQuestion(); }
+
+// ── Physical keyboard support (digits only, no paste) ───
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('s-quiz').classList.contains('active')) return;
+  if (quiz.answered) {
+    if (e.key === 'Enter' || e.key === ' ') { nextQuestion(); e.preventDefault(); }
+    return;
+  }
+  if (e.key >= '0' && e.key <= '9') { kp(e.key); e.preventDefault(); }
+  else if (e.key === '-') { kp('-'); e.preventDefault(); }
+  else if (e.key === ',' || e.key === '.') { kp(','); e.preventDefault(); }
+  else if (e.key === 'Backspace') { kpBack(); e.preventDefault(); }
+  else if (e.key === 'Enter') { checkAnswer(); e.preventDefault(); }
+  else if (e.key === 'Escape' || e.key === 'Delete') { kpClear(); renderAnswer(); e.preventDefault(); }
+  // Block Ctrl+V etc
+  if (e.ctrlKey || e.metaKey) { e.preventDefault(); }
+});
+</script>
+</body>
+</html>
