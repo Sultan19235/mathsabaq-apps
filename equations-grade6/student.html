@@ -86,7 +86,8 @@ body{overflow-x:hidden}
 .quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow);animation:pop .3s ease}
 .q-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-light);color:var(--primary);padding:.3rem .7rem;border-radius:16px;font-size:.72rem;font-weight:700;margin-bottom:.75rem}
 
-.q-display{font-size:1.15rem;font-weight:600;text-align:center;padding:1rem;background:linear-gradient(135deg,var(--primary-light) 0%,#f0f2ff 100%);border:2px solid rgba(67,56,202,.15);border-radius:16px;margin-bottom:1rem;line-height:1.6}
+.q-display{font-size:1.15rem;font-weight:600;text-align:center;padding:1rem;background:linear-gradient(135deg,var(--primary-light) 0%,#f0f2ff 100%);border:2px solid rgba(67,56,202,.15);border-radius:16px;margin-bottom:1rem;line-height:1.6;overflow-x:auto}
+@media(max-width:500px){.q-display{font-size:.92rem;padding:.75rem .5rem}}
 
 .opts-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
 .opt-btn{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border:2.5px solid var(--border);border-radius:14px;background:var(--bg2);cursor:pointer;transition:all .2s;touch-action:manipulation;text-align:left;font-family:inherit;font-size:.92rem;font-weight:500;color:var(--text);width:100%}
@@ -233,7 +234,7 @@ body{overflow-x:hidden}
 const BACKEND = 'https://mathsabaq.online';
 const STORAGE_KEY_PREFIX = 'ms_eq6_';
 const QUESTIONS_PER_LEVEL = 10;
-const PASS_THRESHOLD = 0.8; // 80%
+const PASS_THRESHOLD = 0.8;
 const MAX_LEVEL = 6;
 // ═══════════════════════════════════════════════════════════════
 
@@ -253,14 +254,32 @@ let stats = { correct: 0, wrong: 0, streak: 0 };
 let currentLevel = 1;
 let levelCorrect = 0;
 let levelWrong = 0;
-let levelQuestion = 0; // 0-indexed question within level
+let levelQuestion = 0;
+let levelAttempt = 0;
 let selectedOpt = null;
 let answered = false;
 let currentQuestion = null;
 let submitInterval = null;
 let statusPollInterval = null;
 let quizStarted = false;
-let levelPassed = false; // whether current level-complete was a pass
+let levelPassed = false;
+
+// ══════════════════════════════════════════════════════════
+//  SEEDED PRNG — same student+level+question = same equation
+// ══════════════════════════════════════════════════════════
+let _seed = 1;
+function seedRng(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  _seed = (h >>> 0) || 1;
+}
+function seededRand() {
+  _seed ^= _seed << 13; _seed ^= _seed >> 17; _seed ^= _seed << 5;
+  return ((_seed >>> 0) % 10000000) / 10000000;
+}
+function sRandInt(a, b) { return a + Math.floor(seededRand() * (b - a + 1)); }
+function sRandChoice(arr) { return arr[Math.floor(seededRand() * arr.length)]; }
+function sShuffleArray(arr) { const r = [...arr]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(seededRand() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
 
 // ── Focus tracking ──────────────────────────────────────
 let isFocused = true;
@@ -270,24 +289,17 @@ let awayStart = null;
 
 function markAway() {
   if (!isFocused) return;
-  isFocused = false;
-  tabSwitches++;
+  isFocused = false; tabSwitches++;
   awayStart = Date.now();
-  saveState();
-  sendScore();
+  saveState(); sendScore();
 }
 function markBack() {
   if (isFocused) return;
   isFocused = true;
-  if (awayStart) {
-    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
-    awayStart = null;
-  }
+  if (awayStart) { awaySeconds += Math.round((Date.now() - awayStart) / 1000); awayStart = null; }
   sendScore();
 }
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) markAway(); else markBack();
-});
+document.addEventListener('visibilitychange', () => { if (document.hidden) markAway(); else markBack(); });
 window.addEventListener('blur', markAway);
 window.addEventListener('focus', markBack);
 
@@ -298,19 +310,10 @@ function saveState() {
   if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
   try {
     localStorage.setItem(STORAGE_KEY_PREFIX + sessionCode, JSON.stringify({
-      studentId,
-      name: studentName,
-      correct: stats.correct,
-      wrong: stats.wrong,
-      streak: stats.streak,
-      currentLevel,
-      levelCorrect,
-      levelWrong,
-      levelQuestion,
-      tabSwitches,
-      awaySeconds: currentAway,
-      sections,
-      ts: Date.now()
+      studentId, name: studentName,
+      correct: stats.correct, wrong: stats.wrong, streak: stats.streak,
+      currentLevel, levelCorrect, levelWrong, levelQuestion, levelAttempt,
+      tabSwitches, awaySeconds: currentAway, sections, ts: Date.now()
     }));
   } catch (_) {}
 }
@@ -319,24 +322,16 @@ function loadState(code) {
     const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code);
     if (!raw) return null;
     const data = JSON.parse(raw);
-    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) {
-      localStorage.removeItem(STORAGE_KEY_PREFIX + code);
-      return null;
-    }
+    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) { localStorage.removeItem(STORAGE_KEY_PREFIX + code); return null; }
     return data;
   } catch (_) { return null; }
 }
 function clearState() {
-  if (sessionCode) {
-    try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {}
-  }
+  if (sessionCode) { try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {} }
 }
 
 // ── Helpers ──────────────────────────────────────────────
 function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function randInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
-function randChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-function shuffleArray(arr) { const r = [...arr]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
 function spawnConfetti() {
   const w = document.getElementById('confetti'); w.innerHTML = '';
   const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626'];
@@ -344,7 +339,6 @@ function spawnConfetti() {
   setTimeout(() => w.innerHTML = '', 6000);
 }
 
-// ── Auto-fill code from URL ─────────────────────────────
 if (urlCode) {
   sessionCode = urlCode;
   document.getElementById('scode').value = urlCode;
@@ -363,16 +357,12 @@ if (urlCode) {
     const txt = await r.text();
     let data; try { data = JSON.parse(txt); } catch(_) { return; }
     if (data.status === 'not_found' || data.status === 'ended') { clearState(); return; }
-    sessionCode = urlCode;
-    studentId = saved.studentId;
-    studentName = saved.name;
-    stats = { correct: saved.correct || 0, wrong: saved.wrong || 0, streak: saved.streak || 0 };
-    currentLevel = saved.currentLevel || 1;
-    levelCorrect = saved.levelCorrect || 0;
-    levelWrong = saved.levelWrong || 0;
-    levelQuestion = saved.levelQuestion || 0;
-    tabSwitches = saved.tabSwitches || 0;
-    awaySeconds = saved.awaySeconds || 0;
+    sessionCode = urlCode; studentId = saved.studentId; studentName = saved.name;
+    stats = { correct: saved.correct||0, wrong: saved.wrong||0, streak: saved.streak||0 };
+    currentLevel = saved.currentLevel||1; levelCorrect = saved.levelCorrect||0;
+    levelWrong = saved.levelWrong||0; levelQuestion = saved.levelQuestion||0;
+    levelAttempt = saved.levelAttempt||0;
+    tabSwitches = saved.tabSwitches||0; awaySeconds = saved.awaySeconds||0;
     if (saved.sections?.length) sections = saved.sections;
     if (data.status === 'active') startQuiz();
     else if (data.status === 'waiting') showWait();
@@ -391,37 +381,26 @@ async function joinQuiz() {
   errEl.classList.remove('on');
   const btn = document.getElementById('join-btn');
   btn.disabled = true; btn.textContent = '⏳ Қосылуда...';
-  sessionCode = code;
-  studentName = name;
+  sessionCode = code; studentName = name;
   studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
   try {
     const r = await fetch(`${BACKEND}/status?code=${code}`);
     const txt = await r.text();
     let data; try { data = JSON.parse(txt); } catch(_) { errEl.textContent = 'Серверге қосылу мүмкін болмады.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
-    if (data.status === 'not_found') { errEl.textContent = 'Бөлме табылмады. Кодты тексеріңіз.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
+    if (data.status === 'not_found') { errEl.textContent = 'Бөлме табылмады.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
     if (data.status === 'ended') { errEl.textContent = 'Бұл сабақ аяқталған.'; errEl.classList.add('on'); btn.disabled = false; btn.textContent = '🚀 Кіру'; return; }
     stats = { correct: 0, wrong: 0, streak: 0 };
-    currentLevel = sections[0] || 1;
-    levelCorrect = 0; levelWrong = 0; levelQuestion = 0;
-    await sendScore();
-    saveState();
+    currentLevel = sections[0]||1; levelCorrect = 0; levelWrong = 0; levelQuestion = 0; levelAttempt = 0;
+    await sendScore(); saveState();
     btn.disabled = false; btn.textContent = '🚀 Кіру';
-    if (data.status === 'active') startQuiz();
-    else showWait();
+    if (data.status === 'active') startQuiz(); else showWait();
   } catch (e) {
-    errEl.textContent = 'Серверге қосылу мүмкін болмады.';
-    errEl.classList.add('on');
+    errEl.textContent = 'Серверге қосылу мүмкін болмады.'; errEl.classList.add('on');
     btn.disabled = false; btn.textContent = '🚀 Кіру';
   }
 }
+document.addEventListener('keydown', e => { if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz(); });
 
-document.addEventListener('keydown', e => {
-  if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz();
-});
-
-// ══════════════════════════════════════════════════════════
-//  WAIT
-// ══════════════════════════════════════════════════════════
 function showWait() {
   document.getElementById('wait-name').textContent = studentName;
   show('s-wait');
@@ -438,23 +417,13 @@ async function pollStatus() {
   } catch (_) {}
 }
 
-// ══════════════════════════════════════════════════════════
-//  START QUIZ
-// ══════════════════════════════════════════════════════════
 function startQuiz() {
-  if (quizStarted) return;
-  quizStarted = true;
-  updateStats();
-  show('s-quiz');
-  loadQuestion();
-  sendScore();
+  if (quizStarted) return; quizStarted = true;
+  updateStats(); show('s-quiz'); loadQuestion(); sendScore();
   if (submitInterval) clearInterval(submitInterval);
   submitInterval = setInterval(sendScore, 5000);
 }
 
-// ══════════════════════════════════════════════════════════
-//  SEND SCORE (level encoded: (level-1)*1000 + totalAnswers)
-// ══════════════════════════════════════════════════════════
 async function sendScore(finished) {
   if (!sessionCode || !studentName) return;
   let currentAway = awaySeconds;
@@ -462,19 +431,10 @@ async function sendScore(finished) {
   try {
     const totalAnswers = stats.correct + stats.wrong;
     const r = await fetch(`${BACKEND}/submit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        code: sessionCode,
-        studentId,
-        name: studentName,
-        score: stats.correct,
-        total: (currentLevel - 1) * 1000 + totalAnswers,
-        finished: finished === true,
-        focused: isFocused,
-        tabSwitches,
-        awaySeconds: currentAway
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: sessionCode, studentId, name: studentName,
+        score: stats.correct, total: (currentLevel - 1) * 1000 + totalAnswers,
+        finished: finished === true, focused: isFocused, tabSwitches, awaySeconds: currentAway })
     });
     const txt = await r.text();
     let data; try { data = JSON.parse(txt); } catch(_) { return; }
@@ -482,9 +442,6 @@ async function sendScore(finished) {
   } catch (_) {}
 }
 
-// ══════════════════════════════════════════════════════════
-//  END
-// ══════════════════════════════════════════════════════════
 function showEnd() {
   if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
   if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
@@ -494,9 +451,7 @@ function showEnd() {
   document.getElementById('res-wrong').textContent = stats.wrong;
   document.getElementById('res-pct').textContent = pct + '%';
   document.getElementById('res-emoji').textContent = pct >= 70 ? '🎉' : pct >= 40 ? '👍' : '💪';
-  show('s-results');
-  if (pct >= 70) spawnConfetti();
-  clearState();
+  show('s-results'); if (pct >= 70) spawnConfetti(); clearState();
 }
 
 function updateStats() {
@@ -505,337 +460,244 @@ function updateStats() {
   document.getElementById('st-wrong').textContent = stats.wrong;
   document.getElementById('st-streak').textContent = stats.streak;
 }
-
 function updateLevelUI() {
-  const lvIdx = sections.indexOf(currentLevel);
   document.getElementById('level-badge').innerHTML = `📘 Деңгей ${currentLevel}`;
-  const answered = levelCorrect + levelWrong;
-  document.getElementById('level-fill').style.width = (answered / QUESTIONS_PER_LEVEL * 100) + '%';
-  document.getElementById('level-text').textContent = `${answered}/${QUESTIONS_PER_LEVEL}`;
+  const ans = levelCorrect + levelWrong;
+  document.getElementById('level-fill').style.width = (ans / QUESTIONS_PER_LEVEL * 100) + '%';
+  document.getElementById('level-text').textContent = `${ans}/${QUESTIONS_PER_LEVEL}`;
 }
 
 // ══════════════════════════════════════════════════════════
-//  QUESTION GENERATION — 6 LEVELS
+//  QUESTION GENERATION — 6 LEVELS, MULTIPLE TEMPLATES
 // ══════════════════════════════════════════════════════════
+function fmtSide(coef, con) {
+  let s = coef === 1 ? 'x' : coef === -1 ? '-x' : coef + 'x';
+  if (con > 0) s += ' + ' + con; else if (con < 0) s += ' - ' + Math.abs(con);
+  return s;
+}
+function fmtCoef(c) { return c === 1 ? '' : c === -1 ? '-' : '' + c; }
 
-// ── Level 1: ax + b = cx + d (like task 780) ──
+// ── Level 1: ax+b=cx+d — 4 templates ──
 function genLevel1() {
-  // Form: ax + b = cx + d, where a ≠ c, solution is integer
-  let a, b, c, d, x;
-  do {
-    x = randInt(-15, 15);
-    if (x === 0) continue;
-    a = randInt(1, 25);
-    c = randInt(1, 25);
-    if (a === c) c = a + randInt(1, 5);
-    // ax + b = cx + d → b - d = (c-a)x → pick b,d so it works
-    b = randInt(-50, 50);
-    d = b - (c - a) * x;
-  } while (x === 0 || Math.abs(d) > 70 || Math.abs(b) > 70 || a === c);
-
-  // Format: "ax + b = cx + d" with possible negative handling
-  function fmtSide(coef, con) {
-    let s = '';
-    if (coef === 1) s = 'x';
-    else if (coef === -1) s = '-x';
-    else s = coef + 'x';
-    if (con > 0) s += ' + ' + con;
-    else if (con < 0) s += ' - ' + Math.abs(con);
-    return s;
+  let x; do { x = sRandInt(-12, 12); } while (x === 0);
+  const tpl = sRandInt(0, 3);
+  if (tpl === 0) {
+    const a = sRandInt(2, 20), c = sRandInt(1, 20); if (a === c) return null;
+    const b = sRandInt(-40, 40), d = (a - c) * x + b;
+    if (Math.abs(d) > 50) return null;
+    return { eq: fmtSide(a, b) + ' = ' + fmtSide(c, d), ans: x, level: 1 };
   }
-  const eq = fmtSide(a, b) + ' = ' + fmtSide(c, d);
-  return { eq, ans: x, level: 1 };
+  if (tpl === 1) {
+    const a = sRandInt(2, 15), c = sRandInt(1, 15); if (a === c) return null;
+    const b = sRandInt(1, 40), d = (a - c) * x + b;
+    if (Math.abs(d) > 50 || d === 0) return null;
+    return { eq: b + ' + ' + fmtSide(a, 0) + ' = ' + fmtSide(c, d), ans: x, level: 1 };
+  }
+  if (tpl === 2) {
+    const a = sRandInt(2, 18), c = sRandInt(1, 18); if (a === c) return null;
+    const b = sRandInt(-35, 35), d = (a - c) * x + b;
+    if (Math.abs(d) > 50 || d === 0) return null;
+    return { eq: fmtSide(a, b) + ' = ' + d + ' + ' + fmtSide(c, 0), ans: x, level: 1 };
+  }
+  const a = sRandInt(2, 20), c = sRandInt(1, 20); if (a === c) return null;
+  const d = (a - c) * x; if (Math.abs(d) > 50 || d === 0) return null;
+  return { eq: fmtSide(a, 0) + ' = ' + fmtSide(c, d), ans: x, level: 1 };
 }
 
-// ── Level 2: Equations with brackets (like task 839) ──
-// Forms: ax - b = cx + d, a(x+b) = cx + d, a(x-b) = cx + d
+// ── Level 2: Brackets — 5 templates ──
 function genLevel2() {
-  let x, eq;
-  const form = randInt(0, 2);
-  do {
-    x = randInt(-10, 10);
-    if (x === 0 && Math.random() < 0.5) continue;
-  } while (false);
-  if (x === 0) x = randInt(1, 8) * randChoice([-1, 1]);
-
-  if (form === 0) {
-    // ax - b = cx + d
-    const a = randInt(2, 6);
-    const c = randInt(1, 5);
-    if (a === c) return genLevel2();
-    const b = randInt(1, 20);
-    const d = a * x - b - c * x;
-    if (Math.abs(d) > 30) return genLevel2();
-    let left = (a === 1 ? 'x' : a + 'x') + ' - ' + b;
-    let right = (c === 1 ? 'x' : c + 'x');
-    if (d >= 0) right += ' + ' + d; else right += ' - ' + Math.abs(d);
-    eq = left + ' = ' + right;
-  } else if (form === 1) {
-    // a(x + b) = cx + d
-    const a = randInt(2, 5);
-    const b = randInt(-5, 5);
-    if (b === 0) return genLevel2();
-    const c = randInt(1, 5);
-    if (a === c) return genLevel2();
-    const d = a * (x + b) - c * x;
-    if (Math.abs(d) > 30) return genLevel2();
-    let inner = b > 0 ? `x + ${b}` : `x - ${Math.abs(b)}`;
-    let left = `${a}(${inner})`;
-    let right = (c === 1 ? 'x' : c + 'x');
-    if (d >= 0) right += ' + ' + d; else right += ' - ' + Math.abs(d);
-    eq = left + ' = ' + right;
-  } else {
-    // a(x - b) = cx + d  →  ax - ab = cx + d  →  (a-c)x = d + ab  →  x = (d + ab)/(a-c)
-    const a = randInt(2, 5);
-    const b = randInt(1, 5);
-    const c = randInt(1, 4);
-    if (a === c) return genLevel2();
-    // d = a(x-b) - cx = ax - ab - cx = (a-c)x - ab
-    const d = a * (x - b) - c * x;
-    if (Math.abs(d) > 30) return genLevel2();
-    let left = `${a}(x - ${b})`;
-    let right = (c === 1 ? 'x' : c + 'x');
+  let x; do { x = sRandInt(-8, 8); } while (x === 0);
+  const tpl = sRandInt(0, 4);
+  if (tpl === 0) {
+    const a = sRandInt(2, 5), b = sRandInt(1, 6) * sRandChoice([-1,1]), c = sRandInt(1, 5);
+    if (a === c || b === 0) return null;
+    const d = a * (x + b) - c * x; if (Math.abs(d) > 30) return null;
+    const inner = b > 0 ? `x + ${b}` : `x - ${Math.abs(b)}`;
+    return { eq: `${a}(${inner}) = ${fmtSide(c, d)}`, ans: x, level: 2 };
+  }
+  if (tpl === 1) {
+    const a = sRandInt(2, 5), b = sRandInt(1, 5), c = sRandInt(1, 4);
+    if (a === c) return null;
+    const d = a * (x - b) - c * x; if (Math.abs(d) > 30) return null;
+    let right = fmtSide(c, 0);
     if (d > 0) right += ' + ' + d; else if (d < 0) right += ' - ' + Math.abs(d);
-    eq = left + ' = ' + right;
+    return { eq: `${a}(x - ${b}) = ${right}`, ans: x, level: 2 };
   }
-  return { eq, ans: x, level: 2 };
+  if (tpl === 2) {
+    const a = sRandInt(2, 6), c = sRandInt(2, 5); if (a === c) return null;
+    const b = sRandInt(1, 15);
+    const num = (a - c) * x - b; if (num % c !== 0) return null;
+    const d = num / c; if (Math.abs(d) > 10 || d === 0) return null;
+    const inner = d > 0 ? `x + ${d}` : `x - ${Math.abs(d)}`;
+    return { eq: `${fmtSide(a, 0)} - ${b} = ${c}(${inner})`, ans: x, level: 2 };
+  }
+  if (tpl === 3) {
+    const a = sRandInt(2, 5), c = sRandInt(2, 5); if (a === c) return null;
+    const b = sRandInt(-5, 5), dp = sRandInt(-5, 5);
+    if (b === 0 || dp === 0) return null;
+    if ((c * dp - a * b) % (a - c) !== 0) return null;
+    const xv = (c * dp - a * b) / (a - c); if (xv !== x) return null;
+    const fmtI = v => v > 0 ? `x + ${v}` : `x - ${Math.abs(v)}`;
+    return { eq: `${a}(${fmtI(b)}) = ${c}(${fmtI(dp)})`, ans: x, level: 2 };
+  }
+  const a = sRandInt(2, 5), c = sRandInt(1, 5) * sRandChoice([-1,1]), d = sRandInt(1, 5);
+  if (c === 0) return null;
+  const b2 = sRandInt(1, 30);
+  const e = -(a + d) * x + b2 - a * c; if (Math.abs(e) > 30) return null;
+  const inner = c > 0 ? `x + ${c}` : `x - ${Math.abs(c)}`;
+  return { eq: `${b2} - ${a}(${inner}) = ${fmtSide(d, e)}`, ans: x, level: 2 };
 }
 
-// ── Level 3: Decimals (like task 781) ──
+// ── Level 3: Decimals — 3 templates ──
 function genLevel3() {
-  // Form: a·x + b = c·x + d where a,c have one decimal place, answer is integer
-  let x;
-  do { x = randInt(-10, 10); } while (x === 0);
-
-  // Use tenths: multiply everything by 10 to ensure integer answer
-  const a10 = randInt(5, 40); // a = a10/10
-  const c10 = randInt(5, 40);
-  if (a10 === c10) return genLevel3();
-
-  const a = a10 / 10;
-  const c = c10 / 10;
-  // ax + b = cx + d → b = cx - ax + d → pick b, compute d
-  const b10 = randInt(-80, 80);
-  const b = b10 / 10;
-  // ax + b = cx + d → d = ax + b - cx = (a-c)x + b
-  const dVal = (a - c) * x + b;
-  // Check d is a "nice" decimal (one decimal place)
-  const d10 = Math.round(dVal * 10);
-  if (Math.abs(d10) > 100) return genLevel3();
-  const d = d10 / 10;
-  // Verify
-  if (Math.abs(a * x + b - c * x - d) > 0.001) return genLevel3();
-
-  function fmtDec(n) {
-    if (Number.isInteger(n)) return '' + n;
-    // Kazakh uses comma as decimal separator
-    return ('' + n).replace('.', '{,}');
-  }
-  function fmtSide(coef, con) {
-    let s = '';
-    if (coef === 1) s = 'x';
-    else if (coef === -1) s = '-x';
-    else s = fmtDec(coef) + 'x';
-    if (con > 0) s += ' + ' + fmtDec(con);
-    else if (con < 0) s += ' - ' + fmtDec(Math.abs(con));
+  let x; do { x = sRandInt(-8, 8); } while (x === 0);
+  const tpl = sRandInt(0, 2);
+  function fD(n) { return Number.isInteger(n) ? ''+n : (''+n).replace('.','{,}'); }
+  function fDS(coef, con) {
+    let s = coef === 1 ? 'x' : coef === -1 ? '-x' : fD(coef)+'x';
+    if (con > 0) s += ' + '+fD(con); else if (con < 0) s += ' - '+fD(Math.abs(con));
     return s;
   }
-  const eq = fmtSide(a, b) + ' = ' + fmtSide(c, d);
-  return { eq, ans: x, level: 3 };
+  if (tpl === 0) {
+    const a10=sRandInt(5,35), c10=sRandInt(5,35); if(a10===c10)return null;
+    const a=a10/10, c=c10/10, b10=sRandInt(-60,60), b=b10/10;
+    const d10=Math.round(((a-c)*x+b)*10); if(Math.abs(d10)>80)return null;
+    const d=d10/10; if(Math.abs(a*x+b-c*x-d)>0.001)return null;
+    return { eq: fDS(a,b)+' = '+fDS(c,d), ans: x, level: 3 };
+  }
+  if (tpl === 1) {
+    const a=sRandInt(2,8), d=sRandInt(1,8); if(a===d)return null;
+    const b10=sRandInt(-50,50), b=b10/10;
+    const c10=Math.round(((a-d)*x+b)*10); if(Math.abs(c10)>80)return null;
+    const c=c10/10; if(Math.abs(a*x+b-c-d*x)>0.001)return null;
+    return { eq: fDS(a,b)+' = '+fD(c)+' + '+fDS(d,0), ans: x, level: 3 };
+  }
+  const a10=sRandInt(10,40), d10=sRandInt(5,30);
+  const a=a10/10, dv=d10/10, b10=sRandInt(5,60), b=b10/10;
+  const c10=Math.round(((a+dv)*x-b)*10); if(Math.abs(c10)>80)return null;
+  const c=c10/10; if(Math.abs(a*x-b-c+dv*x)>0.001)return null;
+  return { eq: fD(a)+'x - '+fD(b)+' = '+fD(c)+' - '+fD(dv)+'x', ans: x, level: 3 };
 }
 
-// ── Level 4: Expanding brackets combined (like task 793) ──
+// ── Level 4: Combined brackets — 3 templates ──
 function genLevel4() {
-  // Form: ax + b(c - dx) = e - fx
-  let x;
-  do { x = randInt(-8, 8); } while (x === 0);
-
-  const a = randInt(1, 8);
-  const b = randInt(2, 5);
-  const c = randInt(1, 8);
-  const dd = randInt(1, 4); // coefficient inside bracket for x
-  const f = randInt(1, 12);
-
-  // Left side: ax + b(c - d·x) = ax + bc - bd·x = (a - b·dd)x + b·c
-  const leftCoef = a - b * dd;
-  const leftConst = b * c;
-  // Right side: e - f·x → -f·x + e
-  // Equation: leftCoef * x + leftConst = e - f * x
-  // (leftCoef + f) * x = e - leftConst
-  // x = (e - leftConst) / (leftCoef + f)
-  const denom = leftCoef + f;
-  if (denom === 0) return genLevel4();
-  const e = denom * x + leftConst;
-  if (Math.abs(e) > 40) return genLevel4();
-
-  // Format
-  let left = (a === 1 ? '' : a) + 'x';
-  const sign = b > 0 ? ' + ' : ' - ';
-  let bracket = c + ' - ' + (dd === 1 ? '' : dd) + 'x';
-  left += sign + Math.abs(b) + '(' + bracket + ')';
-  let right = '' + e + ' - ' + (f === 1 ? '' : f) + 'x';
-  const eq = left + ' = ' + right;
-  return { eq, ans: x, level: 4 };
+  let x; do { x = sRandInt(-7, 7); } while (x === 0);
+  const tpl = sRandInt(0, 2);
+  if (tpl === 0) {
+    const a=sRandInt(1,8), b=sRandInt(2,5), c=sRandInt(1,8), dd=sRandInt(1,4), f=sRandInt(1,10);
+    const denom = a - b*dd + f; if(denom===0)return null;
+    const e = denom*x + b*c; if(Math.abs(e)>35)return null;
+    return { eq: fmtCoef(a)+'x + '+b+'('+c+' - '+fmtCoef(dd)+'x) = '+e+' - '+fmtCoef(f)+'x', ans: x, level: 4 };
+  }
+  if (tpl === 1) {
+    const a=sRandInt(5,30), b=sRandInt(2,5), c=sRandInt(1,6), dd=sRandInt(1,3), e=sRandInt(1,8);
+    const coefX = -(b*dd+e); if(coefX===0)return null;
+    const f2 = -(coefX*x + a - b*c); if(Math.abs(f2)>35||f2===0)return null;
+    let right = fmtCoef(e)+'x';
+    right += f2>0 ? ' - '+f2 : ' + '+Math.abs(f2);
+    return { eq: a+' - '+b+'('+c+' + '+fmtCoef(dd)+'x) = '+right, ans: x, level: 4 };
+  }
+  const a=sRandInt(2,5), b=sRandInt(1,8), c=sRandInt(1,4), d=sRandInt(1,6), f=sRandInt(1,8);
+  const denom = d-a*c-f; if(denom===0)return null;
+  const e = denom*x + a*b; if(Math.abs(e)>35)return null;
+  return { eq: a+'('+b+' - '+fmtCoef(c)+'x) + '+fmtCoef(d)+'x = '+e+' + '+fmtCoef(f)+'x', ans: x, level: 4 };
 }
 
-// ── Level 5: Fractions with x in numerators (like task 810) ──
+// ── Level 5: Fractions (uses \frac for mobile) — 3 templates ──
 function genLevel5() {
-  // Form: (ax + b)/c + (dx + e)/f = g + (hx + k)/m  or similar
-  // Strategy: pick x, pick denominators, work backwards
-  let x;
-  do { x = randInt(-8, 8); } while (x === 0);
-
-  const denoms = [2, 3, 4, 5, 6, 8, 10, 12, 15];
-  const d1 = randChoice(denoms);
-  const d2 = randChoice(denoms);
-  const d3 = randChoice(denoms);
-
-  // Coefficients for numerators
-  const a = randInt(1, 6) * randChoice([-1, 1]);
-  const b = randInt(-8, 8);
-  const c = randInt(1, 5) * randChoice([-1, 1]);
-  const e = randInt(-8, 8);
-  const h = randInt(1, 5) * randChoice([-1, 1]);
-  const k = randInt(-8, 8);
-
-  // LHS = (ax+b)/d1 + (cx+e)/d2
-  // RHS = g + (hx+k)/d3
-  // Compute g so equation holds for our x
-  const lhs = (a * x + b) / d1 + (c * x + e) / d2;
-  const rhs_frac = (h * x + k) / d3;
-  const g = lhs - rhs_frac;
-
-  // g must be integer for clean display
-  if (!Number.isInteger(g) || Math.abs(g) > 15) return genLevel5();
-
-  // Verify with different x that it doesn't accidentally hold (ensure unique solution)
-  const lhs2 = (a * (x + 1) + b) / d1 + (c * (x + 1) + e) / d2;
-  const rhs2 = g + (h * (x + 1) + k) / d3;
-  if (Math.abs(lhs2 - rhs2) < 0.0001) return genLevel5();
-
-  // Format as LaTeX
-  function fmtNum(coef, con) {
-    let s = '';
-    if (coef === 1) s = 'x';
-    else if (coef === -1) s = '-x';
-    else s = coef + 'x';
-    if (con > 0) s += ' + ' + con;
-    else if (con < 0) s += ' - ' + Math.abs(con);
+  let x; do { x = sRandInt(-6, 6); } while (x === 0);
+  const denoms = [2,3,4,5,6];
+  const tpl = sRandInt(0, 2);
+  const FR = '\\frac';
+  function fN(coef, con) {
+    let s = coef===1?'x':coef===-1?'-x':coef+'x';
+    if(con>0) s+=' + '+con; else if(con<0) s+=' - '+Math.abs(con);
     return s;
   }
-  let eq = '\\dfrac{' + fmtNum(a, b) + '}{' + d1 + '} + \\dfrac{' + fmtNum(c, e) + '}{' + d2 + '} = ';
-  if (g !== 0) eq += g + ' + ';
-  else if (g === 0) {} // skip
-  eq += '\\dfrac{' + fmtNum(h, k) + '}{' + d3 + '}';
-  if (g === 0) {} // already fine
-
-  return { eq, ans: x, level: 5, isLatex: true };
+  if (tpl === 0) {
+    const d1=sRandChoice(denoms), d2=sRandChoice(denoms), d3=sRandChoice(denoms);
+    const a=sRandInt(1,5)*sRandChoice([-1,1]), b=sRandInt(-6,6);
+    const c=sRandInt(1,4)*sRandChoice([-1,1]), e=sRandInt(-6,6);
+    const h=sRandInt(1,4)*sRandChoice([-1,1]), k=sRandInt(-6,6);
+    const g = (a*x+b)/d1 + (c*x+e)/d2 - (h*x+k)/d3;
+    if(!Number.isInteger(g)||Math.abs(g)>12||g===0)return null;
+    const lhs2=(a*(x+1)+b)/d1+(c*(x+1)+e)/d2;
+    if(Math.abs(lhs2-g-(h*(x+1)+k)/d3)<0.0001)return null;
+    return { eq: FR+'{'+fN(a,b)+'}{'+d1+'} + '+FR+'{'+fN(c,e)+'}{'+d2+'} = '+g+' + '+FR+'{'+fN(h,k)+'}{'+d3+'}', ans: x, level: 5, isLatex: true };
+  }
+  if (tpl === 1) {
+    const d1=sRandChoice(denoms), d2=sRandChoice(denoms), d3=sRandChoice(denoms);
+    const a=sRandInt(1,5)*sRandChoice([-1,1]), b=sRandInt(-5,5);
+    const c=sRandInt(1,4)*sRandChoice([-1,1]), e=sRandInt(-5,5);
+    const h=sRandInt(1,5)*sRandChoice([-1,1]), k=sRandInt(-5,5);
+    const lhs=(a*x+b)/d1+(c*x+e)/d2, rhs=(h*x+k)/d3;
+    if(Math.abs(lhs-rhs)>0.0001)return null;
+    if(Math.abs((a*(x+1)+b)/d1+(c*(x+1)+e)/d2-(h*(x+1)+k)/d3)<0.0001)return null;
+    return { eq: FR+'{'+fN(a,b)+'}{'+d1+'} + '+FR+'{'+fN(c,e)+'}{'+d2+'} = '+FR+'{'+fN(h,k)+'}{'+d3+'}', ans: x, level: 5, isLatex: true };
+  }
+  const d1=sRandChoice(denoms), d2=sRandChoice(denoms), d3=sRandChoice(denoms);
+  const a=sRandInt(1,4)*sRandChoice([-1,1]), b=sRandInt(-5,5);
+  const c=sRandInt(1,4)*sRandChoice([-1,1]), e=sRandInt(-5,5);
+  const h=sRandInt(1,3)*sRandChoice([-1,1]), k=sRandInt(-5,5);
+  const g = (c*x+e)/d2+(h*x+k)/d3-(a*x+b)/d1;
+  if(!Number.isInteger(g)||Math.abs(g)>10||g===0)return null;
+  if(Math.abs(g+(a*(x+1)+b)/d1-(c*(x+1)+e)/d2-(h*(x+1)+k)/d3)<0.0001)return null;
+  return { eq: g+' + '+FR+'{'+fN(a,b)+'}{'+d1+'} = '+FR+'{'+fN(c,e)+'}{'+d2+'} + '+FR+'{'+fN(h,k)+'}{'+d3+'}', ans: x, level: 5, isLatex: true };
 }
 
-// ── Level 6: Complex fractions with brackets (like task 811) ──
+// ── Level 6: Complex fractions with brackets (uses \frac) — 2 templates ──
 function genLevel6() {
-  // Form: a(bx + c)/d + e(fx + g)/h = k(mx + n)/p + q or mixed numbers
-  let x;
-  do { x = randInt(-6, 6); } while (x === 0);
-
-  const d1 = randChoice([3, 4, 5, 6, 8]);
-  const d2 = randChoice([3, 4, 5, 6, 8]);
-  const d3 = randChoice([3, 4, 5, 6, 8, 10, 15]);
-
-  const a1 = randInt(2, 7);
-  const b1 = randInt(-5, 5); if (b1 === 0) return genLevel6();
-  const a2 = randInt(2, 7);
-  const b2 = randInt(-5, 5); if (b2 === 0) return genLevel6();
-  const a3 = randInt(2, 7);
-  const b3 = randInt(-5, 5); if (b3 === 0) return genLevel6();
-
-  // LHS = a1(x + b1)/d1 + a2(x + b2)/d2
-  // RHS = a3(x + b3)/d3 + C
-  const lhs = a1 * (x + b1) / d1 + a2 * (x + b2) / d2;
-  const rhs_frac = a3 * (x + b3) / d3;
-  const C = lhs - rhs_frac;
-
-  // C should be a "nice" fraction or integer
-  // Check if C can be expressed with small denominator
-  const C_num = Math.round(C * 60); // LCM-ish check
-  if (Math.abs(C_num) > 400) return genLevel6();
-  if (Math.abs(C - Math.round(C)) > 0.0001 && Math.abs(C * 2 - Math.round(C * 2)) > 0.0001 && Math.abs(C * 3 - Math.round(C * 3)) > 0.0001) return genLevel6();
-
-  // Verify unique solution
-  const lhs2 = a1 * (x + 1 + b1) / d1 + a2 * (x + 1 + b2) / d2;
-  const rhs2 = a3 * (x + 1 + b3) / d3 + C;
-  if (Math.abs(lhs2 - rhs2) < 0.0001) return genLevel6();
-
-  // Format
-  function fmtInner(con) {
-    if (con > 0) return 'x + ' + con;
-    if (con < 0) return 'x - ' + Math.abs(con);
-    return 'x';
+  let x; do { x = sRandInt(-5, 5); } while (x === 0);
+  const tpl = sRandInt(0, 1);
+  const FR = '\\frac';
+  function fI(con) { return con>0?'x + '+con:con<0?'x - '+Math.abs(con):'x'; }
+  if (tpl === 0) {
+    const d1=sRandChoice([3,4,5,6,8]), d2=sRandChoice([3,4,5,6,8]), d3=sRandChoice([3,4,5,6,8]);
+    const a1=sRandInt(2,7), b1=sRandInt(-4,4); if(!b1)return null;
+    const a2=sRandInt(2,7), b2=sRandInt(-4,4); if(!b2)return null;
+    const a3=sRandInt(2,7), b3=sRandInt(-4,4); if(!b3)return null;
+    const C = a1*(x+b1)/d1+a2*(x+b2)/d2-a3*(x+b3)/d3;
+    if(Math.abs(C)>15)return null;
+    if(Math.abs(C-Math.round(C))>0.0001&&Math.abs(C*2-Math.round(C*2))>0.0001&&Math.abs(C*3-Math.round(C*3))>0.0001)return null;
+    if(Math.abs(a1*(x+1+b1)/d1+a2*(x+1+b2)/d2-a3*(x+1+b3)/d3-C)<0.0001)return null;
+    let eq = FR+'{'+a1+'('+fI(b1)+')}{'+d1+'} + '+FR+'{'+a2+'('+fI(b2)+')}{'+d2+'} = '+FR+'{'+a3+'('+fI(b3)+')}{'+d3+'}';
+    if(Number.isInteger(C)&&C!==0) eq += C>0?' + '+C:' - '+Math.abs(C);
+    else if(Math.abs(C)>0.0001){ let num,den; for(den=2;den<=6;den++){num=Math.round(C*den);if(Math.abs(C-num/den)<0.0001)break;} eq+=C>0?' + '+FR+'{'+num+'}{'+den+'}':' - '+FR+'{'+Math.abs(num)+'}{'+den+'}'; }
+    return { eq, ans: x, level: 6, isLatex: true };
   }
-  let eq = '\\dfrac{' + a1 + '(' + fmtInner(b1) + ')}{' + d1 + '} + \\dfrac{' + a2 + '(' + fmtInner(b2) + ')}{' + d2 + '} = \\dfrac{' + a3 + '(' + fmtInner(b3) + ')}{' + d3 + '}';
-
-  // Add constant C
-  if (Number.isInteger(C) && C !== 0) {
-    if (C > 0) eq += ' + ' + C;
-    else eq += ' - ' + Math.abs(C);
-  } else if (Math.abs(C) > 0.0001) {
-    // Express as fraction
-    let num, den;
-    for (den = 2; den <= 8; den++) {
-      num = Math.round(C * den);
-      if (Math.abs(C - num / den) < 0.0001) break;
-    }
-    if (C > 0) eq += ' + \\dfrac{' + num + '}{' + den + '}';
-    else eq += ' - \\dfrac{' + Math.abs(num) + '}{' + den + '}';
-  }
-
-  return { eq, ans: x, level: 6, isLatex: true };
+  const d1=sRandChoice([3,4,5,6]), d2=sRandChoice([3,4,5,6]), d3=sRandChoice([3,4,5,6,8]);
+  const a1=sRandInt(2,6), b1=sRandInt(-4,4); if(!b1)return null;
+  const a2=sRandInt(2,6), b2=sRandInt(-4,4); if(!b2)return null;
+  const a3=sRandInt(2,6), b3=sRandInt(-4,4); if(!b3)return null;
+  if(Math.abs(a1*(x+b1)/d1-a2*(x+b2)/d2-a3*(x+b3)/d3)>0.0001)return null;
+  if(Math.abs(a1*(x+1+b1)/d1-a2*(x+1+b2)/d2-a3*(x+1+b3)/d3)<0.0001)return null;
+  return { eq: FR+'{'+a1+'('+fI(b1)+')}{'+d1+'} - '+FR+'{'+a2+'('+fI(b2)+')}{'+d2+'} = '+FR+'{'+a3+'('+fI(b3)+')}{'+d3+'}', ans: x, level: 6, isLatex: true };
 }
 
 function generateQuestion(level) {
+  // Seed PRNG: same student + level + question + attempt = same equation
+  seedRng(studentId + '_L' + level + '_Q' + levelQuestion + '_A' + levelAttempt);
   let attempts = 0;
-  while (attempts < 200) {
+  while (attempts < 300) {
     attempts++;
     try {
       let q;
-      if (level === 1) q = genLevel1();
-      else if (level === 2) q = genLevel2();
-      else if (level === 3) q = genLevel3();
-      else if (level === 4) q = genLevel4();
-      else if (level === 5) q = genLevel5();
-      else if (level === 6) q = genLevel6();
+      if (level===1) q=genLevel1(); else if(level===2) q=genLevel2();
+      else if(level===3) q=genLevel3(); else if(level===4) q=genLevel4();
+      else if(level===5) q=genLevel5(); else if(level===6) q=genLevel6();
       if (q) return q;
     } catch (_) {}
   }
-  // Fallback: simple equation
-  const x = randInt(-5, 5) || 1;
-  const a = randInt(2, 5);
-  const b = a * x + randInt(1, 10);
-  return { eq: `${a}x + ${b - a * x} = ${b}`, ans: x, level };
+  const xf=sRandInt(1,5)*sRandChoice([-1,1]), af=sRandInt(2,5);
+  return { eq: fmtSide(af, af*xf+sRandInt(1,10)-af*xf)+' = '+(af*xf+sRandInt(1,10)), ans: xf, level };
 }
 
 function genWrongAnswers(correct) {
   const wrongs = new Set();
-  // Common mistakes: off by sign, off by 1, doubled, halved
-  const candidates = [
-    -correct,
-    correct + 1,
-    correct - 1,
-    correct + 2,
-    correct - 2,
-    correct * 2,
-    Math.abs(correct) === 1 ? correct + 3 : Math.round(correct / 2),
-    correct + randInt(3, 7),
-    correct - randInt(3, 7)
-  ];
-  for (const c of candidates) {
-    if (c !== correct && Number.isInteger(c)) wrongs.add(c);
-    if (wrongs.size >= 3) break;
-  }
-  while (wrongs.size < 3) {
-    const w = correct + randInt(-10, 10);
-    if (w !== correct && Number.isInteger(w)) wrongs.add(w);
-  }
+  const candidates = [-correct, correct+1, correct-1, correct+2, correct-2, correct*2,
+    Math.abs(correct)<=1?correct+3:Math.round(correct/2), correct+sRandInt(3,6), correct-sRandInt(3,6)];
+  for (const c of candidates) { if(c!==correct&&Number.isInteger(c)) wrongs.add(c); if(wrongs.size>=3)break; }
+  while (wrongs.size<3) { const w=correct+sRandInt(-10,10); if(w!==correct&&Number.isInteger(w)) wrongs.add(w); }
   return Array.from(wrongs).slice(0, 3);
 }
 
@@ -843,34 +705,18 @@ function genWrongAnswers(correct) {
 //  LOAD QUESTION
 // ══════════════════════════════════════════════════════════
 function loadQuestion() {
-  selectedOpt = null;
-  answered = false;
+  selectedOpt = null; answered = false;
   currentQuestion = generateQuestion(currentLevel);
-
   updateLevelUI();
-
-  // Display equation
-  const display = document.getElementById('q-display');
-  if (currentQuestion.isLatex) {
-    display.innerHTML = K(currentQuestion.eq);
-  } else {
-    // Wrap in KaTeX
-    display.innerHTML = K(currentQuestion.eq);
-  }
-
-  // Generate options
+  document.getElementById('q-display').innerHTML = K(currentQuestion.eq);
   const wrongs = genWrongAnswers(currentQuestion.ans);
-  const allOpts = shuffleArray([currentQuestion.ans, ...wrongs]);
-  const labels = ['A', 'B', 'C', 'D'];
-
-  const optsList = document.getElementById('opts-list');
-  optsList.innerHTML = allOpts.map((val, i) => `
-    <button class="opt-btn" data-index="${i}" data-value="${val}" data-correct="${val === currentQuestion.ans}" onclick="selectOpt(this)">
+  const allOpts = sShuffleArray([currentQuestion.ans, ...wrongs]);
+  const labels = ['A','B','C','D'];
+  document.getElementById('opts-list').innerHTML = allOpts.map((val, i) => `
+    <button class="opt-btn" data-index="${i}" data-value="${val}" data-correct="${val===currentQuestion.ans}" onclick="selectOpt(this)">
       <span class="opt-letter">${labels[i]}</span>
-      <span class="opt-text">${K('x = ' + val)}</span>
-    </button>
-  `).join('');
-
+      <span class="opt-text">${K('x = '+val)}</span>
+    </button>`).join('');
   document.getElementById('check-btn').disabled = true;
   document.getElementById('check-btn').classList.remove('hidden');
   document.getElementById('next-btn').classList.add('hidden');
@@ -881,8 +727,7 @@ function loadQuestion() {
 function selectOpt(el) {
   if (answered) return;
   document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedOpt = el;
+  el.classList.add('selected'); selectedOpt = el;
   document.getElementById('check-btn').disabled = false;
 }
 
@@ -890,65 +735,39 @@ function checkAnswer() {
   if (!selectedOpt || answered) return;
   answered = true;
   const isCorrect = selectedOpt.dataset.correct === 'true';
-
   document.querySelectorAll('.opt-btn').forEach(b => {
     b.style.pointerEvents = 'none';
     if (b.dataset.correct === 'true') b.classList.add('correct');
     else if (b === selectedOpt) b.classList.add('wrong');
   });
-
   const fb = document.getElementById('feedback');
-  fb.classList.remove('hidden', 'correct', 'wrong');
-  if (isCorrect) {
-    stats.correct++; stats.streak++; levelCorrect++;
-    fb.classList.add('correct');
-    fb.textContent = '✓ Дұрыс!';
-  } else {
-    stats.wrong++; stats.streak = 0; levelWrong++;
-    fb.classList.add('wrong');
-    fb.innerHTML = '✗ Қате! Дұрыс жауап: ' + K('x = ' + currentQuestion.ans);
-  }
+  fb.classList.remove('hidden','correct','wrong');
+  if (isCorrect) { stats.correct++; stats.streak++; levelCorrect++; fb.classList.add('correct'); fb.textContent = '✓ Дұрыс!'; }
+  else { stats.wrong++; stats.streak=0; levelWrong++; fb.classList.add('wrong'); fb.innerHTML = '✗ Қате! Дұрыс жауап: '+K('x = '+currentQuestion.ans); }
   levelQuestion++;
-  updateStats();
-  saveState();
-  sendScore();
-
+  updateStats(); saveState(); sendScore();
   document.getElementById('check-btn').classList.add('hidden');
   document.getElementById('next-btn').classList.remove('hidden');
 }
 
 function nextQuestion() {
-  if (levelQuestion >= QUESTIONS_PER_LEVEL) {
-    showLevelComplete();
-    return;
-  }
+  if (levelQuestion >= QUESTIONS_PER_LEVEL) { showLevelComplete(); return; }
   loadQuestion();
 }
 
-// ══════════════════════════════════════════════════════════
-//  LEVEL COMPLETE
-// ══════════════════════════════════════════════════════════
 function showLevelComplete() {
   const total = levelCorrect + levelWrong;
   const pct = total > 0 ? Math.round(levelCorrect / total * 100) : 0;
-  const passed = pct >= PASS_THRESHOLD * 100;
-  levelPassed = passed;
-
+  levelPassed = pct >= PASS_THRESHOLD * 100;
   document.getElementById('lc-correct').textContent = levelCorrect;
   document.getElementById('lc-wrong').textContent = levelWrong;
   document.getElementById('lc-pct').textContent = pct + '%';
-
-  if (passed) {
+  if (levelPassed) {
     document.getElementById('lc-icon').textContent = '🎉';
     document.getElementById('lc-title').textContent = `Деңгей ${currentLevel} өтілді!`;
     document.getElementById('lc-sub').textContent = 'Жарайсыз! Келесі деңгейге өтіңіз';
-    // Check if there's a next level in sections
     const idx = sections.indexOf(currentLevel);
-    if (idx < sections.length - 1) {
-      document.getElementById('lc-btn').textContent = 'Келесі деңгей →';
-    } else {
-      document.getElementById('lc-btn').textContent = '🏆 Аяқтау';
-    }
+    document.getElementById('lc-btn').textContent = idx < sections.length-1 ? 'Келесі деңгей →' : '🏆 Аяқтау';
     spawnConfetti();
   } else {
     document.getElementById('lc-icon').textContent = '😔';
@@ -962,24 +781,15 @@ function showLevelComplete() {
 function afterLevelScreen() {
   if (levelPassed) {
     const idx = sections.indexOf(currentLevel);
-    if (idx < sections.length - 1) {
-      currentLevel = sections[idx + 1];
-      levelCorrect = 0; levelWrong = 0; levelQuestion = 0;
-      saveState();
-      sendScore();
-      show('s-quiz');
-      loadQuestion();
-    } else {
-      // All levels done
-      sendScore(true);
-      showEnd();
-    }
+    if (idx < sections.length-1) {
+      currentLevel = sections[idx+1];
+      levelCorrect=0; levelWrong=0; levelQuestion=0; levelAttempt=0;
+      saveState(); sendScore(); show('s-quiz'); loadQuestion();
+    } else { sendScore(true); showEnd(); }
   } else {
-    // Retry same level
-    levelCorrect = 0; levelWrong = 0; levelQuestion = 0;
-    saveState();
-    show('s-quiz');
-    loadQuestion();
+    levelCorrect=0; levelWrong=0; levelQuestion=0;
+    levelAttempt++; // new attempt = new seed = new questions
+    saveState(); show('s-quiz'); loadQuestion();
   }
 }
 </script>
