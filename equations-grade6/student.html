@@ -585,18 +585,17 @@ function genLevel2() {
     if (d >= 0) right += ' + ' + d; else right += ' - ' + Math.abs(d);
     eq = left + ' = ' + right;
   } else {
-    // a(x - b) = cx - d
+    // a(x - b) = cx + d  →  ax - ab = cx + d  →  (a-c)x = d + ab  →  x = (d + ab)/(a-c)
     const a = randInt(2, 5);
     const b = randInt(1, 5);
     const c = randInt(1, 4);
     if (a === c) return genLevel2();
-    const rhs = a * (x - b);
-    // rhs = cx - d → d = cx - rhs
-    const d = c * x - rhs;
+    // d = a(x-b) - cx = ax - ab - cx = (a-c)x - ab
+    const d = a * (x - b) - c * x;
     if (Math.abs(d) > 30) return genLevel2();
     let left = `${a}(x - ${b})`;
     let right = (c === 1 ? 'x' : c + 'x');
-    if (d >= 0) right += ' + ' + d; else right += ' - ' + Math.abs(d);
+    if (d > 0) right += ' + ' + d; else if (d < 0) right += ' - ' + Math.abs(d);
     eq = left + ' = ' + right;
   }
   return { eq, ans: x, level: 2 };
