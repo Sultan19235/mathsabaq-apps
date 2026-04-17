@@ -82,7 +82,9 @@ body{overflow-x:hidden}
 .quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow)}
 .q-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-light);color:var(--primary);padding:.3rem .7rem;border-radius:16px;font-size:.72rem;font-weight:700;margin-bottom:.75rem}
 .q-text{font-size:1rem;color:var(--text);line-height:1.5;margin-bottom:.4rem;font-weight:600}
-.eq-display{font-size:1.4rem;font-weight:700;color:var(--primary-dark);text-align:center;padding:1rem;background:linear-gradient(135deg,var(--primary-light) 0%,#f0f2ff 100%);border:2px solid rgba(67,56,202,.2);border-radius:16px;margin-bottom:1rem;overflow-x:auto}
+.eq-display{font-size:1.4rem;font-weight:700;color:var(--primary-dark);text-align:center;padding:1rem .75rem;background:linear-gradient(135deg,var(--primary-light) 0%,#f0f2ff 100%);border:2px solid rgba(67,56,202,.2);border-radius:16px;margin-bottom:1rem;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:72px}
+.eq-display .katex{white-space:nowrap}
+.eq-scale{transform-origin:center center;display:inline-block;max-width:100%}
 
 .opts{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1rem}
 .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border:2px solid var(--border);border-radius:12px;background:var(--bg2);cursor:pointer;transition:all .15s;text-align:left;font-family:inherit;font-size:1rem;touch-action:manipulation;min-height:54px}
@@ -210,7 +212,7 @@ const tex = s => katex.renderToString(s, { throwOnError: false });
 const QUESTIONS = [
   // 779 — устно (oral)
   { id:'779-1', label:'№779 (1)', sec:'sec779', eq:'x + 2{,}7 = 3',                    correctIdx:1, opts:['x = 0{,}2','x = 0{,}3','x = 5{,}7','x = -0{,}3','x = 0{,}4'] },
-  { id:'779-2', label:'№779 (2)', sec:'sec779', eq:'x - 0{,}6 = 1{,}4',                correctIdx:2, opts:['x = 0{,}8','x = 1{,}2','x = 2','x = -2','x = 0{,}8'] },
+  { id:'779-2', label:'№779 (2)', sec:'sec779', eq:'x - 0{,}6 = 1{,}4',                correctIdx:2, opts:['x = 0{,}8','x = 1{,}2','x = 2','x = -2','x = 2{,}2'] },
   { id:'779-3', label:'№779 (3)', sec:'sec779', eq:'\\dfrac{3}{4} + x = 1',            correctIdx:0, opts:['x = \\dfrac{1}{4}','x = \\dfrac{3}{4}','x = \\dfrac{1}{2}','x = \\dfrac{7}{4}','x = 1'] },
   { id:'779-4', label:'№779 (4)', sec:'sec779', eq:'x - 1\\dfrac{1}{5} = \\dfrac{4}{5}', correctIdx:0, opts:['x = 2','x = \\dfrac{2}{5}','x = -2','x = 1','x = \\dfrac{4}{5}'] },
   { id:'779-5', label:'№779 (5)', sec:'sec779', eq:'2x - 5 = x - 1',                   correctIdx:3, opts:['x = -4','x = 6','x = -6','x = 4','x = 3'] },
@@ -219,7 +221,7 @@ const QUESTIONS = [
   // 780
   { id:'780-1', label:'№780 (1)', sec:'sec780', eq:'2x + 17 = 22 + 3x',                correctIdx:2, opts:['x = 5','x = -4','x = -5','x = 4','x = -3'] },
   { id:'780-2', label:'№780 (2)', sec:'sec780', eq:'18 + 3x = x + 14',                 correctIdx:0, opts:['x = -2','x = 2','x = -4','x = 4','x = -1'] },
-  { id:'780-3', label:'№780 (3)', sec:'sec780', eq:'25 - 4x = 12 - 5x',                correctIdx:3, opts:['x = 13','x = -13','x = 37','x = -13','x = 1'] },
+  { id:'780-3', label:'№780 (3)', sec:'sec780', eq:'25 - 4x = 12 - 5x',                correctIdx:1, opts:['x = 13','x = -13','x = 37','x = -37','x = 1'] },
   { id:'780-4', label:'№780 (4)', sec:'sec780', eq:'13x + 27 = 16x + 4{,}5',           correctIdx:1, opts:['x = -7{,}5','x = 7{,}5','x = 7','x = 8','x = 10{,}5'] },
   { id:'780-5', label:'№780 (5)', sec:'sec780', eq:'21x + 45 = 17 + 14x',              correctIdx:4, opts:['x = 4','x = 9','x = -9','x = 2','x = -4'] },
   { id:'780-6', label:'№780 (6)', sec:'sec780', eq:'13x + 70 = 2x + 15',               correctIdx:2, opts:['x = 5','x = -7{,}7','x = -5','x = 7{,}7','x = 15'] },
@@ -371,8 +373,9 @@ function spawnConfetti() {
 }
 
 function buildQueue() {
-  const filtered = QUESTIONS.filter(q => sections.includes(q.sec));
-  return shuffleArray(filtered);
+  // Questions must appear in textbook order: 779(1) → 779(2) → ... → 811(3)
+  // Preserve the natural order of QUESTIONS array; filter by selected sections only
+  return QUESTIONS.filter(q => sections.includes(q.sec));
 }
 
 // ── Auto-fill code from URL ─────────────────────────────
@@ -599,7 +602,10 @@ function loadQuestion() {
 
   currentQuestion = questionQueue[currentIdx];
   document.getElementById('q-badge').textContent = '📝 ' + currentQuestion.label;
-  document.getElementById('eq-display').innerHTML = tex(currentQuestion.eq);
+  const eqBox = document.getElementById('eq-display');
+  eqBox.innerHTML = '<span class="eq-scale" id="eq-scale">' + tex(currentQuestion.eq) + '</span>';
+  // Auto-scale equation to fit on one line
+  requestAnimationFrame(() => fitEquation());
 
   const letters = ['A','B','C','D','E'];
   const list = document.getElementById('opts-list');
@@ -619,6 +625,21 @@ function loadQuestion() {
   document.getElementById('finish-btn').classList.add('hidden');
   document.getElementById('feedback').classList.add('hidden');
 }
+
+function fitEquation() {
+  const box = document.getElementById('eq-display');
+  const inner = document.getElementById('eq-scale');
+  if (!box || !inner) return;
+  // Reset scale first so we measure the natural width
+  inner.style.transform = 'scale(1)';
+  const boxW = box.clientWidth - 24; // subtract horizontal padding
+  const innerW = inner.scrollWidth;
+  if (innerW <= boxW || innerW === 0) return;
+  const scale = Math.max(0.45, boxW / innerW);
+  inner.style.transform = `scale(${scale})`;
+}
+
+window.addEventListener('resize', () => { fitEquation(); });
 
 function selectOpt(idx) {
   if (quiz.answered) return;
