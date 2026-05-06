@@ -367,7 +367,7 @@ async function createRoom() {
 
 function backToSetup() {
   if (sseSource) sseSource.close();
-  students.clear(); prevState.clear(); lastSortedIds = []; sessionCode = null;
+  students.clear(); prevState.clear(); lastSeenLocal.clear(); lastSortedIds = []; sessionCode = null;
   show('s-setup');
 }
 
@@ -444,7 +444,11 @@ function connectSSE() {
     const data = JSON.parse(e.data);
 
     if (data.type === 'snapshot') {
-      data.students.forEach(s => students.set(s.studentId, s));
+      const now = Date.now();
+      data.students.forEach(s => {
+        students.set(s.studentId, s);
+        lastSeenLocal.set(s.studentId, now);
+      });
       if (data.status === 'active' && data.timeLeft != null) {
         timeLeftSec = data.timeLeft;
       }
@@ -457,6 +461,7 @@ function connectSSE() {
     } else if (data.type === 'update') {
       const prev = students.get(data.studentId);
       students.set(data.studentId, data);
+      lastSeenLocal.set(data.studentId, Date.now());
       flashCard(data.studentId, prev);
       // Diff-update: only changed fields, preserves DOM, no blink
       updateLobby();
@@ -572,14 +577,14 @@ function patchCard(studentId) {
     bar.style.background = barBg;
   }
 
-  // Focus indicator
-  const isFocused = s.focused !== false;
+  // Focus indicator (combines reported state + staleness)
+  const away = isStudentEffectivelyAway(s);
   const fdot = document.getElementById('fdot-' + studentId);
   const ftxt = document.getElementById('ftxt-' + studentId);
-  if (fdot) fdot.className = 's-focus-dot ' + (isFocused ? 'on' : 'off');
+  if (fdot) fdot.className = 's-focus-dot ' + (away ? 'off' : 'on');
   if (ftxt) {
-    ftxt.className = 's-focus-text' + (isFocused ? '' : ' away');
-    const t = isFocused ? 'Экранда' : 'Сыртта';
+    ftxt.className = 's-focus-text' + (away ? ' away' : '');
+    const t = away ? 'Сыртта' : 'Экранда';
     if (ftxt.textContent !== t) ftxt.textContent = t;
   }
 
@@ -606,7 +611,7 @@ function buildCardHTML(s, i) {
   const ac = AV_COLORS[i % AV_COLORS.length];
   const medals = ['🥇','🥈','🥉'];
 
-  const isFocused = s.focused !== false;
+  const away = isStudentEffectivelyAway(s);
   const tabSw = s.tabSwitches || 0;
   const awaySec = s.awaySeconds || 0;
 
@@ -625,8 +630,8 @@ function buildCardHTML(s, i) {
     <div class="s-bar"><div class="s-bar-fill" id="bar-${s.studentId}" style="width:${pct}%;background:${barBg}"></div></div>
     <div class="s-card-footer">
       <div class="s-focus">
-        <span class="s-focus-dot ${isFocused ? 'on' : 'off'}" id="fdot-${s.studentId}"></span>
-        <span class="s-focus-text${isFocused ? '' : ' away'}" id="ftxt-${s.studentId}">${isFocused ? 'Экранда' : 'Сыртта'}</span>
+        <span class="s-focus-dot ${away ? 'off' : 'on'}" id="fdot-${s.studentId}"></span>
+        <span class="s-focus-text${away ? ' away' : ''}" id="ftxt-${s.studentId}">${away ? 'Сыртта' : 'Экранда'}</span>
       </div>
       <span class="tab-warn" id="warn-${s.studentId}" style="${tabSw > 0 ? '' : 'display:none'}">${tabSw > 0 ? `👀 ${tabSw}× · ${awaySec}с` : ''}</span>
     </div>
@@ -649,7 +654,7 @@ function updateLiveStats() {
   const avgEl = document.getElementById('avg-pct');
   if (avgEl && avgEl.textContent !== String(avg)) avgEl.textContent = avg;
 
-  const awayArr = arr.filter(s => s.focused === false);
+  const awayArr = arr.filter(s => isStudentEffectivelyAway(s));
   const pill = document.getElementById('away-pill');
   if (awayArr.length) {
     pill.style.display = '';
@@ -666,25 +671,42 @@ function updateLiveStats() {
 //  or the student's last update was > 10 seconds ago
 // ══════════════════════════════════════════════════════════
 let stalenessInterval = null;
+
+// ─── Staleness detection: per-student "last seen locally" timestamp ───
+// Catches screen lock, network drop, app killed in background — cases
+// where the student stops sending heartbeats but never fired blur/visibilitychange.
+const STALE_MS = 12000; // 12 seconds without heartbeat = effectively away
+const lastSeenLocal = new Map(); // studentId → Date.now() of last update we got
+
+function isStudentEffectivelyAway(s) {
+  if (!s) return true;
+  if (s.focused === false) return true;          // Student reported away
+  const seen = lastSeenLocal.get(s.studentId);
+  if (!seen) return false;                        // No timestamp yet — assume on
+  return (Date.now() - seen) > STALE_MS;          // Stale heartbeat = away
+}
+
 function startStalenessCheck() {
   if (stalenessInterval) clearInterval(stalenessInterval);
   stalenessInterval = setInterval(() => {
-    // Re-patch all visible cards' focus state to reflect any drift
+    // Re-patch every card's focus state — picks up both reported state and staleness
     students.forEach((s, id) => {
       const card = document.getElementById('card-' + id);
       if (!card) return;
       const fdot = document.getElementById('fdot-' + id);
       const ftxt = document.getElementById('ftxt-' + id);
       if (!fdot || !ftxt) return;
-      const isFocused = s.focused !== false;
-      const desiredCls = 's-focus-dot ' + (isFocused ? 'on' : 'off');
+      const away = isStudentEffectivelyAway(s);
+      const desiredCls = 's-focus-dot ' + (away ? 'off' : 'on');
       if (fdot.className !== desiredCls) fdot.className = desiredCls;
-      const desiredText = isFocused ? 'Экранда' : 'Сыртта';
+      const desiredText = away ? 'Сыртта' : 'Экранда';
       if (ftxt.textContent !== desiredText) ftxt.textContent = desiredText;
-      const desiredFCls = 's-focus-text' + (isFocused ? '' : ' away');
+      const desiredFCls = 's-focus-text' + (away ? ' away' : '');
       if (ftxt.className !== desiredFCls) ftxt.className = desiredFCls;
     });
-  }, 3000);
+    // Also refresh the "away count" pill since staleness changes it
+    updateLiveStats();
+  }, 2000);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -719,7 +741,7 @@ function showResults() {
 
 function newSession() {
   sessionCode = null; quizEnded = false;
-  students.clear(); prevState.clear(); lastSortedIds = [];
+  students.clear(); prevState.clear(); lastSeenLocal.clear(); lastSortedIds = [];
   show('s-setup');
 }
 </script>
