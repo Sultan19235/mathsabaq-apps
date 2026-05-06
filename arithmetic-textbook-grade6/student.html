@@ -279,8 +279,7 @@ let sessionCode = '';
 let studentId = '';
 let studentName = '';
 let stats = { correct: 0, wrong: 0, streak: 0 };
-let questionOrder = []; // shuffled indices into QUESTIONS
-let qIdx = 0;           // current position in questionOrder
+let qIdx = 0;           // current position; questions go in linear order 0,1,2,...,53
 let currentQuestion = null;
 let currentOpts = [];
 let currentCorrectIdx = -1;
@@ -290,34 +289,93 @@ let submitInterval = null;
 let statusPollInterval = null;
 let quizStarted = false;
 
-// ── Focus tracking ──────────────────────────────────────
+// ── Focus tracking (reliable) ───────────────────────────
 let isFocused = true;
 let tabSwitches = 0;
 let awaySeconds = 0;
 let awayStart = null;
+let focusDebounceTimer = null;
 
-function markAway() {
+// Use sendBeacon for markAway — survives tab close on mobile/desktop
+function sendScoreBeacon() {
+  if (!sessionCode || !studentName) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  const payload = JSON.stringify({
+    code: sessionCode,
+    studentId,
+    name: studentName,
+    score: stats.correct,
+    total: stats.correct + stats.wrong,
+    finished: false,
+    focused: isFocused,
+    tabSwitches,
+    awaySeconds: currentAway
+  });
+  try {
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'application/json' });
+      navigator.sendBeacon(`${BACKEND}/submit`, blob);
+    } else {
+      // Fallback: regular fetch with keepalive
+      fetch(`${BACKEND}/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true });
+    }
+  } catch (_) {}
+}
+
+function applyAway() {
   if (!isFocused) return;
   isFocused = false;
   tabSwitches++;
   awayStart = Date.now();
   saveState();
-  sendScore();
+  sendScoreBeacon(); // Use beacon — survives tab close
 }
-function markBack() {
+function applyBack() {
   if (isFocused) return;
   isFocused = true;
   if (awayStart) {
     awaySeconds += Math.round((Date.now() - awayStart) / 1000);
     awayStart = null;
   }
-  sendScore();
+  sendScore(); // Regular fetch is fine when coming back
 }
+
+// Debounce so brief focus blips (e.g. clicking inside page) don't trigger
+function markAway() {
+  if (focusDebounceTimer) { clearTimeout(focusDebounceTimer); focusDebounceTimer = null; }
+  focusDebounceTimer = setTimeout(() => { focusDebounceTimer = null; applyAway(); }, 150);
+}
+function markBack() {
+  if (focusDebounceTimer) { clearTimeout(focusDebounceTimer); focusDebounceTimer = null; }
+  focusDebounceTimer = setTimeout(() => { focusDebounceTimer = null; applyBack(); }, 150);
+}
+
+// visibilitychange — most reliable cross-platform signal
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) markAway(); else markBack();
 });
+// blur/focus — backup signal for desktop window switches
 window.addEventListener('blur', markAway);
 window.addEventListener('focus', markBack);
+// pagehide — iOS Safari fires this when user swipes away (visibilitychange may not)
+window.addEventListener('pagehide', () => {
+  // Force away state and beacon-send before page is frozen
+  if (isFocused) {
+    isFocused = false;
+    tabSwitches++;
+    awayStart = Date.now();
+    saveState();
+  }
+  sendScoreBeacon();
+});
+// pageshow — iOS Safari fires this when user comes back from bfcache
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    // Coming back from bfcache — treat as return to focus
+    markBack();
+  }
+});
 
 // ── Helpers ─────────────────────────────────────────────
 function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
@@ -343,7 +401,6 @@ function saveState() {
       streak: stats.streak,
       tabSwitches,
       awaySeconds: currentAway,
-      questionOrder,
       qIdx,
       ts: Date.now()
     }));
@@ -395,7 +452,6 @@ if (urlCode) {
     stats = { correct: saved.correct || 0, wrong: saved.wrong || 0, streak: saved.streak || 0 };
     tabSwitches = saved.tabSwitches || 0;
     awaySeconds = saved.awaySeconds || 0;
-    questionOrder = saved.questionOrder && saved.questionOrder.length ? saved.questionOrder : shuffleArray(QUESTIONS.map((_, i) => i));
     qIdx = saved.qIdx || 0;
 
     if (data.status === 'active') {
@@ -443,7 +499,6 @@ async function joinQuiz() {
     }
 
     stats = { correct: 0, wrong: 0, streak: 0 };
-    questionOrder = shuffleArray(QUESTIONS.map((_, i) => i));
     qIdx = 0;
 
     await sendScore();
@@ -496,10 +551,7 @@ async function pollStatus() {
 function startQuiz() {
   if (quizStarted) return;
   quizStarted = true;
-  if (!questionOrder.length) {
-    questionOrder = shuffleArray(QUESTIONS.map((_, i) => i));
-    qIdx = 0;
-  }
+  if (qIdx < 0 || qIdx >= QUESTIONS.length) qIdx = 0;
   updateStats();
   show('s-quiz');
   loadQuestion();
@@ -568,13 +620,14 @@ function updateStats() {
 //  QUESTION LOADING
 // ══════════════════════════════════════════════════════════
 function loadQuestion() {
-  // If we've gone through all questions, reshuffle and continue
-  if (qIdx >= questionOrder.length) {
-    questionOrder = shuffleArray(QUESTIONS.map((_, i) => i));
-    qIdx = 0;
+  // Linear order: 1313→1)→2)→...→1319→8). End quiz when all done.
+  if (qIdx >= QUESTIONS.length) {
+    sendScore(true);
+    showEnd();
+    return;
   }
 
-  const q = QUESTIONS[questionOrder[qIdx]];
+  const q = QUESTIONS[qIdx];
   currentQuestion = q;
   currentSelected = null;
   currentAnswered = false;
@@ -585,7 +638,7 @@ function loadQuestion() {
   currentCorrectIdx = currentOpts.findIndex(o => o.correct);
 
   // Render
-  document.getElementById('q-source').textContent = q.src;
+  document.getElementById('q-source').textContent = q.src + ' · ' + (qIdx + 1) + '/' + QUESTIONS.length;
   document.getElementById('q-instruction').textContent = q.instr;
   document.getElementById('q-expr').innerHTML = tex(q.expr);
 
