@@ -399,6 +399,7 @@ async function startQuiz() {
     prevState.clear();
     renderAllCards();
     updateLiveStats();
+    startStalenessCheck();
     show('s-live');
   } catch (e) {
     toast('❌ Серверге қосылу қатесі', 'er');
@@ -660,12 +661,40 @@ function updateLiveStats() {
 }
 
 // ══════════════════════════════════════════════════════════
+//  STALENESS CHECK — re-patch focus dots every 3 seconds
+//  This catches cases where the SSE update was delayed
+//  or the student's last update was > 10 seconds ago
+// ══════════════════════════════════════════════════════════
+let stalenessInterval = null;
+function startStalenessCheck() {
+  if (stalenessInterval) clearInterval(stalenessInterval);
+  stalenessInterval = setInterval(() => {
+    // Re-patch all visible cards' focus state to reflect any drift
+    students.forEach((s, id) => {
+      const card = document.getElementById('card-' + id);
+      if (!card) return;
+      const fdot = document.getElementById('fdot-' + id);
+      const ftxt = document.getElementById('ftxt-' + id);
+      if (!fdot || !ftxt) return;
+      const isFocused = s.focused !== false;
+      const desiredCls = 's-focus-dot ' + (isFocused ? 'on' : 'off');
+      if (fdot.className !== desiredCls) fdot.className = desiredCls;
+      const desiredText = isFocused ? 'Экранда' : 'Сыртта';
+      if (ftxt.textContent !== desiredText) ftxt.textContent = desiredText;
+      const desiredFCls = 's-focus-text' + (isFocused ? '' : ' away');
+      if (ftxt.className !== desiredFCls) ftxt.className = desiredFCls;
+    });
+  }, 3000);
+}
+
+// ══════════════════════════════════════════════════════════
 //  RESULTS
 // ══════════════════════════════════════════════════════════
 function showResults() {
   if (quizEnded) return;
   quizEnded = true;
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (stalenessInterval) { clearInterval(stalenessInterval); stalenessInterval = null; }
   if (sseSource) sseSource.close();
 
   const arr = getSortedStudents();
