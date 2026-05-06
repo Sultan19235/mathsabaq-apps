@@ -609,7 +609,7 @@ function generateQuestion(type) {
     a = makeSignedInt();
     b = makeSignedInt();
     // At least one negative
-    if (a.value > 0 && b.value > 0) b = { display: '−' + b.display, value: -b.value };
+    if (a.value > 0 && b.value > 0) b = { display: '−' + b.display, value: -b.value, displayForAdd: '(−' + b.display + ')' };
     exprDisplay = `${a.display} + ${b.displayForAdd}`;
     result = a.value + b.value;
   } else if (type === 4) {
