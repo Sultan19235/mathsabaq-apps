@@ -133,8 +133,14 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .s-focus-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .s-focus-dot.on{background:var(--green);animation:breathe 2s infinite}
 .s-focus-dot.off{background:var(--red);animation:pulse 1s infinite}
+.s-focus-dot.idle{background:var(--amber);animation:pulse 1.6s infinite}
+.s-focus-dot.stale{background:#9ca3af;animation:pulse 1.2s infinite}
+.s-focus-dot.done{background:var(--primary)}
 .s-focus-text{color:var(--muted)}
 .s-focus-text.away{color:var(--red)}
+.s-focus-text.idle{color:var(--amber)}
+.s-focus-text.stale{color:#6b7280}
+.s-focus-text.done{color:var(--primary)}
 .tab-warn{font-size:.58rem;color:var(--red);font-weight:700;background:var(--red-light);border:1px solid var(--red-border);border-radius:6px;padding:2px 7px;display:flex;align-items:center;gap:3px}
 
 /* ── RESULTS ── */
@@ -278,7 +284,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
           <div class="stat-pill timer" id="timer-pill">⏱ 45:00</div>
           <div class="stat-pill">👥 <span id="live-count">0</span></div>
           <div class="stat-pill">🎯 <span id="avg-pct">0</span>%</div>
-          <div class="stat-pill" id="away-pill" style="display:none;border-color:var(--red-border);color:var(--red)">👀 <span id="away-count">0</span> сыртта</div>
+          <div class="stat-pill" id="away-pill" style="display:none;border-color:var(--red-border);color:var(--red)">⚠ <span id="away-count">0</span> назар</div>
+          <div class="stat-pill" id="idle-pill" style="display:none;border-color:var(--amber-border);color:var(--amber)">💤 <span id="idle-count">0</span> қимылсыз</div>
+          <div class="stat-pill" id="stale-pill" style="display:none;border-color:#9ca3af;color:#6b7280">📵 <span id="stale-count">0</span> қосылмаған</div>
           <div class="code-pill" id="live-code" onclick="openQR()">------</div>
           <button class="btn btn-red btn-sm" onclick="endQuiz()">⏹ Аяқтау</button>
         </div>
@@ -367,7 +375,7 @@ async function createRoom() {
 
 function backToSetup() {
   if (sseSource) sseSource.close();
-  students.clear(); prevState.clear(); lastSeenLocal.clear(); lastSortedIds = []; sessionCode = null;
+  students.clear(); prevState.clear(); lastSeenLocal.clear(); lastClientTime.clear(); lastSortedIds = []; sessionCode = null;
   show('s-setup');
 }
 
@@ -448,11 +456,11 @@ function connectSSE() {
       data.students.forEach(s => {
         students.set(s.studentId, s);
         lastSeenLocal.set(s.studentId, now);
+        if (s.clientTime) lastClientTime.set(s.studentId, s.clientTime);
       });
       if (data.status === 'active' && data.timeLeft != null) {
         timeLeftSec = data.timeLeft;
       }
-      // Snapshot: full re-render is OK (rare event)
       updateLobby();
       lastSortedIds = [];
       prevState.clear();
@@ -460,10 +468,25 @@ function connectSSE() {
       updateLiveStats();
     } else if (data.type === 'update') {
       const prev = students.get(data.studentId);
+      const now = Date.now();
+      const prevSeen = lastSeenLocal.get(data.studentId);
+      const prevClient = lastClientTime.get(data.studentId);
+
+      // Drift detection: compare wall clock vs client clock advancement
+      // If client clock jumped much further than wall clock, device was suspended
+      if (prevSeen && prevClient && data.clientTime) {
+        const wallDelta = now - prevSeen;
+        const clientDelta = data.clientTime - prevClient;
+        // Negative drift would mean clock skew; we only care about positive (suspension)
+        const drift = clientDelta - wallDelta;
+        data._driftMs = drift;
+      }
+
       students.set(data.studentId, data);
-      lastSeenLocal.set(data.studentId, Date.now());
+      lastSeenLocal.set(data.studentId, now);
+      if (data.clientTime) lastClientTime.set(data.studentId, data.clientTime);
+
       flashCard(data.studentId, prev);
-      // Diff-update: only changed fields, preserves DOM, no blink
       updateLobby();
       patchOrRender(data.studentId);
       updateLiveStats();
@@ -577,15 +600,15 @@ function patchCard(studentId) {
     bar.style.background = barBg;
   }
 
-  // Focus indicator (combines reported state + staleness)
-  const away = isStudentEffectivelyAway(s);
+  // Focus indicator (multi-state classifier)
+  const state = classifyStudent(s);
+  const info = STATE_INFO[state] || STATE_INFO.active;
   const fdot = document.getElementById('fdot-' + studentId);
   const ftxt = document.getElementById('ftxt-' + studentId);
-  if (fdot) fdot.className = 's-focus-dot ' + (away ? 'off' : 'on');
+  if (fdot) fdot.className = 's-focus-dot ' + info.dot;
   if (ftxt) {
-    ftxt.className = 's-focus-text' + (away ? ' away' : '');
-    const t = away ? 'Сыртта' : 'Экранда';
-    if (ftxt.textContent !== t) ftxt.textContent = t;
+    ftxt.className = 's-focus-text' + info.cls;
+    if (ftxt.textContent !== info.text) ftxt.textContent = info.text;
   }
 
   // Tab-switch warning
@@ -611,7 +634,8 @@ function buildCardHTML(s, i) {
   const ac = AV_COLORS[i % AV_COLORS.length];
   const medals = ['🥇','🥈','🥉'];
 
-  const away = isStudentEffectivelyAway(s);
+  const state = classifyStudent(s);
+  const info = STATE_INFO[state] || STATE_INFO.active;
   const tabSw = s.tabSwitches || 0;
   const awaySec = s.awaySeconds || 0;
 
@@ -630,8 +654,8 @@ function buildCardHTML(s, i) {
     <div class="s-bar"><div class="s-bar-fill" id="bar-${s.studentId}" style="width:${pct}%;background:${barBg}"></div></div>
     <div class="s-card-footer">
       <div class="s-focus">
-        <span class="s-focus-dot ${away ? 'off' : 'on'}" id="fdot-${s.studentId}"></span>
-        <span class="s-focus-text${away ? ' away' : ''}" id="ftxt-${s.studentId}">${away ? 'Сыртта' : 'Экранда'}</span>
+        <span class="s-focus-dot ${info.dot}" id="fdot-${s.studentId}"></span>
+        <span class="s-focus-text${info.cls}" id="ftxt-${s.studentId}">${info.text}</span>
       </div>
       <span class="tab-warn" id="warn-${s.studentId}" style="${tabSw > 0 ? '' : 'display:none'}">${tabSw > 0 ? `👀 ${tabSw}× · ${awaySec}с` : ''}</span>
     </div>
@@ -654,14 +678,33 @@ function updateLiveStats() {
   const avgEl = document.getElementById('avg-pct');
   if (avgEl && avgEl.textContent !== String(avg)) avgEl.textContent = avg;
 
-  const awayArr = arr.filter(s => isStudentEffectivelyAway(s));
+  // Count per state for the diagnostic pills
+  const counts = { active: 0, idle: 0, away_reported: 0, stale: 0, finished: 0 };
+  arr.forEach(s => { counts[classifyStudent(s)] = (counts[classifyStudent(s)] || 0) + 1; });
+
+  // Combined "needs attention" count for legacy pill
+  const attentionCount = counts.idle + counts.away_reported + counts.stale;
   const pill = document.getElementById('away-pill');
-  if (awayArr.length) {
+  if (attentionCount > 0) {
     pill.style.display = '';
     const ac = document.getElementById('away-count');
-    if (ac && ac.textContent !== String(awayArr.length)) ac.textContent = awayArr.length;
+    if (ac && ac.textContent !== String(attentionCount)) ac.textContent = attentionCount;
   } else {
     if (pill.style.display !== 'none') pill.style.display = 'none';
+  }
+
+  // Detailed breakdown pills (idle / stale)
+  const idleEl = document.getElementById('idle-count');
+  const idlePill = document.getElementById('idle-pill');
+  if (idleEl && idlePill) {
+    if (counts.idle > 0) { idlePill.style.display = ''; if (idleEl.textContent !== String(counts.idle)) idleEl.textContent = counts.idle; }
+    else if (idlePill.style.display !== 'none') idlePill.style.display = 'none';
+  }
+  const staleEl = document.getElementById('stale-count');
+  const stalePill = document.getElementById('stale-pill');
+  if (staleEl && stalePill) {
+    if (counts.stale > 0) { stalePill.style.display = ''; if (staleEl.textContent !== String(counts.stale)) staleEl.textContent = counts.stale; }
+    else if (stalePill.style.display !== 'none') stalePill.style.display = 'none';
   }
 }
 
@@ -672,39 +715,83 @@ function updateLiveStats() {
 // ══════════════════════════════════════════════════════════
 let stalenessInterval = null;
 
-// ─── Staleness detection: per-student "last seen locally" timestamp ───
-// Catches screen lock, network drop, app killed in background — cases
-// where the student stops sending heartbeats but never fired blur/visibilitychange.
-const STALE_MS = 12000; // 12 seconds without heartbeat = effectively away
-const lastSeenLocal = new Map(); // studentId → Date.now() of last update we got
+// ─── Multi-state focus classification ─────────────────────
+// active        : focused, recently active (idle < 20s), heartbeat fresh
+// idle          : focused, no input for 20-45s (thinking, or walked away)
+// away_reported : student reported focused:false (Alt-tab / minimize)
+// stale         : no heartbeat in 12s+ (screen lock / network drop / closed)
+// finished      : all questions answered (handled separately)
+//
+// Drift detection: if (clientTime - lastClientTime) >> (now - lastSeenLocal)
+// then the device was suspended (screen lock) — force "stale".
+
+const STALE_MS = 12000;       // No heartbeat this long = stale
+const IDLE_MS = 20000;        // No input this long = idle
+const DRIFT_THRESHOLD = 8000; // Client clock jumped this much more than wall clock = suspended
+
+const lastSeenLocal = new Map();   // studentId → Date.now() of last heartbeat we got
+const lastClientTime = new Map();  // studentId → student's clientTime from last heartbeat
+
+function classifyStudent(s) {
+  if (!s) return 'stale';
+  if (s.finished) return 'finished';
+
+  const now = Date.now();
+  const seen = lastSeenLocal.get(s.studentId);
+  const heartbeatAgeMs = seen ? (now - seen) : 0;
+
+  // Stale: no recent heartbeat at all
+  if (seen && heartbeatAgeMs > STALE_MS) return 'stale';
+
+  // Drift: client clock advanced much more than wall clock = device suspended
+  // (device was off/locked between heartbeats — JS event loop paused)
+  if (s._driftMs && s._driftMs > DRIFT_THRESHOLD) return 'stale';
+
+  // Reported away by the student (visibilitychange / blur fired)
+  if (s.focused === false) return 'away_reported';
+
+  // Idle: focused but no input for a while
+  // idleMs comes from the student; add heartbeat age for current idle
+  const effectiveIdleMs = (s.idleMs || 0) + heartbeatAgeMs;
+  if (effectiveIdleMs > IDLE_MS) return 'idle';
+
+  // Low focus ratio — fired blur/focus rapidly within last interval
+  if (s.focusedRatio !== undefined && s.focusedRatio < 0.5) return 'away_reported';
+
+  return 'active';
+}
+
+// State → display info (text, css class, dot class)
+const STATE_INFO = {
+  active:        { text: 'Экранда',   cls: '',         dot: 'on' },
+  idle:          { text: 'Қимылсыз',  cls: ' idle',    dot: 'idle' },
+  away_reported: { text: 'Сыртта',    cls: ' away',    dot: 'off' },
+  stale:         { text: 'Қосылмаған', cls: ' stale',  dot: 'stale' },
+  finished:      { text: '✓ Бітірді', cls: ' done',   dot: 'done' }
+};
 
 function isStudentEffectivelyAway(s) {
-  if (!s) return true;
-  if (s.focused === false) return true;          // Student reported away
-  const seen = lastSeenLocal.get(s.studentId);
-  if (!seen) return false;                        // No timestamp yet — assume on
-  return (Date.now() - seen) > STALE_MS;          // Stale heartbeat = away
+  const st = classifyStudent(s);
+  return st === 'stale' || st === 'away_reported' || st === 'idle';
 }
 
 function startStalenessCheck() {
   if (stalenessInterval) clearInterval(stalenessInterval);
   stalenessInterval = setInterval(() => {
-    // Re-patch every card's focus state — picks up both reported state and staleness
     students.forEach((s, id) => {
       const card = document.getElementById('card-' + id);
       if (!card) return;
       const fdot = document.getElementById('fdot-' + id);
       const ftxt = document.getElementById('ftxt-' + id);
       if (!fdot || !ftxt) return;
-      const away = isStudentEffectivelyAway(s);
-      const desiredCls = 's-focus-dot ' + (away ? 'off' : 'on');
+      const state = classifyStudent(s);
+      const info = STATE_INFO[state] || STATE_INFO.active;
+      const desiredCls = 's-focus-dot ' + info.dot;
       if (fdot.className !== desiredCls) fdot.className = desiredCls;
-      const desiredText = away ? 'Сыртта' : 'Экранда';
-      if (ftxt.textContent !== desiredText) ftxt.textContent = desiredText;
-      const desiredFCls = 's-focus-text' + (away ? ' away' : '');
+      if (ftxt.textContent !== info.text) ftxt.textContent = info.text;
+      const desiredFCls = 's-focus-text' + info.cls;
       if (ftxt.className !== desiredFCls) ftxt.className = desiredFCls;
     });
-    // Also refresh the "away count" pill since staleness changes it
     updateLiveStats();
   }, 2000);
 }
@@ -741,7 +828,7 @@ function showResults() {
 
 function newSession() {
   sessionCode = null; quizEnded = false;
-  students.clear(); prevState.clear(); lastSeenLocal.clear(); lastSortedIds = [];
+  students.clear(); prevState.clear(); lastSeenLocal.clear(); lastClientTime.clear(); lastSortedIds = [];
   show('s-setup');
 }
 </script>
