@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Бүтін сандармен амалдар — Оқушы</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
+  --shadow-lg:0 8px 30px rgba(20,24,38,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+
+.screen{display:none;min-height:100vh;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+.container{max-width:560px;margin:0 auto;padding:1rem;padding-bottom:2rem}
+
+/* ── JOIN ── */
+.join-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.join-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.join-logo{text-align:center;margin-bottom:20px}
+.join-icon{font-size:2.4rem;margin-bottom:6px}
+.join-title{font-size:1.3rem;font-weight:800;margin-bottom:2px}
+.join-sub{color:var(--muted);font-size:.82rem}
+.field{margin-bottom:12px}
+.field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px}
+.field input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;outline:none;transition:border-color .15s;background:var(--bg)}
+.field input:focus{border-color:var(--primary)}
+.field input.code-input{font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:6px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
+.err.on{display:block}
+
+/* ── WAIT ── */
+.wait-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.wait-icon{font-size:3.5rem;margin-bottom:12px}
+.wait-title{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+.wait-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.wait-name{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.82rem;font-weight:700;margin-top:8px}
+.dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-top:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+
+/* ── QUIZ ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.6rem .4rem;text-align:center;box-shadow:var(--shadow-sm)}
+.stat-card.hl{background:var(--primary-light);border-color:rgba(67,56,202,.25)}
+.stat-icon{font-size:1rem;margin-bottom:.15rem}
+.stat-value{font-size:1.25rem;font-weight:800;color:var(--primary)}
+.stat-card.g .stat-value{color:var(--green)}
+.stat-card.r .stat-value{color:var(--red)}
+.stat-card.a .stat-value{color:var(--amber)}
+.stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.25rem;box-shadow:var(--shadow)}
+.q-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--primary-light);color:var(--primary);padding:.3rem .7rem;border-radius:16px;font-size:.72rem;font-weight:700;margin-bottom:.75rem}
+.q-source{display:inline-block;background:var(--bg3);color:var(--text2);border-radius:8px;padding:.2rem .55rem;font-size:.7rem;font-weight:700;margin-bottom:.6rem;font-family:'JetBrains Mono',monospace}
+.q-text{font-size:1rem;font-weight:600;color:var(--text2);margin-bottom:.5rem;line-height:1.5}
+.q-expr{font-size:1.7rem;font-weight:700;color:var(--primary-dark);text-align:center;padding:1rem;background:linear-gradient(135deg,var(--primary-light) 0%,#f0f2ff 100%);border:2px solid rgba(67,56,202,.2);border-radius:16px;margin-bottom:1rem;overflow-x:auto}
+.q-expr .katex{font-size:inherit!important}
+.opts{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1rem}
+.opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border:2.5px solid var(--border);border-radius:14px;background:var(--bg2);cursor:pointer;transition:all .15s;font-size:1.05rem;font-weight:600;color:var(--text);min-height:54px;touch-action:manipulation}
+.opt:active{transform:scale(.99)}
+.opt.selected{border-color:var(--primary);background:var(--primary-light);box-shadow:0 0 0 3px rgba(67,56,202,.1)}
+.opt.correct{border-color:var(--green);background:var(--green-light);color:var(--green)}
+.opt.wrong{border-color:var(--red);background:var(--red-light);color:var(--red)}
+.opt-letter{width:30px;height:30px;border-radius:8px;background:var(--bg3);color:var(--muted);font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.85rem}
+.opt.selected .opt-letter{background:var(--primary);color:#fff}
+.opt.correct .opt-letter{background:var(--green);color:#fff}
+.opt.wrong .opt-letter{background:var(--red);color:#fff}
+.opt-content{flex:1;overflow-x:auto}
+.feedback{text-align:center;padding:.85rem;border-radius:12px;margin-bottom:1rem;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.feedback.correct{background:var(--green-light);color:var(--green);border:1px solid var(--green)}
+.feedback.wrong{background:var(--red-light);color:var(--red);border:1px solid var(--red)}
+.btn-group{display:flex;gap:.6rem;justify-content:center;align-items:center;flex-wrap:wrap}
+.hidden{display:none!important}
+
+/* ── RESULTS ── */
+.res-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.res-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg)}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.res-stat{background:var(--bg);border-radius:12px;padding:12px 8px}
+.res-val{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.res-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+
+.cfw{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.cfp{position:absolute;animation:cfFall linear forwards}
+</style>
+</head>
+<body>
+<div class="cfw" id="confetti"></div>
+
+<!-- ════ JOIN ════ -->
+<div class="screen active" id="s-join">
+  <div class="join-wrap">
+    <div class="join-card">
+      <div class="join-logo">
+        <div class="join-icon">➕➖</div>
+        <div class="join-title">Бүтін сандармен амалдар</div>
+        <div class="join-sub">№1313–1319 · 6-сынып</div>
+      </div>
+      <div class="err" id="join-err"></div>
+      <div class="field">
+        <label>Аты-жөні</label>
+        <input type="text" id="sname" placeholder="Атыңызды жазыңыз" maxlength="20" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="field" id="code-wrap">
+        <label>Бөлме коды</label>
+        <input type="text" id="scode" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
+      </div>
+      <button class="btn btn-primary btn-block" id="join-btn" style="margin-top:4px" onclick="joinQuiz()">🚀 Кіру</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WAIT ════ -->
+<div class="screen" id="s-wait">
+  <div class="wait-wrap">
+    <div class="wait-icon">✅</div>
+    <div class="wait-title">Қосылдыңыз!</div>
+    <div class="wait-sub">Мұғалім сабақты бастағанша күтіңіз</div>
+    <div class="wait-name" id="wait-name"></div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div class="screen" id="s-quiz">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-card hl"><div class="stat-icon">📊</div><div class="stat-value" id="st-total">0</div><div class="stat-label">Жауап</div></div>
+      <div class="stat-card g"><div class="stat-icon">✓</div><div class="stat-value" id="st-correct">0</div><div class="stat-label">Дұрыс</div></div>
+      <div class="stat-card r"><div class="stat-icon">✗</div><div class="stat-value" id="st-wrong">0</div><div class="stat-label">Қате</div></div>
+      <div class="stat-card a"><div class="stat-icon">🔥</div><div class="stat-value" id="st-streak">0</div><div class="stat-label">Қатарынан</div></div>
+    </div>
+    <div class="quiz-card">
+      <div class="q-source" id="q-source">№1313 · 1)</div>
+      <div class="q-badge"><span>📝</span><span id="q-instruction">Амалдарды орындаңдар</span></div>
+      <div class="q-expr" id="q-expr"></div>
+      <div class="opts" id="opts"></div>
+      <div class="feedback hidden" id="feedback"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()" disabled>✓ Тексеру</button>
+        <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Келесі →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RESULTS ════ -->
+<div class="screen" id="s-results">
+  <div class="res-wrap">
+    <div class="res-card">
+      <div style="font-size:3rem;margin-bottom:8px" id="res-emoji">🏆</div>
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px">Тест аяқталды!</div>
+      <div style="color:var(--muted);font-size:.86rem">Нәтижелеріңіз</div>
+      <div class="res-stats">
+        <div class="res-stat"><div class="res-val" id="res-correct" style="color:var(--green)">0</div><div class="res-lbl">Дұрыс</div></div>
+        <div class="res-stat"><div class="res-val" id="res-wrong" style="color:var(--red)">0</div><div class="res-lbl">Қате</div></div>
+        <div class="res-stat"><div class="res-val" id="res-pct" style="color:var(--primary)">0%</div><div class="res-lbl">Пайыз</div></div>
+      </div>
+      <p style="color:var(--muted);margin-top:16px;font-size:.82rem">Нәтижелер мұғалімге жіберілді ✓</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const STORAGE_KEY_PREFIX = 'ms_arith_textbook_';
+// ═══════════════════════════════════════════════════════════════
+
+const tex = s => katex.renderToString(s, { throwOnError: false });
+
+// ═══════════════════════════════════════════════════════════════
+// QUESTION BANK — №1313–1319 (54 questions)
+// Each: { src, instr, expr, ans, distractors }
+// "ans" is the correct answer string (LaTeX)
+// "distractors" is array of 4 plausible wrong answers
+// At runtime, all 5 are shuffled and one is marked correct
+// ═══════════════════════════════════════════════════════════════
+const QUESTIONS = [
+  // ─── №1313 — Амалдарды орындаңдар (subtraction with negatives) ───
+  { src:'№1313 · 1)', instr:'Амалдарды орындаңдар', expr:'-8 - 4', ans:'-12', distractors:['-4','4','12','-32'] },
+  { src:'№1313 · 2)', instr:'Амалдарды орындаңдар', expr:'-9 - 10', ans:'-19', distractors:['1','-1','19','-90'] },
+  { src:'№1313 · 3)', instr:'Амалдарды орындаңдар', expr:'6 - (-5)', ans:'11', distractors:['1','-1','-11','30'] },
+  { src:'№1313 · 4)', instr:'Амалдарды орындаңдар', expr:'12 - (-4)', ans:'16', distractors:['8','-8','-16','48'] },
+  { src:'№1313 · 5)', instr:'Амалдарды орындаңдар', expr:'-5 - (-1)', ans:'-4', distractors:['-6','6','4','-5'] },
+  { src:'№1313 · 6)', instr:'Амалдарды орындаңдар', expr:'5 - (-3)', ans:'8', distractors:['2','-2','-8','15'] },
+  { src:'№1313 · 7)', instr:'Амалдарды орындаңдар', expr:'-13 + 10', ans:'-3', distractors:['3','-23','23','-130'] },
+  { src:'№1313 · 8)', instr:'Амалдарды орындаңдар', expr:'13 - (-7)', ans:'20', distractors:['6','-6','-20','91'] },
+  { src:'№1313 · 9)', instr:'Амалдарды орындаңдар', expr:'-29 - 5', ans:'-34', distractors:['-24','24','34','-145'] },
+  { src:'№1313 · 10)', instr:'Амалдарды орындаңдар', expr:'5 - (-5)', ans:'10', distractors:['0','-10','25','-25'] },
+  { src:'№1313 · 11)', instr:'Амалдарды орындаңдар', expr:'-1{,}2 - 1{,}2', ans:'-2{,}4', distractors:['0','2{,}4','-1{,}44','1{,}44'] },
+  { src:'№1313 · 12)', instr:'Амалдарды орындаңдар', expr:'-3{,}2 - (-4{,}1)', ans:'0{,}9', distractors:['-7{,}3','7{,}3','-0{,}9','-1{,}9'] },
+  { src:'№1313 · 13)', instr:'Амалдарды орындаңдар', expr:'2{,}6 - 5{,}96', ans:'-3{,}36', distractors:['3{,}36','-8{,}56','8{,}56','-2{,}36'] },
+  { src:'№1313 · 14)', instr:'Амалдарды орындаңдар', expr:'0 - 5{,}2', ans:'-5{,}2', distractors:['5{,}2','0','-0{,}52','-52'] },
+  { src:'№1313 · 15)', instr:'Амалдарды орындаңдар', expr:'0 - (-2{,}4)', ans:'2{,}4', distractors:['-2{,}4','0','-0{,}24','24'] },
+  { src:'№1313 · 16)', instr:'Амалдарды орындаңдар', expr:'-5{,}3 - 0', ans:'-5{,}3', distractors:['5{,}3','0','-0{,}53','-53'] },
+  { src:'№1313 · 17)', instr:'Амалдарды орындаңдар', expr:'1 - (-4{,}9)', ans:'5{,}9', distractors:['-3{,}9','3{,}9','-5{,}9','-4{,}9'] },
+  { src:'№1313 · 18)', instr:'Амалдарды орындаңдар', expr:'2 - 7{,}3', ans:'-5{,}3', distractors:['5{,}3','9{,}3','-9{,}3','-14{,}6'] },
+
+  // ─── №1314 — Азайтуды орындап, қосудың көмегімен тексеріңдер ───
+  { src:'№1314 · 1)', instr:'Азайтуды орындап, қосудың көмегімен тексеріңдер', expr:'7{,}8 - (-6{,}9)', ans:'14{,}7', distractors:['0{,}9','-0{,}9','-14{,}7','1{,}47'] },
+  { src:'№1314 · 2)', instr:'Азайтуды орындап, қосудың көмегімен тексеріңдер', expr:'-6{,}7 - (-7{,}6)', ans:'0{,}9', distractors:['-0{,}9','-14{,}3','14{,}3','1{,}9'] },
+  { src:'№1314 · 3)', instr:'Азайтуды орындап, қосудың көмегімен тексеріңдер', expr:'-5{,}4 - 6{,}8', ans:'-12{,}2', distractors:['1{,}4','-1{,}4','12{,}2','-36{,}72'] },
+  { src:'№1314 · 4)', instr:'Азайтуды орындап, қосудың көмегімен тексеріңдер', expr:'-5\\dfrac{4}{5} - \\left(-20\\dfrac{3}{5}\\right)', ans:'14\\dfrac{4}{5}', distractors:['-26\\dfrac{2}{5}','26\\dfrac{2}{5}','-14\\dfrac{4}{5}','15\\dfrac{2}{5}'] },
+  { src:'№1314 · 5)', instr:'Азайтуды орындап, қосудың көмегімен тексеріңдер', expr:'-1\\dfrac{7}{9} - 3\\dfrac{5}{6}', ans:'-5\\dfrac{11}{18}', distractors:['2\\dfrac{1}{18}','-2\\dfrac{1}{18}','5\\dfrac{11}{18}','-4\\dfrac{2}{15}'] },
+  { src:'№1314 · 6)', instr:'Азайтуды орындап, қосудың көмегімен тексеріңдер', expr:'\\dfrac{16}{21} - 5\\dfrac{1}{3}', ans:'-4\\dfrac{4}{7}', distractors:['4\\dfrac{4}{7}','-6\\dfrac{2}{21}','6\\dfrac{2}{21}','-5\\dfrac{1}{3}'] },
+
+  // ─── №1315 — Өрнектің мәнін табыңдар ───
+  { src:'№1315 · 1)', instr:'Өрнектің мәнін табыңдар', expr:'-1\\dfrac{3}{7} - \\dfrac{1}{4}', ans:'-1\\dfrac{19}{28}', distractors:['-1\\dfrac{1}{4}','1\\dfrac{19}{28}','-1\\dfrac{2}{11}','-2\\dfrac{19}{28}'] },
+  { src:'№1315 · 2)', instr:'Өрнектің мәнін табыңдар', expr:'2\\dfrac{1}{3} - 3\\dfrac{4}{9}', ans:'-1\\dfrac{1}{9}', distractors:['1\\dfrac{1}{9}','-1\\dfrac{3}{6}','5\\dfrac{7}{9}','-5\\dfrac{7}{9}'] },
+  { src:'№1315 · 3)', instr:'Өрнектің мәнін табыңдар', expr:'-5\\dfrac{3}{4} - \\left(-2\\dfrac{1}{9}\\right)', ans:'-3\\dfrac{23}{36}', distractors:['-7\\dfrac{31}{36}','7\\dfrac{31}{36}','3\\dfrac{23}{36}','-3\\dfrac{2}{5}'] },
+  { src:'№1315 · 4)', instr:'Өрнектің мәнін табыңдар', expr:'-5{,}9 - 0', ans:'-5{,}9', distractors:['5{,}9','0','-0{,}59','-59'] },
+  { src:'№1315 · 5)', instr:'Өрнектің мәнін табыңдар', expr:'1 - (-2{,}7)', ans:'3{,}7', distractors:['-1{,}7','1{,}7','-3{,}7','-2{,}7'] },
+  { src:'№1315 · 6)', instr:'Өрнектің мәнін табыңдар', expr:'5 - 6\\dfrac{2}{3}', ans:'-1\\dfrac{2}{3}', distractors:['1\\dfrac{2}{3}','-11\\dfrac{2}{3}','11\\dfrac{2}{3}','-1\\dfrac{1}{3}'] },
+
+  // ─── №1316 — Амалдарды орындаңдар ───
+  { src:'№1316 · 1)', instr:'Амалдарды орындаңдар', expr:'-2{,}4 - 1{,}75 - \\left(-\\dfrac{5}{12}\\right)', ans:'-3\\dfrac{11}{15}', distractors:['-4\\dfrac{2}{15}','3\\dfrac{11}{15}','-3\\dfrac{1}{6}','-4\\dfrac{7}{12}'] },
+  { src:'№1316 · 2)', instr:'Амалдарды орындаңдар', expr:'-4{,}2 - 3{,}25 - \\left(-\\dfrac{1}{12}\\right)', ans:'-7\\dfrac{11}{30}', distractors:['-7\\dfrac{8}{15}','7\\dfrac{11}{30}','-7\\dfrac{1}{6}','-8\\dfrac{1}{12}'] },
+  { src:'№1316 · 3)', instr:'Амалдарды орындаңдар', expr:'-61{,}3 - (-7{,}7) + 5{,}36', ans:'-48{,}24', distractors:['-74{,}36','74{,}36','48{,}24','-58{,}96'] },
+  { src:'№1316 · 4)', instr:'Амалдарды орындаңдар', expr:'-8{,}6 + (-4{,}9) - 8{,}6 - (-5{,}3)', ans:'-16{,}8', distractors:['16{,}8','-27{,}4','27{,}4','-6{,}2'] },
+  { src:'№1316 · 5)', instr:'Амалдарды орындаңдар', expr:'-9 + 10 - 51 + 42', ans:'-8', distractors:['8','-92','92','-10'] },
+  { src:'№1316 · 6)', instr:'Амалдарды орындаңдар', expr:'10 - 61 + 72 - 13', ans:'8', distractors:['-8','-86','86','18'] },
+  { src:'№1316 · 7)', instr:'Амалдарды орындаңдар', expr:'-10 - 2 + 33 - 4', ans:'17', distractors:['-17','-49','49','21'] },
+  { src:'№1316 · 8)', instr:'Амалдарды орындаңдар', expr:'60 - 71 + 8 - 9 + 10', ans:'-2', distractors:['2','-22','22','-12'] },
+
+  // ─── №1317 — Амалдарды орындаңдар ───
+  { src:'№1317 · 1)', instr:'Амалдарды орындаңдар', expr:'21{,}8 - \\left(7\\dfrac{19}{20} - 8\\dfrac{3}{5}\\right)', ans:'22\\dfrac{9}{20}', distractors:['21\\dfrac{3}{20}','-22\\dfrac{9}{20}','22\\dfrac{1}{4}','21\\dfrac{4}{5}'] },
+  { src:'№1317 · 2)', instr:'Амалдарды орындаңдар', expr:'-8{,}25 - \\left(-\\dfrac{1}{30} + \\dfrac{7}{30}\\right)', ans:'-8\\dfrac{9}{20}', distractors:['-8\\dfrac{1}{20}','8\\dfrac{9}{20}','-8\\dfrac{4}{15}','-8\\dfrac{1}{5}'] },
+  { src:'№1317 · 3)', instr:'Амалдарды орындаңдар', expr:'3\\dfrac{1}{14} + 2\\dfrac{3}{7} - (-2{,}85)', ans:'8\\dfrac{7}{20}', distractors:['2\\dfrac{27}{140}','-8\\dfrac{7}{20}','5\\dfrac{1}{2}','8\\dfrac{1}{5}'] },
+  { src:'№1317 · 4)', instr:'Амалдарды орындаңдар', expr:'28 - 3\\dfrac{5}{12} + \\left(-4{,}5 + 2\\dfrac{1}{4}\\right)', ans:'22\\dfrac{1}{3}', distractors:['33\\dfrac{1}{3}','-22\\dfrac{1}{3}','22\\dfrac{2}{3}','24\\dfrac{7}{12}'] },
+
+  // ─── №1318 — Бөлуді орындаңдар ───
+  { src:'№1318 · 1)', instr:'Бөлуді орындаңдар', expr:'-9{,}6 : 12', ans:'-0{,}8', distractors:['0{,}8','-1{,}25','-8','-115{,}2'] },
+  { src:'№1318 · 2)', instr:'Бөлуді орындаңдар', expr:'-0{,}12 : (-0{,}3)', ans:'0{,}4', distractors:['-0{,}4','-2{,}5','2{,}5','0{,}036'] },
+  { src:'№1318 · 3)', instr:'Бөлуді орындаңдар', expr:'-0{,}35 : (-0{,}07)', ans:'5', distractors:['-5','0{,}2','-0{,}2','0{,}0245'] },
+  { src:'№1318 · 4)', instr:'Бөлуді орындаңдар', expr:'636 : (-0{,}12)', ans:'-5300', distractors:['5300','-53','53','-76{,}32'] },
+
+  // ─── №1319 — Амалдарды орындаңдар ───
+  { src:'№1319 · 1)', instr:'Амалдарды орындаңдар', expr:'9{,}8 \\cdot \\left(-3\\dfrac{4}{29}\\right) \\cdot 4\\dfrac{1}{7}', ans:'-127{,}4', distractors:['127{,}4','-30{,}8','30{,}8','-12{,}74'] },
+  { src:'№1319 · 2)', instr:'Амалдарды орындаңдар', expr:'4\\dfrac{1}{2} \\cdot (-4{,}05) \\cdot \\left(-1\\dfrac{1}{9}\\right)', ans:'20{,}25', distractors:['-20{,}25','-2{,}025','2{,}025','-18{,}225'] },
+  { src:'№1319 · 3)', instr:'Амалдарды орындаңдар', expr:'4\\dfrac{2}{3} \\cdot \\left(-1\\dfrac{4}{5}\\right) \\cdot \\left(-\\dfrac{5}{18}\\right)', ans:'2\\dfrac{1}{3}', distractors:['-2\\dfrac{1}{3}','-2\\dfrac{1}{6}','2\\dfrac{1}{6}','-7\\dfrac{2}{15}'] },
+  { src:'№1319 · 4)', instr:'Амалдарды орындаңдар', expr:'4{,}8 \\cdot \\dfrac{5}{6} \\cdot (-1{,}8) \\cdot \\dfrac{5}{9}', ans:'-4', distractors:['4','-2','2','-8{,}64'] },
+  { src:'№1319 · 5)', instr:'Амалдарды орындаңдар', expr:'-2{,}36 \\cdot 5{,}4 \\cdot 2\\dfrac{7}{9}', ans:'-35{,}4', distractors:['35{,}4','-12{,}744','12{,}744','-3{,}54'] },
+  { src:'№1319 · 6)', instr:'Амалдарды орындаңдар', expr:'\\left(-1\\dfrac{1}{2}\\right) \\cdot 0{,}5 \\cdot 2{,}8', ans:'-2{,}1', distractors:['2{,}1','-0{,}21','0{,}21','-1{,}8'] },
+  { src:'№1319 · 7)', instr:'Амалдарды орындаңдар', expr:'2\\dfrac{7}{20} \\cdot \\dfrac{15}{47} \\cdot (-0{,}64)', ans:'-0{,}48', distractors:['0{,}48','-0{,}75','0{,}75','-1{,}504'] },
+  { src:'№1319 · 8)', instr:'Амалдарды орындаңдар', expr:'7{,}5 \\cdot (-0{,}01) \\cdot \\dfrac{1}{10} \\cdot \\left(-1\\dfrac{1}{3}\\right) \\cdot \\dfrac{1}{40}', ans:'\\dfrac{1}{4000}', distractors:['-\\dfrac{1}{4000}','\\dfrac{1}{400}','-\\dfrac{1}{400}','\\dfrac{1}{40000}'] }
+];
+
+// ── URL params ──────────────────────────────────────────
+const urlParams = new URLSearchParams(location.search);
+const urlCode = (urlParams.get('code') || '').toUpperCase();
+
+// ── State ───────────────────────────────────────────────
+let sessionCode = '';
+let studentId = '';
+let studentName = '';
+let stats = { correct: 0, wrong: 0, streak: 0 };
+let questionOrder = []; // shuffled indices into QUESTIONS
+let qIdx = 0;           // current position in questionOrder
+let currentQuestion = null;
+let currentOpts = [];
+let currentCorrectIdx = -1;
+let currentSelected = null;
+let currentAnswered = false;
+let submitInterval = null;
+let statusPollInterval = null;
+let quizStarted = false;
+
+// ── Focus tracking ──────────────────────────────────────
+let isFocused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let awayStart = null;
+
+function markAway() {
+  if (!isFocused) return;
+  isFocused = false;
+  tabSwitches++;
+  awayStart = Date.now();
+  saveState();
+  sendScore();
+}
+function markBack() {
+  if (isFocused) return;
+  isFocused = true;
+  if (awayStart) {
+    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
+    awayStart = null;
+  }
+  sendScore();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) markAway(); else markBack();
+});
+window.addEventListener('blur', markAway);
+window.addEventListener('focus', markBack);
+
+// ── Helpers ─────────────────────────────────────────────
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function shuffleArray(arr) { const r = [...arr]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
+function spawnConfetti() {
+  const w = document.getElementById('confetti'); w.innerHTML = '';
+  const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626'];
+  for (let i = 0; i < 60; i++) { const e = document.createElement('div'); e.className = 'cfp'; const s = 5 + Math.random() * 9; e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`; w.appendChild(e); }
+  setTimeout(() => w.innerHTML = '', 6000);
+}
+
+// ── localStorage ────────────────────────────────────────
+function saveState() {
+  if (!sessionCode) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + sessionCode, JSON.stringify({
+      studentId,
+      name: studentName,
+      correct: stats.correct,
+      wrong: stats.wrong,
+      streak: stats.streak,
+      tabSwitches,
+      awaySeconds: currentAway,
+      questionOrder,
+      qIdx,
+      ts: Date.now()
+    }));
+  } catch (_) {}
+}
+function loadState(code) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + code);
+      return null;
+    }
+    return data;
+  } catch (_) { return null; }
+}
+function clearState() {
+  if (sessionCode) {
+    try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {}
+  }
+}
+
+// ── Auto-fill code ──────────────────────────────────────
+if (urlCode) {
+  sessionCode = urlCode;
+  document.getElementById('scode').value = urlCode;
+  document.getElementById('code-wrap').style.display = 'none';
+}
+
+// ── RECONNECT ───────────────────────────────────────────
+(async function tryReconnect() {
+  if (!urlCode) return;
+  const saved = loadState(urlCode);
+  if (!saved) return;
+
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${urlCode}`);
+    const data = await res.json();
+
+    if (data.status === 'not_found' || data.status === 'ended') {
+      clearState();
+      return;
+    }
+
+    sessionCode = urlCode;
+    studentId = saved.studentId;
+    studentName = saved.name;
+    stats = { correct: saved.correct || 0, wrong: saved.wrong || 0, streak: saved.streak || 0 };
+    tabSwitches = saved.tabSwitches || 0;
+    awaySeconds = saved.awaySeconds || 0;
+    questionOrder = saved.questionOrder && saved.questionOrder.length ? saved.questionOrder : shuffleArray(QUESTIONS.map((_, i) => i));
+    qIdx = saved.qIdx || 0;
+
+    if (data.status === 'active') {
+      startQuiz();
+    } else if (data.status === 'waiting') {
+      showWait();
+    }
+  } catch (_) {}
+})();
+
+// ══════════════════════════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════════════════════════
+async function joinQuiz() {
+  const name = document.getElementById('sname').value.trim();
+  const code = (urlCode || document.getElementById('scode').value.trim()).toUpperCase();
+  const errEl = document.getElementById('join-err');
+
+  if (!name) { errEl.textContent = 'Атыңызды жазыңыз'; errEl.classList.add('on'); return; }
+  if (code.length < 4) { errEl.textContent = 'Бөлме кодын енгізіңіз'; errEl.classList.add('on'); return; }
+  errEl.classList.remove('on');
+
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = '⏳ Қосылуда...';
+
+  sessionCode = code;
+  studentName = name;
+  studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
+
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${code}`);
+    const data = await res.json();
+
+    if (data.status === 'not_found') {
+      errEl.textContent = 'Бөлме табылмады. Кодты тексеріңіз.';
+      errEl.classList.add('on');
+      btn.disabled = false; btn.textContent = '🚀 Кіру';
+      return;
+    }
+    if (data.status === 'ended') {
+      errEl.textContent = 'Бұл сабақ аяқталған.';
+      errEl.classList.add('on');
+      btn.disabled = false; btn.textContent = '🚀 Кіру';
+      return;
+    }
+
+    stats = { correct: 0, wrong: 0, streak: 0 };
+    questionOrder = shuffleArray(QUESTIONS.map((_, i) => i));
+    qIdx = 0;
+
+    await sendScore();
+    saveState();
+
+    btn.disabled = false; btn.textContent = '🚀 Кіру';
+
+    if (data.status === 'active') {
+      startQuiz();
+    } else {
+      showWait();
+    }
+  } catch (e) {
+    errEl.textContent = 'Серверге қосылу мүмкін болмады.';
+    errEl.classList.add('on');
+    btn.disabled = false; btn.textContent = '🚀 Кіру';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz();
+});
+
+// ══════════════════════════════════════════════════════════
+//  WAIT
+// ══════════════════════════════════════════════════════════
+function showWait() {
+  document.getElementById('wait-name').textContent = studentName;
+  show('s-wait');
+  if (statusPollInterval) clearInterval(statusPollInterval);
+  statusPollInterval = setInterval(pollStatus, 2000);
+}
+async function pollStatus() {
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
+    const data = await res.json();
+    if (data.status === 'active') {
+      clearInterval(statusPollInterval); statusPollInterval = null;
+      startQuiz();
+    } else if (data.status === 'ended' || data.status === 'not_found') {
+      clearInterval(statusPollInterval); statusPollInterval = null;
+      showEnd();
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  START QUIZ
+// ══════════════════════════════════════════════════════════
+function startQuiz() {
+  if (quizStarted) return;
+  quizStarted = true;
+  if (!questionOrder.length) {
+    questionOrder = shuffleArray(QUESTIONS.map((_, i) => i));
+    qIdx = 0;
+  }
+  updateStats();
+  show('s-quiz');
+  loadQuestion();
+
+  sendScore();
+  if (submitInterval) clearInterval(submitInterval);
+  submitInterval = setInterval(sendScore, 5000);
+}
+
+// ══════════════════════════════════════════════════════════
+//  SEND SCORE
+// ══════════════════════════════════════════════════════════
+async function sendScore(finished) {
+  if (!sessionCode || !studentName) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    const res = await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: sessionCode,
+        studentId,
+        name: studentName,
+        score: stats.correct,
+        total: stats.correct + stats.wrong,
+        finished: finished === true,
+        focused: isFocused,
+        tabSwitches,
+        awaySeconds: currentAway
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'ended' || data.status === 'not_found') {
+      showEnd();
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  END
+// ══════════════════════════════════════════════════════════
+function showEnd() {
+  if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
+  if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+
+  const total = stats.correct + stats.wrong;
+  const pct = total > 0 ? Math.round(stats.correct / total * 100) : 0;
+  document.getElementById('res-correct').textContent = stats.correct;
+  document.getElementById('res-wrong').textContent = stats.wrong;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-emoji').textContent = pct >= 70 ? '🎉' : pct >= 40 ? '👍' : '💪';
+  show('s-results');
+  if (pct >= 70) spawnConfetti();
+  clearState();
+}
+
+function updateStats() {
+  document.getElementById('st-total').textContent = stats.correct + stats.wrong;
+  document.getElementById('st-correct').textContent = stats.correct;
+  document.getElementById('st-wrong').textContent = stats.wrong;
+  document.getElementById('st-streak').textContent = stats.streak;
+}
+
+// ══════════════════════════════════════════════════════════
+//  QUESTION LOADING
+// ══════════════════════════════════════════════════════════
+function loadQuestion() {
+  // If we've gone through all questions, reshuffle and continue
+  if (qIdx >= questionOrder.length) {
+    questionOrder = shuffleArray(QUESTIONS.map((_, i) => i));
+    qIdx = 0;
+  }
+
+  const q = QUESTIONS[questionOrder[qIdx]];
+  currentQuestion = q;
+  currentSelected = null;
+  currentAnswered = false;
+
+  // Build option list: 1 correct + 4 distractors, shuffled
+  const all = [{ text: q.ans, correct: true }, ...q.distractors.map(d => ({ text: d, correct: false }))];
+  currentOpts = shuffleArray(all);
+  currentCorrectIdx = currentOpts.findIndex(o => o.correct);
+
+  // Render
+  document.getElementById('q-source').textContent = q.src;
+  document.getElementById('q-instruction').textContent = q.instr;
+  document.getElementById('q-expr').innerHTML = tex(q.expr);
+
+  const letters = ['A', 'B', 'C', 'D', 'E'];
+  const optsHtml = currentOpts.map((o, i) => `
+    <div class="opt" data-i="${i}" onclick="selectOpt(${i})">
+      <div class="opt-letter">${letters[i]}</div>
+      <div class="opt-content">${tex(o.text)}</div>
+    </div>`).join('');
+  document.getElementById('opts').innerHTML = optsHtml;
+
+  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').classList.remove('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+  document.getElementById('feedback').classList.add('hidden');
+}
+
+function selectOpt(idx) {
+  if (currentAnswered) return;
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+  document.querySelector(`.opt[data-i="${idx}"]`).classList.add('selected');
+  currentSelected = idx;
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer() {
+  if (currentSelected === null || currentAnswered) return;
+  currentAnswered = true;
+
+  const opts = document.querySelectorAll('.opt');
+  const isCorrect = currentSelected === currentCorrectIdx;
+
+  opts.forEach((o, i) => {
+    o.style.pointerEvents = 'none';
+    if (i === currentCorrectIdx) o.classList.add('correct');
+    else if (i === currentSelected) o.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('hidden', 'correct', 'wrong');
+  if (isCorrect) {
+    stats.correct++; stats.streak++;
+    fb.classList.add('correct'); fb.textContent = '✓ Дұрыс!';
+  } else {
+    stats.wrong++; stats.streak = 0;
+    fb.classList.add('wrong'); fb.textContent = '✗ Қате! Дұрыс жауап жасыл түспен белгіленді.';
+  }
+
+  updateStats();
+  saveState();
+  sendScore();
+
+  document.getElementById('check-btn').classList.add('hidden');
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+  qIdx++;
+  saveState();
+  loadQuestion();
+}
+</script>
+</body>
+</html>
