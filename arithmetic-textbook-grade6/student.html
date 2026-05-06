@@ -296,11 +296,50 @@ let awaySeconds = 0;
 let awayStart = null;
 let focusDebounceTimer = null;
 
+// ── Activity tracking (catches screen-lock / pocket / afk) ───
+let lastActivityAt = Date.now(); // last user input (mouse/touch/key/scroll)
+let lastHeartbeatAt = Date.now(); // when we last sent — used for focusedRatio
+let focusedMsAccumulator = 0;     // ms spent focused since last heartbeat
+let lastFocusCheckAt = Date.now();
+
+function bumpActivity() { lastActivityAt = Date.now(); }
+['mousedown','mousemove','keydown','touchstart','touchmove','scroll','wheel','click','pointerdown'].forEach(ev => {
+  window.addEventListener(ev, bumpActivity, { passive: true, capture: true });
+});
+
+// Tally focused-time precisely (catches sub-heartbeat blips)
+function tallyFocusedTime() {
+  const now = Date.now();
+  if (isFocused) focusedMsAccumulator += (now - lastFocusCheckAt);
+  lastFocusCheckAt = now;
+}
+setInterval(tallyFocusedTime, 500); // sample every 500ms
+
+// ── Wake Lock — keep screen on during quiz ───────────────
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
+  } catch (_) { /* user can deny — that's fine */ }
+}
+// Re-request on visibility change (some browsers release wake lock when hidden)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && !wakeLock && quizStarted) requestWakeLock();
+});
+
 // Use sendBeacon for markAway — survives tab close on mobile/desktop
 function sendScoreBeacon() {
   if (!sessionCode || !studentName) return;
   let currentAway = awaySeconds;
   if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  tallyFocusedTime();
+  const now = Date.now();
+  const intervalMs = Math.max(1, now - lastHeartbeatAt);
+  const focusedRatio = Math.min(1, focusedMsAccumulator / intervalMs);
+  const idleMs = now - lastActivityAt;
   const payload = JSON.stringify({
     code: sessionCode,
     studentId,
@@ -310,17 +349,24 @@ function sendScoreBeacon() {
     finished: false,
     focused: isFocused,
     tabSwitches,
-    awaySeconds: currentAway
+    awaySeconds: currentAway,
+    // ─── New telemetry ───
+    clientTime: now,
+    idleMs,
+    focusedRatio: Math.round(focusedRatio * 100) / 100
   });
   try {
     if (navigator.sendBeacon) {
       const blob = new Blob([payload], { type: 'application/json' });
       navigator.sendBeacon(`${BACKEND}/submit`, blob);
     } else {
-      // Fallback: regular fetch with keepalive
       fetch(`${BACKEND}/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true });
     }
   } catch (_) {}
+  // Reset accumulator after send
+  focusedMsAccumulator = 0;
+  lastHeartbeatAt = now;
+  lastFocusCheckAt = now;
 }
 
 function applyAway() {
@@ -555,6 +601,13 @@ function startQuiz() {
   updateStats();
   show('s-quiz');
   loadQuestion();
+  requestWakeLock(); // Keep screen on during quiz
+
+  // Reset heartbeat accumulator at quiz start
+  lastHeartbeatAt = Date.now();
+  lastFocusCheckAt = Date.now();
+  focusedMsAccumulator = 0;
+  lastActivityAt = Date.now();
 
   sendScore();
   if (submitInterval) clearInterval(submitInterval);
@@ -568,6 +621,11 @@ async function sendScore(finished) {
   if (!sessionCode || !studentName) return;
   let currentAway = awaySeconds;
   if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  tallyFocusedTime();
+  const now = Date.now();
+  const intervalMs = Math.max(1, now - lastHeartbeatAt);
+  const focusedRatio = Math.min(1, focusedMsAccumulator / intervalMs);
+  const idleMs = now - lastActivityAt;
   try {
     const res = await fetch(`${BACKEND}/submit`, {
       method: 'POST',
@@ -581,9 +639,17 @@ async function sendScore(finished) {
         finished: finished === true,
         focused: isFocused,
         tabSwitches,
-        awaySeconds: currentAway
+        awaySeconds: currentAway,
+        // ─── New telemetry ───
+        clientTime: now,
+        idleMs,
+        focusedRatio: Math.round(focusedRatio * 100) / 100
       })
     });
+    // Reset accumulator after successful send
+    focusedMsAccumulator = 0;
+    lastHeartbeatAt = now;
+    lastFocusCheckAt = now;
     const data = await res.json();
     if (data.status === 'ended' || data.status === 'not_found') {
       showEnd();
