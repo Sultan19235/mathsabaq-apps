@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Цилиндр көлемі — Оқушы</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://www.geogebra.org/apps/deployggb.js"></script>
+<style>
+:root{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e6e9f0;
+  --border:#d2d6e2;
+  --text:#141826;--text2:#3b4063;--muted:#7a7f9a;
+  --primary:#4338ca;--primary-light:#eef0ff;--primary-dark:#3730a3;
+  --green:#059669;--green-light:#ecfdf5;--green-border:#6ee7b7;
+  --red:#dc2626;--red-light:#fef2f2;--red-border:#fca5a5;
+  --amber:#d97706;--amber-light:#fffbeb;
+  --r:14px;
+  --shadow-sm:0 1px 3px rgba(20,24,38,.05);
+  --shadow:0 2px 10px rgba(20,24,38,.07);
+  --shadow-lg:0 8px 30px rgba(20,24,38,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;-webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+
+.screen{display:none;min-height:100vh;animation:fadeUp .3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes cfFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes slideDown{from{opacity:0;max-height:0}to{opacity:1;max-height:600px}}
+
+.container{max-width:560px;margin:0 auto;padding:1rem;padding-bottom:2rem}
+.hidden{display:none!important}
+
+/* ── JOIN ── */
+.join-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.join-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.join-logo{text-align:center;margin-bottom:20px}
+.join-icon{font-size:2.4rem;margin-bottom:6px}
+.join-title{font-size:1.3rem;font-weight:800;margin-bottom:2px}
+.join-sub{color:var(--muted);font-size:.82rem}
+.field{margin-bottom:12px}
+.field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px}
+.field input{width:100%;padding:13px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;outline:none;transition:border-color .15s;background:var(--bg)}
+.field input:focus{border-color:var(--primary)}
+.field input.code-input{font-family:'JetBrains Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:6px;text-transform:uppercase}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation;min-height:48px}
+.btn:active{transform:scale(.97)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 2px 10px rgba(67,56,202,.3)}
+.btn-green{background:var(--green);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.err{background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:10px 14px;color:var(--red);font-size:.82rem;font-weight:500;display:none;margin-bottom:10px}
+.err.on{display:block}
+
+/* ── WAIT ── */
+.wait-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.wait-icon{font-size:3.5rem;margin-bottom:12px}
+.wait-title{font-size:1.2rem;font-weight:800;margin-bottom:6px}
+.wait-sub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.wait-name{display:inline-block;background:var(--primary-light);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.82rem;font-weight:700;margin-top:8px}
+.dots{display:flex;gap:5px;align-items:center;justify-content:center;margin-top:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+
+/* ── QUIZ ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-bottom:.85rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:.55rem .35rem;text-align:center;box-shadow:var(--shadow-sm)}
+.stat-card.hl{background:var(--primary-light);border-color:rgba(67,56,202,.25)}
+.stat-icon{font-size:.95rem;margin-bottom:.1rem}
+.stat-value{font-size:1.1rem;font-weight:800;color:var(--primary);font-family:'JetBrains Mono',monospace}
+.stat-card.g .stat-value{color:var(--green)}
+.stat-card.r .stat-value{color:var(--red)}
+.stat-card.a .stat-value{color:var(--amber)}
+.stat-label{font-size:.58rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.5px}
+
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:1.1rem;box-shadow:var(--shadow)}
+.q-progress{display:inline-flex;align-items:center;gap:.35rem;background:var(--primary-light);color:var(--primary);padding:.3rem .75rem;border-radius:14px;font-size:.7rem;font-weight:700;margin-bottom:.75rem;letter-spacing:.5px}
+.q-text{font-size:1rem;line-height:1.6;color:var(--text);font-weight:500;margin-bottom:1rem}
+
+.hint-row{display:flex;gap:.5rem;margin-bottom:.9rem}
+.hint-btn{flex:1;padding:.7rem .5rem;background:var(--bg2);border:2px solid var(--border);border-radius:11px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--text2);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.3rem;min-height:42px;touch-action:manipulation}
+.hint-btn:active{transform:scale(.97)}
+.hint-btn.active{background:var(--amber-light);border-color:var(--amber);color:var(--amber)}
+
+.hint-panel{margin-bottom:.9rem;border:2px solid var(--amber);border-radius:12px;overflow:hidden;background:var(--amber-light);animation:slideDown .25s ease}
+.hint-panel-header{padding:.55rem .85rem;background:var(--amber);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+
+.formulas-content{padding:.85rem 1rem}
+.formulas-content p{font-size:.92rem;line-height:1.65;margin-bottom:.5rem;color:var(--text2)}
+.formulas-content p:last-child{margin-bottom:0}
+
+.ggb-wrap{padding:.4rem;background:#fff}
+.ggb-target{width:100%;height:360px;border-radius:8px;overflow:hidden}
+.ggb-loading{display:flex;align-items:center;justify-content:center;height:360px;color:var(--muted);font-size:.85rem;gap:.5rem}
+.ggb-loading-spinner{width:18px;height:18px;border:2.5px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Suppress 3D algebra sidebar inside our applet */
+.ggb-target .algebraView,
+.ggb-target .algebraPanel,
+.ggb-target [class*="algebraView"],
+.ggb-target [class*="algebraPanel"],
+.ggb-target .inputBar,
+.ggb-target .AlgebraViewW{display:none!important;height:0!important;max-height:0!important;overflow:hidden!important}
+
+.options-grid{display:grid;grid-template-columns:1fr;gap:.5rem;margin-bottom:1rem}
+.option{padding:.85rem 1rem;background:var(--bg2);border:2.5px solid var(--border);border-radius:12px;cursor:pointer;text-align:left;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:.7rem;min-height:54px;touch-action:manipulation}
+.option:active{transform:scale(.98)}
+.option.selected{border-color:var(--primary);background:var(--primary-light)}
+.option.correct{border-color:var(--green);background:var(--green-light);box-shadow:0 0 0 3px rgba(5,150,105,.12)}
+.option.wrong{border-color:var(--red);background:var(--red-light);box-shadow:0 0 0 3px rgba(220,38,38,.12)}
+.option-label{width:30px;height:30px;background:var(--primary);color:#fff;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.86rem;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.option.correct .option-label{background:var(--green)}
+.option.wrong .option-label{background:var(--red)}
+.option-text{flex:1;font-size:.95rem;display:flex;align-items:center;flex-wrap:wrap;gap:.2rem}
+
+.feedback{text-align:center;padding:.85rem;border-radius:12px;margin-bottom:.9rem;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.feedback.correct{background:var(--green-light);color:var(--green);border:1.5px solid var(--green-border)}
+.feedback.wrong{background:var(--red-light);color:var(--red);border:1.5px solid var(--red-border)}
+
+.btn-group{display:flex;gap:.6rem;justify-content:center;align-items:center;flex-wrap:wrap}
+
+/* ── DONE / RESULTS ── */
+.res-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.res-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg)}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.res-stat{background:var(--bg);border-radius:12px;padding:12px 8px}
+.res-val{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.res-lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-top:2px}
+
+.cfw{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.cfp{position:absolute;animation:cfFall linear forwards}
+</style>
+</head>
+<body>
+<div class="cfw" id="confetti"></div>
+
+<!-- ════ JOIN ════ -->
+<div class="screen active" id="s-join">
+  <div class="join-wrap">
+    <div class="join-card">
+      <div class="join-logo">
+        <div class="join-icon">🔵</div>
+        <div class="join-title">Цилиндр көлемі</div>
+        <div class="join-sub">Геометрия · 11-сынып</div>
+      </div>
+      <div class="err" id="join-err"></div>
+      <div class="field">
+        <label>Аты-жөні</label>
+        <input type="text" id="sname" placeholder="Атыңызды жазыңыз" maxlength="20" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="field" id="code-wrap">
+        <label>Бөлме коды</label>
+        <input type="text" id="scode" class="code-input" placeholder="------" maxlength="6" autocomplete="off">
+      </div>
+      <button class="btn btn-primary btn-block" id="join-btn" style="margin-top:4px" onclick="joinQuiz()">🚀 Кіру</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WAIT ════ -->
+<div class="screen" id="s-wait">
+  <div class="wait-wrap">
+    <div class="wait-icon">✅</div>
+    <div class="wait-title">Қосылдыңыз!</div>
+    <div class="wait-sub">Мұғалім сабақты бастағанша күтіңіз</div>
+    <div class="wait-name" id="wait-name"></div>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+</div>
+
+<!-- ════ QUIZ ════ -->
+<div class="screen" id="s-quiz">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-card hl"><div class="stat-icon">📊</div><div class="stat-value" id="st-total">0</div><div class="stat-label">Жауап</div></div>
+      <div class="stat-card g"><div class="stat-icon">✓</div><div class="stat-value" id="st-correct">0</div><div class="stat-label">Дұрыс</div></div>
+      <div class="stat-card r"><div class="stat-icon">✗</div><div class="stat-value" id="st-wrong">0</div><div class="stat-label">Қате</div></div>
+      <div class="stat-card a"><div class="stat-icon">🔥</div><div class="stat-value" id="st-streak">0</div><div class="stat-label">Қатарынан</div></div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="q-progress">📝 Сұрақ <span id="q-num">1</span> / <span id="q-total">7</span></div>
+      <div class="q-text" id="q-text"></div>
+
+      <div class="hint-row">
+        <button class="hint-btn" id="hint-graph-btn" onclick="toggleGraph()">💡 Графикті көрсету</button>
+        <button class="hint-btn" id="hint-formula-btn" onclick="toggleFormulas()">📐 Формула</button>
+      </div>
+
+      <div class="hint-panel hidden" id="graph-panel">
+        <div class="hint-panel-header">🎯 Графика · 3D көріністі айналдыруға болады</div>
+        <div class="ggb-wrap">
+          <div class="ggb-target" id="ggb-target"></div>
+        </div>
+      </div>
+
+      <div class="hint-panel hidden" id="formulas-panel">
+        <div class="hint-panel-header">📐 Шешу формулалары</div>
+        <div class="formulas-content" id="formulas-content"></div>
+      </div>
+
+      <div class="options-grid" id="options-grid"></div>
+      <div class="feedback hidden" id="feedback"></div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()" disabled>✓ Тексеру</button>
+        <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Келесі →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ DONE (all questions answered, waiting for teacher) ════ -->
+<div class="screen" id="s-done">
+  <div class="res-wrap">
+    <div class="res-card">
+      <div style="font-size:3.5rem;margin-bottom:8px">🎯</div>
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:6px">Барлық сұрақтарды бітірдіңіз!</div>
+      <div style="color:var(--muted);font-size:.86rem">Мұғалім сабақты аяқтағанша күтіңіз</div>
+      <div class="res-stats">
+        <div class="res-stat"><div class="res-val" id="done-correct" style="color:var(--green)">0</div><div class="res-lbl">Дұрыс</div></div>
+        <div class="res-stat"><div class="res-val" id="done-wrong" style="color:var(--red)">0</div><div class="res-lbl">Қате</div></div>
+        <div class="res-stat"><div class="res-val" id="done-pct" style="color:var(--primary)">0%</div><div class="res-lbl">Пайыз</div></div>
+      </div>
+      <div class="dots" style="margin-top:14px"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RESULTS ════ -->
+<div class="screen" id="s-results">
+  <div class="res-wrap">
+    <div class="res-card">
+      <div style="font-size:3rem;margin-bottom:8px" id="res-emoji">🏆</div>
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px">Тест аяқталды!</div>
+      <div style="color:var(--muted);font-size:.86rem">Нәтижелеріңіз</div>
+      <div class="res-stats">
+        <div class="res-stat"><div class="res-val" id="res-correct" style="color:var(--green)">0</div><div class="res-lbl">Дұрыс</div></div>
+        <div class="res-stat"><div class="res-val" id="res-wrong" style="color:var(--red)">0</div><div class="res-lbl">Қате</div></div>
+        <div class="res-stat"><div class="res-val" id="res-pct" style="color:var(--primary)">0%</div><div class="res-lbl">Пайыз</div></div>
+      </div>
+      <p style="color:var(--muted);margin-top:16px;font-size:.82rem">Нәтижелер мұғалімге жіберілді ✓</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+const BACKEND = 'https://mathsabaq.online';
+const STORAGE_KEY_PREFIX = 'ms_cylvol_';
+const PROBLEMS_URL = 'problems.json';
+// ═══════════════════════════════════════════════════════════════
+
+// ── URL params ──────────────────────────────────────────
+const urlParams = new URLSearchParams(location.search);
+const urlCode = (urlParams.get('code') || '').toUpperCase();
+
+// ── State ───────────────────────────────────────────────
+let sessionCode = '';
+let studentId = '';
+let studentName = '';
+let problems = [];
+let currentIdx = 0;
+let stats = { correct: 0, wrong: 0, streak: 0 };
+let quiz = { selected: null, answered: false };
+let submitInterval = null;
+let statusPollInterval = null;
+let quizStarted = false;
+let ggbAppletInstance = null;
+let graphLoadedForIdx = -1;
+
+// ── Focus tracking ──────────────────────────────────────
+let isFocused = true;
+let tabSwitches = 0;
+let awaySeconds = 0;
+let awayStart = null;
+
+function markAway() {
+  if (!isFocused) return;
+  isFocused = false;
+  tabSwitches++;
+  awayStart = Date.now();
+  saveState();
+  sendScore();
+}
+function markBack() {
+  if (isFocused) return;
+  isFocused = true;
+  if (awayStart) {
+    awaySeconds += Math.round((Date.now() - awayStart) / 1000);
+    awayStart = null;
+  }
+  sendScore();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) markAway(); else markBack();
+});
+window.addEventListener('blur', markAway);
+window.addEventListener('focus', markBack);
+
+// ── Math rendering ──────────────────────────────────────
+function renderText(str) {
+  if (!str) return '';
+  return String(str).replace(/\$([^$]+)\$/g, (m, latex) => {
+    try {
+      return katex.renderToString(latex, { throwOnError: false, displayMode: false });
+    } catch (e) {
+      return m;
+    }
+  });
+}
+
+// ── localStorage helpers ────────────────────────────────
+function saveState() {
+  if (!sessionCode) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + sessionCode, JSON.stringify({
+      studentId,
+      name: studentName,
+      correct: stats.correct,
+      wrong: stats.wrong,
+      streak: stats.streak,
+      currentIdx,
+      tabSwitches,
+      awaySeconds: currentAway,
+      ts: Date.now()
+    }));
+  } catch (_) {}
+}
+function loadState(code) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + code);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > 3 * 60 * 60 * 1000) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + code);
+      return null;
+    }
+    return data;
+  } catch (_) { return null; }
+}
+function clearState() {
+  if (sessionCode) {
+    try { localStorage.removeItem(STORAGE_KEY_PREFIX + sessionCode); } catch (_) {}
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function spawnConfetti() {
+  const w = document.getElementById('confetti'); w.innerHTML = '';
+  const cols = ['#4338ca','#2563eb','#d97706','#059669','#dc2626'];
+  for (let i = 0; i < 60; i++) {
+    const e = document.createElement('div');
+    e.className = 'cfp';
+    const s = 5 + Math.random() * 9;
+    e.style.cssText = `left:${Math.random()*100}vw;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*1.4}s`;
+    w.appendChild(e);
+  }
+  setTimeout(() => w.innerHTML = '', 6000);
+}
+
+// ── Load problems.json ──────────────────────────────────
+async function loadProblems() {
+  try {
+    const res = await fetch(PROBLEMS_URL, { cache: 'no-cache' });
+    const data = await res.json();
+    problems = data.problems || [];
+    document.getElementById('q-total').textContent = problems.length;
+    return true;
+  } catch (e) {
+    console.error('Failed to load problems.json', e);
+    return false;
+  }
+}
+
+// ── Auto-fill code from URL ─────────────────────────────
+if (urlCode) {
+  sessionCode = urlCode;
+  document.getElementById('scode').value = urlCode;
+  document.getElementById('code-wrap').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════
+//  RECONNECTION on page load
+// ══════════════════════════════════════════════════════════
+(async function tryReconnect() {
+  await loadProblems();
+  if (!urlCode) return;
+  const saved = loadState(urlCode);
+  if (!saved) return;
+
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${urlCode}`);
+    const data = await res.json();
+
+    if (data.status === 'not_found' || data.status === 'ended') {
+      clearState();
+      return;
+    }
+
+    sessionCode = urlCode;
+    studentId = saved.studentId;
+    studentName = saved.name;
+    stats = { correct: saved.correct || 0, wrong: saved.wrong || 0, streak: saved.streak || 0 };
+    currentIdx = saved.currentIdx || 0;
+    tabSwitches = saved.tabSwitches || 0;
+    awaySeconds = saved.awaySeconds || 0;
+
+    if (data.status === 'active') {
+      startQuiz();
+    } else if (data.status === 'waiting') {
+      showWait();
+    }
+  } catch (_) {}
+})();
+
+// ══════════════════════════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════════════════════════
+async function joinQuiz() {
+  const name = document.getElementById('sname').value.trim();
+  const code = (urlCode || document.getElementById('scode').value.trim()).toUpperCase();
+  const errEl = document.getElementById('join-err');
+
+  if (!name) { errEl.textContent = 'Атыңызды жазыңыз'; errEl.classList.add('on'); return; }
+  if (code.length < 4) { errEl.textContent = 'Бөлме кодын енгізіңіз'; errEl.classList.add('on'); return; }
+  if (!problems.length) {
+    const ok = await loadProblems();
+    if (!ok) { errEl.textContent = 'Сұрақтар жүктелмеді. Бетті қайта ашыңыз.'; errEl.classList.add('on'); return; }
+  }
+  errEl.classList.remove('on');
+
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = '⏳ Қосылуда...';
+
+  sessionCode = code;
+  studentName = name;
+  studentId = 'stu_' + Math.random().toString(36).substr(2, 9);
+
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${code}`);
+    const data = await res.json();
+
+    if (data.status === 'not_found') {
+      errEl.textContent = 'Бөлме табылмады. Кодты тексеріңіз.';
+      errEl.classList.add('on');
+      btn.disabled = false; btn.textContent = '🚀 Кіру';
+      return;
+    }
+    if (data.status === 'ended') {
+      errEl.textContent = 'Бұл сабақ аяқталған.';
+      errEl.classList.add('on');
+      btn.disabled = false; btn.textContent = '🚀 Кіру';
+      return;
+    }
+
+    stats = { correct: 0, wrong: 0, streak: 0 };
+    currentIdx = 0;
+    await sendScore();
+    saveState();
+
+    btn.disabled = false; btn.textContent = '🚀 Кіру';
+
+    if (data.status === 'active') {
+      startQuiz();
+    } else {
+      showWait();
+    }
+  } catch (e) {
+    errEl.textContent = 'Серверге қосылу мүмкін болмады.';
+    errEl.classList.add('on');
+    btn.disabled = false; btn.textContent = '🚀 Кіру';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('s-join').classList.contains('active') && e.key === 'Enter') joinQuiz();
+});
+
+// ══════════════════════════════════════════════════════════
+//  WAIT
+// ══════════════════════════════════════════════════════════
+function showWait() {
+  document.getElementById('wait-name').textContent = studentName;
+  show('s-wait');
+  if (statusPollInterval) clearInterval(statusPollInterval);
+  statusPollInterval = setInterval(pollStatus, 2000);
+}
+
+async function pollStatus() {
+  try {
+    const res = await fetch(`${BACKEND}/status?code=${sessionCode}`);
+    const data = await res.json();
+    if (data.status === 'active') {
+      clearInterval(statusPollInterval);
+      statusPollInterval = null;
+      startQuiz();
+    } else if (data.status === 'ended' || data.status === 'not_found') {
+      clearInterval(statusPollInterval);
+      statusPollInterval = null;
+      showEnd();
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  START QUIZ
+// ══════════════════════════════════════════════════════════
+function startQuiz() {
+  if (quizStarted) return;
+  quizStarted = true;
+  updateStats();
+  // If reconnecting at a finished state
+  if (currentIdx >= problems.length) {
+    showDone();
+  } else {
+    show('s-quiz');
+    loadProblem();
+  }
+
+  sendScore();
+  if (submitInterval) clearInterval(submitInterval);
+  submitInterval = setInterval(sendScore, 5000);
+}
+
+// ══════════════════════════════════════════════════════════
+//  SEND SCORE
+// ══════════════════════════════════════════════════════════
+async function sendScore(finished) {
+  if (!sessionCode || !studentName) return;
+  let currentAway = awaySeconds;
+  if (awayStart) currentAway += Math.round((Date.now() - awayStart) / 1000);
+  try {
+    const res = await fetch(`${BACKEND}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: sessionCode,
+        studentId,
+        name: studentName,
+        score: stats.correct,
+        total: stats.correct + stats.wrong,
+        finished: finished === true,
+        focused: isFocused,
+        tabSwitches,
+        awaySeconds: currentAway
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'ended' || data.status === 'not_found') {
+      showEnd();
+    }
+  } catch (_) {}
+}
+
+// ══════════════════════════════════════════════════════════
+//  DONE & END
+// ══════════════════════════════════════════════════════════
+function showDone() {
+  const total = stats.correct + stats.wrong;
+  const pct = total > 0 ? Math.round(stats.correct / total * 100) : 0;
+  document.getElementById('done-correct').textContent = stats.correct;
+  document.getElementById('done-wrong').textContent = stats.wrong;
+  document.getElementById('done-pct').textContent = pct + '%';
+  show('s-done');
+}
+
+function showEnd() {
+  if (submitInterval) { clearInterval(submitInterval); submitInterval = null; }
+  if (statusPollInterval) { clearInterval(statusPollInterval); statusPollInterval = null; }
+
+  const total = stats.correct + stats.wrong;
+  const pct = total > 0 ? Math.round(stats.correct / total * 100) : 0;
+  document.getElementById('res-correct').textContent = stats.correct;
+  document.getElementById('res-wrong').textContent = stats.wrong;
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-emoji').textContent = pct >= 70 ? '🎉' : pct >= 40 ? '👍' : '💪';
+  show('s-results');
+  if (pct >= 70) spawnConfetti();
+  clearState();
+}
+
+function updateStats() {
+  document.getElementById('st-total').textContent = stats.correct + stats.wrong;
+  document.getElementById('st-correct').textContent = stats.correct;
+  document.getElementById('st-wrong').textContent = stats.wrong;
+  document.getElementById('st-streak').textContent = stats.streak;
+}
+
+// ══════════════════════════════════════════════════════════
+//  PROBLEM LOADING
+// ══════════════════════════════════════════════════════════
+function loadProblem() {
+  if (currentIdx >= problems.length) { showDone(); return; }
+  const p = problems[currentIdx];
+  quiz = { selected: null, answered: false };
+
+  document.getElementById('q-num').textContent = currentIdx + 1;
+  document.getElementById('q-text').innerHTML = renderText(p.text);
+
+  // Reset hints
+  document.getElementById('graph-panel').classList.add('hidden');
+  document.getElementById('formulas-panel').classList.add('hidden');
+  document.getElementById('hint-graph-btn').classList.remove('active');
+  document.getElementById('hint-formula-btn').classList.remove('active');
+  document.getElementById('hint-graph-btn').textContent = '💡 Графикті көрсету';
+  document.getElementById('hint-formula-btn').textContent = '📐 Формула';
+  // Clear previous applet
+  document.getElementById('ggb-target').innerHTML = '';
+  graphLoadedForIdx = -1;
+  ggbAppletInstance = null;
+
+  // Build formulas
+  document.getElementById('formulas-content').innerHTML =
+    (p.formulas || []).map(f => `<p>${renderText(f)}</p>`).join('');
+
+  // Build options
+  const labels = ['A','B','C','D'];
+  document.getElementById('options-grid').innerHTML = p.options.map((opt, i) => `
+    <div class="option" data-letter="${labels[i]}" onclick="selectOpt('${labels[i]}')">
+      <span class="option-label">${labels[i]}</span>
+      <span class="option-text">${renderText(opt)}</span>
+    </div>`).join('');
+
+  // Reset feedback + buttons
+  document.getElementById('feedback').classList.add('hidden');
+  document.getElementById('feedback').classList.remove('correct','wrong');
+  const checkBtn = document.getElementById('check-btn');
+  checkBtn.disabled = true;
+  checkBtn.classList.remove('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+}
+
+// ══════════════════════════════════════════════════════════
+//  HINT TOGGLES
+// ══════════════════════════════════════════════════════════
+function toggleGraph() {
+  const panel = document.getElementById('graph-panel');
+  const btn = document.getElementById('hint-graph-btn');
+  if (panel.classList.contains('hidden')) {
+    panel.classList.remove('hidden');
+    btn.classList.add('active');
+    btn.textContent = '💡 Графикті жасыру';
+    if (graphLoadedForIdx !== currentIdx) {
+      loadGeoGebraForProblem(problems[currentIdx]);
+      graphLoadedForIdx = currentIdx;
+    }
+  } else {
+    panel.classList.add('hidden');
+    btn.classList.remove('active');
+    btn.textContent = '💡 Графикті көрсету';
+  }
+}
+
+function toggleFormulas() {
+  const panel = document.getElementById('formulas-panel');
+  const btn = document.getElementById('hint-formula-btn');
+  if (panel.classList.contains('hidden')) {
+    panel.classList.remove('hidden');
+    btn.classList.add('active');
+    btn.textContent = '📐 Формуланы жасыру';
+  } else {
+    panel.classList.add('hidden');
+    btn.classList.remove('active');
+    btn.textContent = '📐 Формула';
+  }
+}
+
+function loadGeoGebraForProblem(problem) {
+  const target = document.getElementById('ggb-target');
+  target.innerHTML = '<div class="ggb-loading"><div class="ggb-loading-spinner"></div><span>Графика жүктелуде...</span></div>';
+
+  const inner = document.createElement('div');
+  inner.id = 'ggb-inner-' + Date.now();
+  inner.style.width = '100%';
+  inner.style.height = '100%';
+
+  const params = {
+    appName: problem.type === '3d' ? '3d' : 'classic',
+    width: target.clientWidth || 320,
+    height: 360,
+    showToolBar: false,
+    showAlgebraInput: false,
+    showMenuBar: false,
+    showResetIcon: false,
+    enableShiftDragZoom: true,
+    enableRightClick: false,
+    enableLabelDrags: false,
+    showZoomButtons: true,
+    capturingThreshold: null,
+    language: 'en',
+    appletOnLoad: function(api) {
+      try {
+        problem.geogebra.commands.forEach(cmd => {
+          try { api.evalCommand(cmd); }
+          catch (e) { console.error('GGB cmd error:', cmd, e); }
+        });
+      } catch (e) { console.error('GGB load error:', e); }
+    }
+  };
+
+  setTimeout(() => {
+    target.innerHTML = '';
+    target.appendChild(inner);
+    try {
+      ggbAppletInstance = new GGBApplet(params, true);
+      ggbAppletInstance.inject(inner.id);
+    } catch (e) {
+      target.innerHTML = '<div class="ggb-loading"><span>Графика жүктелмеді</span></div>';
+    }
+  }, 50);
+}
+
+// ══════════════════════════════════════════════════════════
+//  ANSWER
+// ══════════════════════════════════════════════════════════
+function selectOpt(letter) {
+  if (quiz.answered) return;
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  document.querySelector(`.option[data-letter="${letter}"]`).classList.add('selected');
+  quiz.selected = letter;
+  document.getElementById('check-btn').disabled = false;
+}
+
+function checkAnswer() {
+  if (quiz.selected === null || quiz.answered) return;
+  quiz.answered = true;
+  const p = problems[currentIdx];
+  const correct = p.answer;
+  const isCorrect = quiz.selected === correct;
+
+  document.querySelectorAll('.option').forEach(o => {
+    o.style.pointerEvents = 'none';
+    o.classList.remove('selected');
+    const l = o.dataset.letter;
+    if (l === correct) o.classList.add('correct');
+    else if (l === quiz.selected) o.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('hidden','correct','wrong');
+  if (isCorrect) {
+    stats.correct++; stats.streak++;
+    fb.classList.add('correct');
+    fb.textContent = '✓ Дұрыс!';
+  } else {
+    stats.wrong++; stats.streak = 0;
+    fb.classList.add('wrong');
+    fb.textContent = '✗ Қате! Дұрыс жауап: ' + correct;
+  }
+
+  updateStats();
+  saveState();
+  sendScore();
+
+  document.getElementById('check-btn').classList.add('hidden');
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.classList.remove('hidden');
+  if (currentIdx >= problems.length - 1) {
+    nextBtn.textContent = '✓ Аяқтау';
+  } else {
+    nextBtn.textContent = 'Келесі →';
+  }
+}
+
+function nextQuestion() {
+  currentIdx++;
+  saveState();
+  if (currentIdx >= problems.length) {
+    showDone();
+    sendScore(true);
+  } else {
+    loadProblem();
+  }
+}
+</script>
+</body>
+</html>
