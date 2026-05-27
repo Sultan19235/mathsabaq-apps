@@ -8,10 +8,22 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
           "cyl = Cylinder((0,0,0), (0,0,3), 2)",
           "SetColor(cyl, \"#2563eb\")",
           "SetFilling(cyl, 0.35)",
-          "SetLineThickness(cyl, 2)"
+          "SetLineThickness(cyl, 1)",
+          "rad = Segment((0,0,0), (2,0,0))",
+          "SetColor(rad, \"#dc2626\")",
+          "SetLineThickness(rad, 2)",
+          "SetCaption(rad, \"r = 2\")",
+          "SetLabelMode(rad, 3)",
+          "hgt = Segment((2,0,0), (2,0,3))",
+          "SetColor(hgt, \"#dc2626\")",
+          "SetLineThickness(hgt, 2)",
+          "SetCaption(hgt, \"h = 3\")",
+          "SetLabelMode(hgt, 3)"
         ]
       },
       "formulas": [
@@ -35,18 +47,24 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "A = (0, -0.5, 0)",
-          "B = (0, 0.5, 0)",
-          "C = (0, 0.5, 1)",
-          "D = (0, -0.5, 1)",
-          "cyl = Cylinder((0,0,0), (0,0,1), 0.5)",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl = Cylinder((0,0,0), (0,0,2), 1)",
           "SetColor(cyl, \"#2563eb\")",
           "SetFilling(cyl, 0.18)",
-          "SetLineThickness(cyl, 2)",
-          "sq = Polygon(A, B, C, D)",
+          "SetLineThickness(cyl, 1)",
+          "sq = Polygon((0,-1,0), (0,1,0), (0,1,2), (0,-1,2))",
           "SetColor(sq, \"#dc2626\")",
           "SetFilling(sq, 0.45)",
-          "SetLineThickness(sq, 2)"
+          "SetLineThickness(sq, 1)",
+          "side = Segment((0,1,0), (0,1,2))",
+          "SetCaption(side, \"a\")",
+          "SetLabelMode(side, 3)",
+          "SetLineThickness(side, 2)",
+          "base = Segment((0,-1,0), (0,1,0))",
+          "SetCaption(base, \"a\")",
+          "SetLabelMode(base, 3)",
+          "SetLineThickness(base, 2)"
         ]
       },
       "formulas": [
@@ -69,14 +87,36 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "cyl1 = Cylinder((-2, 0, 0), (-2, 0, 2), 1)",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl1 = Cylinder((-2.5, 0, 0), (-2.5, 0, 2), 1)",
           "SetColor(cyl1, \"#2563eb\")",
           "SetFilling(cyl1, 0.35)",
-          "SetLineThickness(cyl1, 2)",
-          "cyl2 = Cylinder((2, 0, 0), (2, 0, 1), 1.5)",
+          "SetLineThickness(cyl1, 1)",
+          "h1 = Segment((-3.5, 0, 0), (-3.5, 0, 2))",
+          "SetCaption(h1, \"2h\")",
+          "SetLabelMode(h1, 3)",
+          "SetLineThickness(h1, 2)",
+          "SetColor(h1, \"#dc2626\")",
+          "r1 = Segment((-2.5, 0, 2), (-1.5, 0, 2))",
+          "SetCaption(r1, \"r\")",
+          "SetLabelMode(r1, 3)",
+          "SetLineThickness(r1, 2)",
+          "SetColor(r1, \"#dc2626\")",
+          "cyl2 = Cylinder((2.5, 0, 0), (2.5, 0, 1), 1.5)",
           "SetColor(cyl2, \"#16a34a\")",
           "SetFilling(cyl2, 0.35)",
-          "SetLineThickness(cyl2, 2)"
+          "SetLineThickness(cyl2, 1)",
+          "h2 = Segment((4.2, 0, 0), (4.2, 0, 1))",
+          "SetCaption(h2, \"h\")",
+          "SetLabelMode(h2, 3)",
+          "SetLineThickness(h2, 2)",
+          "SetColor(h2, \"#dc2626\")",
+          "r2 = Segment((2.5, 0, 1), (4, 0, 1))",
+          "SetCaption(r2, \"1.5r\")",
+          "SetLabelMode(r2, 3)",
+          "SetLineThickness(r2, 2)",
+          "SetColor(r2, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -101,19 +141,25 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "A = (0, 0, 0)",
-          "B = (1, 0, 0)",
-          "C = (1, 0, 1)",
-          "D = (0, 0, 1)",
-          "sq = Polygon(A, B, C, D)",
-          "SetColor(sq, \"#eab308\")",
-          "SetFilling(sq, 0.45)",
-          "SetLineThickness(sq, 2)",
-          "cyl = Cylinder(A, D, 1)",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl = Cylinder((0,0,0), (0,0,2), 2)",
           "SetColor(cyl, \"#2563eb\")",
           "SetFilling(cyl, 0.2)",
-          "SetLineThickness(cyl, 2)",
-          "ax = Segment((0, 0, -0.5), (0, 0, 1.5))",
+          "SetLineThickness(cyl, 1)",
+          "sq = Polygon((0,0,0), (2,0,0), (2,0,2), (0,0,2))",
+          "SetColor(sq, \"#eab308\")",
+          "SetFilling(sq, 0.45)",
+          "SetLineThickness(sq, 1)",
+          "side1 = Segment((0,0,0), (2,0,0))",
+          "SetCaption(side1, \"a\")",
+          "SetLabelMode(side1, 3)",
+          "SetLineThickness(side1, 2)",
+          "side2 = Segment((2,0,0), (2,0,2))",
+          "SetCaption(side2, \"a\")",
+          "SetLabelMode(side2, 3)",
+          "SetLineThickness(side2, 2)",
+          "ax = Segment((0,0,-0.5), (0,0,2.5))",
           "SetColor(ax, \"#1e293b\")",
           "SetLineThickness(ax, 1)"
         ]
@@ -139,21 +185,25 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "A = (0, -sqrt(3)/4, 0)",
-          "B = (0, sqrt(3)/4, 0)",
-          "C = (0, sqrt(3)/4, 0.5)",
-          "D = (0, -sqrt(3)/4, 0.5)",
-          "cyl = Cylinder((0,0,0), (0,0,0.5), sqrt(3)/4)",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl = Cylinder((0,0,0), (0,0,2), 1.732)",
           "SetColor(cyl, \"#2563eb\")",
           "SetFilling(cyl, 0.18)",
-          "SetLineThickness(cyl, 2)",
-          "sq = Polygon(A, B, C, D)",
+          "SetLineThickness(cyl, 1)",
+          "sq = Polygon((0,-1.732,0), (0,1.732,0), (0,1.732,2), (0,-1.732,2))",
           "SetColor(sq, \"#eab308\")",
           "SetFilling(sq, 0.45)",
-          "SetLineThickness(sq, 2)",
-          "diag = Segment(A, C)",
+          "SetLineThickness(sq, 1)",
+          "diag = Segment((0,-1.732,0), (0,1.732,2))",
           "SetColor(diag, \"#dc2626\")",
-          "SetLineThickness(diag, 3)"
+          "SetLineThickness(diag, 2)",
+          "SetCaption(diag, \"1\")",
+          "SetLabelMode(diag, 3)",
+          "ang = Angle((0,1.732,0), (0,-1.732,0), (0,1.732,2))",
+          "SetCaption(ang, \"30^\\circ\")",
+          "SetLabelMode(ang, 3)",
+          "SetColor(ang, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -178,17 +228,20 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "A = (0, 0, 0)",
-          "B = (1, 0, 0)",
-          "P = (0, 0, 1)",
-          "cube = Cube(A, B, P)",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cube = Prism(Polygon((-1,-1,0), (1,-1,0), (1,1,0), (-1,1,0)), 2)",
           "SetColor(cube, \"#94a3b8\")",
           "SetFilling(cube, 0.12)",
-          "SetLineThickness(cube, 2)",
-          "cyl = Cylinder((0.5, 0.5, 0), (0.5, 0.5, 1), 0.5)",
+          "SetLineThickness(cube, 1)",
+          "cyl = Cylinder((0,0,0), (0,0,2), 1)",
           "SetColor(cyl, \"#dc2626\")",
           "SetFilling(cyl, 0.5)",
-          "SetLineThickness(cyl, 2)"
+          "SetLineThickness(cyl, 1)",
+          "edge = Segment((-1,-1,0), (1,-1,0))",
+          "SetCaption(edge, \"1\")",
+          "SetLabelMode(edge, 3)",
+          "SetLineThickness(edge, 2)"
         ]
       },
       "formulas": [
@@ -213,19 +266,26 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "A = (-0.5, -0.5, 0)",
-          "B = (0.5, -0.5, 0)",
-          "C = (0.5, 0.5, 0)",
-          "D = (-0.5, 0.5, 0)",
-          "A1 = (-0.5, -0.5, 2)",
-          "pr = Prism(A, B, C, D, A1)",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "pr = Prism(Polygon((-1,-1,0), (1,-1,0), (1,1,0), (-1,1,0)), 4)",
           "SetColor(pr, \"#eab308\")",
           "SetFilling(pr, 0.45)",
-          "SetLineThickness(pr, 2)",
-          "cyl = Cylinder((0, 0, 0), (0, 0, 2), sqrt(2)/2)",
+          "SetLineThickness(pr, 1)",
+          "cyl = Cylinder((0, 0, 0), (0, 0, 4), 1.414)",
           "SetColor(cyl, \"#2563eb\")",
           "SetFilling(cyl, 0.18)",
-          "SetLineThickness(cyl, 2)"
+          "SetLineThickness(cyl, 1)",
+          "baseEdge = Segment((-1,-1,0), (1,-1,0))",
+          "SetCaption(baseEdge, \"1\")",
+          "SetLabelMode(baseEdge, 3)",
+          "SetLineThickness(baseEdge, 2)",
+          "SetColor(baseEdge, \"#dc2626\")",
+          "hEdge = Segment((1,-1,0), (1,-1,4))",
+          "SetCaption(hEdge, \"2\")",
+          "SetLabelMode(hEdge, 3)",
+          "SetLineThickness(hEdge, 2)",
+          "SetColor(hEdge, \"#dc2626\")"
         ]
       },
       "formulas": [
