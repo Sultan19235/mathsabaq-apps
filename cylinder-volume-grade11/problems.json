@@ -7,6 +7,7 @@
       "text": "Цилиндрдің жасаушысы $3$ см-ге, ал табанының радиусы $2$ см-ге тең. Цилиндрдің көлемін табыңдар.",
       "geogebra": {
         "commands": [
+          "SetPerspective(\"T\")",
           "SetViewDirection((1.2, -1.5, 0.8))",
           "ShowAxes(false)",
           "ShowGrid(false)",
@@ -46,6 +47,7 @@
       "text": "Цилиндрдің осьтік қимасы — қабырғасы $a$ см болатын квадрат. Цилиндрдің көлемін табыңдар.",
       "geogebra": {
         "commands": [
+          "SetPerspective(\"T\")",
           "SetViewDirection((1.2, -1.5, 0.8))",
           "ShowAxes(false)",
           "ShowGrid(false)",
@@ -86,6 +88,7 @@
       "text": "Бір кесенің екіншісіне қарағанда $2$ есе биіктеу, ал екінші кесенің біріншісіне қарағанда $1{,}5$ есе кеңірек. Қандай кесенің сыйымдылығы жоғары?",
       "geogebra": {
         "commands": [
+          "SetPerspective(\"T\")",
           "SetViewDirection((1.2, -1.5, 0.8))",
           "ShowAxes(false)",
           "ShowGrid(false)",
@@ -140,6 +143,7 @@
       "text": "Квадраттың қабырғасы $a$-ға тең. Квадратты қабырғасы жатқан түзуден айналдырғанда пайда болған фигураның көлемін табыңдар.",
       "geogebra": {
         "commands": [
+          "SetPerspective(\"T\")",
           "SetViewDirection((1.2, -1.5, 0.8))",
           "ShowAxes(false)",
           "ShowGrid(false)",
@@ -184,6 +188,7 @@
       "text": "Цилиндрдің осьтік қимасының диагоналі $1$ см-ге тең және ол табан жазықтығына $30^\\circ$ бұрыш жасап көлбейді. Цилиндрдің көлемін табыңдар.",
       "geogebra": {
         "commands": [
+          "SetPerspective(\"T\")",
           "SetViewDirection((1.2, -1.5, 0.8))",
           "ShowAxes(false)",
           "ShowGrid(false)",
@@ -227,6 +232,7 @@
       "text": "Бірлік кубқа іштей сызылған цилиндрдің көлемін табыңдар.",
       "geogebra": {
         "commands": [
+          "SetPerspective(\"T\")",
           "SetViewDirection((1.2, -1.5, 0.8))",
           "ShowAxes(false)",
           "ShowGrid(false)",
@@ -265,6 +271,7 @@
       "text": "Тік призманың табаны — қабырғасы $1$ см-ге тең квадрат. Призманың бүйір қыры $2$ см-ге тең. Осы призмаға сырттай сызылған цилиндрдің көлемін табыңдар.",
       "geogebra": {
         "commands": [
+          "SetPerspective(\"T\")",
           "SetViewDirection((1.2, -1.5, 0.8))",
           "ShowAxes(false)",
           "ShowGrid(false)",
