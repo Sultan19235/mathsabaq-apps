@@ -8,23 +8,17 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "O = (0, 0, 0)",
-          "P = (0, 0, 3)",
-          "cyl = Cylinder(O, P, 2)",
-          "SetColor(cyl, \"blue\")",
-          "SetFilling(cyl, 0.3)",
-          "hSeg = Segment((2.3, 0, 0), (2.3, 0, 3))",
-          "SetColor(hSeg, \"red\")",
-          "SetLineThickness(hSeg, 4)",
-          "rSeg = Segment(O, (2, 0, 0))",
-          "SetColor(rSeg, \"green\")",
-          "SetLineThickness(rSeg, 4)"
+          "cyl = Cylinder((0,0,0), (0,0,3), 2)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.35)",
+          "SetLineThickness(cyl, 2)"
         ]
       },
       "formulas": [
         "Цилиндрдің көлемі: $V = \\pi r^2 h$",
         "Мұндағы $r$ — табан радиусы, $h$ — биіктік (жасаушы)",
-        "Берілгені: $r = 2$ см, $h = 3$ см"
+        "Берілгені: $r = 2$ см, $h = 3$ см",
+        "$V = \\pi \\cdot 2^2 \\cdot 3 = 12\\pi$"
       ],
       "options": [
         "$6\\pi$ см³",
@@ -41,32 +35,32 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "O = (0, 0, 0)",
-          "P = (0, 0, 2)",
-          "cyl = Cylinder(O, P, 1)",
-          "SetColor(cyl, \"blue\")",
-          "SetFilling(cyl, 0.2)",
-          "A = (-1, 0, 0)",
-          "B = (1, 0, 0)",
-          "C = (1, 0, 2)",
-          "D = (-1, 0, 2)",
+          "A = (0, -0.5, 0)",
+          "B = (0, 0.5, 0)",
+          "C = (0, 0.5, 1)",
+          "D = (0, -0.5, 1)",
+          "cyl = Cylinder((0,0,0), (0,0,1), 0.5)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.18)",
+          "SetLineThickness(cyl, 2)",
           "sq = Polygon(A, B, C, D)",
-          "SetColor(sq, \"red\")",
-          "SetFilling(sq, 0.5)"
+          "SetColor(sq, \"#dc2626\")",
+          "SetFilling(sq, 0.45)",
+          "SetLineThickness(sq, 2)"
         ]
       },
       "formulas": [
-        "Осьтік қима — цилиндрдің осі арқылы өтетін қима, тіктөртбұрыш",
-        "Қима квадрат болса: $h = 2r$, демек $a = 2r$, яғни $r = \\dfrac{a}{2}$",
-        "Цилиндрдің көлемі: $V = \\pi r^2 h = \\pi \\cdot \\dfrac{a^2}{4} \\cdot a = \\dfrac{\\pi a^3}{4}$"
+        "Осьтік қимасы квадрат болғандықтан, цилиндрдің биіктігі $h = a$ және табанының диаметрі $D = a$ болады",
+        "Цилиндрдің радиусы: $r = \\dfrac{D}{2} = \\dfrac{a}{2}$",
+        "Көлем: $V = \\pi r^2 h = \\pi \\cdot \\left(\\dfrac{a}{2}\\right)^2 \\cdot a = \\dfrac{\\pi a^3}{4}$"
       ],
       "options": [
-        "$\\dfrac{\\pi a^3}{4}$ см³",
-        "$\\dfrac{\\pi a^3}{2}$ см³",
-        "$\\pi a^3$ см³",
-        "$\\dfrac{\\pi a^3}{8}$ см³"
+        "$\\pi a^3$",
+        "$\\dfrac{\\pi a^3}{4}$",
+        "$\\dfrac{\\pi a^3}{2}$",
+        "$\\dfrac{\\pi a^3}{8}$"
       ],
-      "answer": "A"
+      "answer": "B"
     },
     {
       "id": 3,
@@ -75,29 +69,30 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "cup1 = Cylinder((-2.5, 0, 0), (-2.5, 0, 4), 1)",
-          "SetColor(cup1, \"blue\")",
-          "SetFilling(cup1, 0.3)",
-          "cup2 = Cylinder((2.5, 0, 0), (2.5, 0, 2), 1.5)",
-          "SetColor(cup2, \"green\")",
-          "SetFilling(cup2, 0.3)"
+          "cyl1 = Cylinder((-2, 0, 0), (-2, 0, 2), 1)",
+          "SetColor(cyl1, \"#2563eb\")",
+          "SetFilling(cyl1, 0.35)",
+          "SetLineThickness(cyl1, 2)",
+          "cyl2 = Cylinder((2, 0, 0), (2, 0, 1), 1.5)",
+          "SetColor(cyl2, \"#16a34a\")",
+          "SetFilling(cyl2, 0.35)",
+          "SetLineThickness(cyl2, 2)"
         ]
       },
       "formulas": [
-        "Цилиндрдің көлемі: $V = \\pi r^2 h$",
-        "Бірінші кесе: $h_1 = 2h_2$, $r_1$",
-        "Екінші кесе: $h_2 = \\dfrac{h_1}{2}$, $r_2 = 1{,}5 r_1$",
-        "$V_1 = \\pi r_1^2 h_1$",
-        "$V_2 = \\pi (1{,}5 r_1)^2 \\cdot \\dfrac{h_1}{2} = 1{,}125 \\pi r_1^2 h_1$",
-        "Демек $V_2 > V_1$"
+        "Бірінші кесенің өлшемдері: радиусы $r$, биіктігі $2h$",
+        "Оның көлемі: $V_1 = \\pi r^2 (2h) = 2\\pi r^2 h$",
+        "Екінші кесенің өлшемдері: радиусы $1{,}5r$, биіктігі $h$",
+        "Оның көлемі: $V_2 = \\pi (1{,}5r)^2 h = 2{,}25\\pi r^2 h$",
+        "$2{,}25 > 2$ болғандықтан, екінші кесенің сыйымдылығы жоғары ($V_2 > V_1$)"
       ],
       "options": [
-        "Бірінші кесенің сыйымдылығы жоғары",
-        "Екінші кесенің сыйымдылығы жоғары",
-        "Олардың сыйымдылығы тең",
-        "Жауап беру мүмкін емес"
+        "Екінші кесенің",
+        "Бірінші кесенің",
+        "Сыйымдылықтары бірдей",
+        "Анықтау мүмкін емес"
       ],
-      "answer": "B"
+      "answer": "A"
     },
     {
       "id": 4,
@@ -107,75 +102,74 @@
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
           "A = (0, 0, 0)",
-          "B = (2, 0, 0)",
-          "C = (2, 0, 2)",
-          "D = (0, 0, 2)",
+          "B = (1, 0, 0)",
+          "C = (1, 0, 1)",
+          "D = (0, 0, 1)",
           "sq = Polygon(A, B, C, D)",
-          "SetColor(sq, \"red\")",
-          "SetFilling(sq, 0.7)",
-          "cyl = Cylinder((0, 0, 0), (2, 0, 0), 2)",
-          "SetColor(cyl, \"blue\")",
+          "SetColor(sq, \"#eab308\")",
+          "SetFilling(sq, 0.45)",
+          "SetLineThickness(sq, 2)",
+          "cyl = Cylinder(A, D, 1)",
+          "SetColor(cyl, \"#2563eb\")",
           "SetFilling(cyl, 0.2)",
-          "axis = Segment((-0.5, 0, 0), (2.5, 0, 0))",
-          "SetColor(axis, \"black\")",
-          "SetLineThickness(axis, 3)"
+          "SetLineThickness(cyl, 2)",
+          "ax = Segment((0, 0, -0.5), (0, 0, 1.5))",
+          "SetColor(ax, \"#1e293b\")",
+          "SetLineThickness(ax, 1)"
         ]
       },
       "formulas": [
-        "Квадратты қабырғасы жатқан түзу айналдырғанда цилиндр пайда болады",
-        "Цилиндрдің радиусы: $r = a$",
-        "Цилиндрдің биіктігі: $h = a$",
-        "Көлемі: $V = \\pi r^2 h = \\pi a^2 \\cdot a = \\pi a^3$"
+        "Квадратты қабырғасы жатқан түзуден айналдырғанда цилиндр пайда болады",
+        "Бұл цилиндрдің биіктігі квадраттың қабырғасына тең: $h = a$",
+        "Табан радиусы да квадраттың қабырғасына тең: $r = a$",
+        "Пайда болған фигураның көлемі: $V = \\pi r^2 h = \\pi a^2 \\cdot a = \\pi a^3$"
       ],
       "options": [
-        "$\\dfrac{\\pi a^3}{2}$",
+        "$\\pi a^3$",
         "$2\\pi a^3$",
-        "$\\dfrac{\\pi a^3}{3}$",
-        "$\\pi a^3$"
+        "$\\dfrac{\\pi a^3}{2}$",
+        "$\\dfrac{\\pi a^3}{4}$"
       ],
-      "answer": "D"
+      "answer": "A"
     },
     {
       "id": 5,
       "type": "3d",
-      "text": "Цилиндрдің осьтік қимасының диагоналы $1$ см-ге тең және ол табан жазықтығына $30^\\circ$ бұрыш жасап көлбейді. Цилиндрдің көлемін табыңдар.",
+      "text": "Цилиндрдің осьтік қимасының диагоналі $1$ см-ге тең және ол табан жазықтығына $30^\\circ$ бұрыш жасап көлбейді. Цилиндрдің көлемін табыңдар.",
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "h = 1",
-          "r = sqrt(3)/2",
-          "O = (0, 0, 0)",
-          "P = (0, 0, h)",
-          "cyl = Cylinder(O, P, r)",
-          "SetColor(cyl, \"blue\")",
-          "SetFilling(cyl, 0.2)",
-          "A = (-r, 0, 0)",
-          "B = (r, 0, 0)",
-          "C = (r, 0, h)",
-          "D = (-r, 0, h)",
-          "sect = Polygon(A, B, C, D)",
-          "SetColor(sect, \"yellow\")",
-          "SetFilling(sect, 0.5)",
+          "A = (0, -sqrt(3)/4, 0)",
+          "B = (0, sqrt(3)/4, 0)",
+          "C = (0, sqrt(3)/4, 0.5)",
+          "D = (0, -sqrt(3)/4, 0.5)",
+          "cyl = Cylinder((0,0,0), (0,0,0.5), sqrt(3)/4)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.18)",
+          "SetLineThickness(cyl, 2)",
+          "sq = Polygon(A, B, C, D)",
+          "SetColor(sq, \"#eab308\")",
+          "SetFilling(sq, 0.45)",
+          "SetLineThickness(sq, 2)",
           "diag = Segment(A, C)",
-          "SetColor(diag, \"red\")",
-          "SetLineThickness(diag, 5)"
+          "SetColor(diag, \"#dc2626\")",
+          "SetLineThickness(diag, 3)"
         ]
       },
       "formulas": [
-        "Осьтік қима — диагоналы $d$ болатын тіктөртбұрыш",
-        "Диагональ табан жазықтығына $\\alpha = 30^\\circ$ бұрыш жасайды",
-        "Биіктік: $h = d \\sin\\alpha = 1 \\cdot \\sin 30^\\circ = \\dfrac{1}{2}$",
-        "Диаметр: $2r = d \\cos\\alpha = 1 \\cdot \\cos 30^\\circ = \\dfrac{\\sqrt{3}}{2}$",
+        "Тікбұрышты үшбұрышта $30^\\circ$ бұрышқа қарсы жатқан катет гипотенузаның жартысына тең",
+        "Цилиндрдің биіктігі: $h = d \\cdot \\sin(30^\\circ) = 1 \\cdot \\dfrac{1}{2} = \\dfrac{1}{2}$",
+        "Табанының диаметрі: $2r = d \\cdot \\cos(30^\\circ) = 1 \\cdot \\dfrac{\\sqrt{3}}{2}$",
         "Радиус: $r = \\dfrac{\\sqrt{3}}{4}$",
-        "Көлем: $V = \\pi r^2 h = \\pi \\cdot \\dfrac{3}{16} \\cdot \\dfrac{1}{2} = \\dfrac{3\\pi}{32}$"
+        "Көлем: $V = \\pi r^2 h = \\pi \\left(\\dfrac{\\sqrt{3}}{4}\\right)^2 \\cdot \\dfrac{1}{2} = \\pi \\cdot \\dfrac{3}{16} \\cdot \\dfrac{1}{2} = \\dfrac{3\\pi}{32}$"
       ],
       "options": [
-        "$\\dfrac{3\\pi}{32}$ см³",
-        "$\\dfrac{\\pi}{16}$ см³",
-        "$\\dfrac{3\\pi}{16}$ см³",
-        "$\\dfrac{\\pi\\sqrt{3}}{32}$ см³"
+        "$\\dfrac{\\pi}{8}$",
+        "$\\dfrac{3\\pi}{16}$",
+        "$\\dfrac{\\pi}{16}$",
+        "$\\dfrac{3\\pi}{32}$"
       ],
-      "answer": "A"
+      "answer": "D"
     },
     {
       "id": 6,
@@ -188,11 +182,13 @@
           "B = (1, 0, 0)",
           "P = (0, 0, 1)",
           "cube = Cube(A, B, P)",
-          "SetFilling(cube, 0.1)",
-          "SetColor(cube, \"gray\")",
+          "SetColor(cube, \"#94a3b8\")",
+          "SetFilling(cube, 0.12)",
+          "SetLineThickness(cube, 2)",
           "cyl = Cylinder((0.5, 0.5, 0), (0.5, 0.5, 1), 0.5)",
-          "SetColor(cyl, \"red\")",
-          "SetFilling(cyl, 0.5)"
+          "SetColor(cyl, \"#dc2626\")",
+          "SetFilling(cyl, 0.5)",
+          "SetLineThickness(cyl, 2)"
         ]
       },
       "formulas": [
@@ -217,31 +213,33 @@
       "geogebra": {
         "commands": [
           "SetViewDirection((1.2, -1.5, 0.8))",
-          "A = (0, 0, 0)",
-          "B = (1, 0, 0)",
-          "C = (1, 1, 0)",
-          "D = (0, 1, 0)",
-          "A1 = (0, 0, 2)",
-          "prism = Prism(A, B, C, D, A1)",
-          "SetFilling(prism, 0.4)",
-          "SetColor(prism, \"blue\")",
-          "cyl = Cylinder((0.5, 0.5, 0), (0.5, 0.5, 2), sqrt(2)/2)",
-          "SetColor(cyl, \"red\")",
-          "SetFilling(cyl, 0.2)"
+          "A = (-0.5, -0.5, 0)",
+          "B = (0.5, -0.5, 0)",
+          "C = (0.5, 0.5, 0)",
+          "D = (-0.5, 0.5, 0)",
+          "A1 = (-0.5, -0.5, 2)",
+          "pr = Prism(A, B, C, D, A1)",
+          "SetColor(pr, \"#eab308\")",
+          "SetFilling(pr, 0.45)",
+          "SetLineThickness(pr, 2)",
+          "cyl = Cylinder((0, 0, 0), (0, 0, 2), sqrt(2)/2)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.18)",
+          "SetLineThickness(cyl, 2)"
         ]
       },
       "formulas": [
-        "Призмаға сырттай сызылған цилиндрдің табаны — призма табан квадратына сырттай сызылған шеңбер",
-        "Квадрат қабырғасы $a=1$, диагоналы $d = a\\sqrt{2} = \\sqrt{2}$",
-        "Шеңбер радиусы: $r = \\dfrac{d}{2} = \\dfrac{\\sqrt{2}}{2}$",
-        "Цилиндр биіктігі: $h = 2$ см",
-        "Көлем: $V = \\pi r^2 h = \\pi \\cdot \\dfrac{1}{2} \\cdot 2 = \\pi$"
+        "Призма табаны — қабырғасы $a = 1$ квадрат",
+        "Цилиндр призмаға сырттай сызылғандықтан, табанындағы шеңбер квадратқа сырттай сызылған",
+        "Сырттай сызылған шеңбер радиусы квадраттың диагоналінің жартысына тең: $R = \\dfrac{a\\sqrt{2}}{2} = \\dfrac{\\sqrt{2}}{2}$",
+        "Цилиндрдің биіктігі призманың бүйір қырына тең: $h = 2$",
+        "Цилиндрдің көлемі: $V = \\pi R^2 h = \\pi \\left(\\dfrac{\\sqrt{2}}{2}\\right)^2 \\cdot 2 = \\pi \\cdot \\dfrac{2}{4} \\cdot 2 = \\pi$"
       ],
       "options": [
-        "$2\\pi$ см³",
-        "$\\dfrac{\\pi}{2}$ см³",
-        "$\\sqrt{2}\\pi$ см³",
-        "$\\pi$ см³"
+        "$2\\pi$",
+        "$\\dfrac{\\pi}{2}$",
+        "$\\dfrac{\\pi}{4}$",
+        "$\\pi$"
       ],
       "answer": "D"
     }
