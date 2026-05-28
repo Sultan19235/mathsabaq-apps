@@ -118,7 +118,7 @@
           "SetLineThickness(h2, 2)",
           "SetColor(h2, \"#dc2626\")",
           "r2 = Segment((2.5, 0, 1), (4, 0, 1))",
-          "SetCaption(r2, \"1.5r\")",
+          "SetCaption(r2, \"1{,}5r\")",
           "SetLabelMode(r2, 3)",
           "SetLineThickness(r2, 2)",
           "SetColor(r2, \"#dc2626\")"
@@ -312,6 +312,131 @@
         "$\\dfrac{\\pi}{2}$",
         "$\\dfrac{\\pi}{4}$",
         "$\\pi$"
+      ],
+      "answer": "D"
+    },
+    {
+      "id": 8,
+      "type": "3d",
+      "text": "Цилиндрдің көлемі $16\\pi$ см$^3$, ал биіктігі $4$ см. Цилиндрдің табанының радиусын табыңдар.",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl = Cylinder((0,0,0), (0,0,4), 2)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.35)",
+          "SetLineThickness(cyl, 1)",
+          "hgt = Segment((2,0,0), (2,0,4))",
+          "SetColor(hgt, \"#dc2626\")",
+          "SetLineThickness(hgt, 2)",
+          "SetCaption(hgt, \"h = 4\")",
+          "SetLabelMode(hgt, 3)",
+          "rad = Segment((0,0,4), (2,0,4))",
+          "SetColor(rad, \"#dc2626\")",
+          "SetLineThickness(rad, 2)",
+          "SetCaption(rad, \"r = ?\")",
+          "SetLabelMode(rad, 3)"
+        ]
+      },
+      "formulas": [
+        "Цилиндрдің көлемі: $V = \\pi r^2 h$",
+        "Бізге белгілісі: $16\\pi = \\pi r^2 \\cdot 4$",
+        "$r^2 = \\dfrac{16\\pi}{4\\pi} = 4$",
+        "Осыдан радиус $r = 2$ см екенін табамыз."
+      ],
+      "options": [
+        "$4$ см",
+        "$8$ см",
+        "$2$ см",
+        "$16$ см"
+      ],
+      "answer": "C"
+    },
+    {
+      "id": 9,
+      "type": "3d",
+      "text": "Тең бүйірлі цилиндрдің (осьтік қимасы квадрат) көлемі $54\\pi$ см$^3$. Оның биіктігін табыңдар.",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl = Cylinder((0,0,0), (0,0,6), 3)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.18)",
+          "SetLineThickness(cyl, 1)",
+          "sq = Polygon((0,-3,0), (0,3,0), (0,3,6), (0,-3,6))",
+          "SetColor(sq, \"#eab308\")",
+          "SetFilling(sq, 0.45)",
+          "SetLineThickness(sq, 1)",
+          "hgt = Segment((0,3,0), (0,3,6))",
+          "SetColor(hgt, \"#dc2626\")",
+          "SetLineThickness(hgt, 2)",
+          "SetCaption(hgt, \"h = 2r\")",
+          "SetLabelMode(hgt, 3)"
+        ]
+      },
+      "formulas": [
+        "Тең бүйірлі цилиндрдің осьтік қимасы квадрат болғандықтан, $h = 2r$ немесе $r = \\dfrac{h}{2}$.",
+        "Көлем формуласы: $V = \\pi r^2 h = \\pi \\left(\\dfrac{h}{2}\\right)^2 \\cdot h = \\dfrac{\\pi h^3}{4}$",
+        "$\\,\\dfrac{\\pi h^3}{4} = 54\\pi$",
+        "$h^3 = 216$",
+        "$h = 6$ см"
+      ],
+      "options": [
+        "$3$ см",
+        "$6$ см",
+        "$9$ см",
+        "$12$ см"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 10,
+      "type": "3d",
+      "text": "Екі цилиндрдің биіктіктері бірдей. Бірінші цилиндрдің табан радиусы екіншісінен $3$ есе үлкен. Олардың көлемдерінің қатынасы қандай?",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl1 = Cylinder((-4,0,0), (-4,0,3), 3)",
+          "SetColor(cyl1, \"#2563eb\")",
+          "SetFilling(cyl1, 0.35)",
+          "SetLineThickness(cyl1, 1)",
+          "r1 = Segment((-4,0,3), (-1,0,3))",
+          "SetCaption(r1, \"3r\")",
+          "SetLabelMode(r1, 3)",
+          "SetLineThickness(r1, 2)",
+          "SetColor(r1, \"#dc2626\")",
+          "cyl2 = Cylinder((2,0,0), (2,0,3), 1)",
+          "SetColor(cyl2, \"#16a34a\")",
+          "SetFilling(cyl2, 0.35)",
+          "SetLineThickness(cyl2, 1)",
+          "r2 = Segment((2,0,3), (3,0,3))",
+          "SetCaption(r2, \"r\")",
+          "SetLabelMode(r2, 3)",
+          "SetLineThickness(r2, 2)",
+          "SetColor(r2, \"#dc2626\")"
+        ]
+      },
+      "formulas": [
+        "Цилиндр көлемі: $V = \\pi r^2 h$",
+        "Бірінші цилиндрдің көлемі: $V_1 = \\pi (3r)^2 h = 9\\pi r^2 h$",
+        "Екінші цилиндрдің көлемі: $V_2 = \\pi r^2 h$",
+        "Олардың қатынасы: $\\dfrac{V_1}{V_2} = \\dfrac{9\\pi r^2 h}{\\pi r^2 h} = 9$",
+        "Яғни, бірінші цилиндрдің көлемі $9$ есе үлкен ($9:1$)."
+      ],
+      "options": [
+        "$3:1$",
+        "$6:1$",
+        "$27:1$",
+        "$9:1$"
       ],
       "answer": "D"
     }
