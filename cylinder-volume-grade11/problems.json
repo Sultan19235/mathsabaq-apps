@@ -1,444 +1,323 @@
 {
-  "title": "Цилиндр көлемі",
-  "problems": [
-    {
-      "id": 1,
-      "type": "3d",
-      "text": "Цилиндрдің жасаушысы $3$ см-ге, ал табанының радиусы $2$ см-ге тең. Цилиндрдің көлемін табыңдар.",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "cyl = Cylinder((0,0,0), (0,0,3), 2)",
-          "SetColor(cyl, \"#2563eb\")",
-          "SetFilling(cyl, 0.35)",
-          "SetLineThickness(cyl, 1)",
-          "rad = Segment((0,0,0), (2,0,0))",
-          "SetColor(rad, \"#dc2626\")",
-          "SetLineThickness(rad, 2)",
-          "SetCaption(rad, \"r = 2\")",
-          "SetLabelMode(rad, 3)",
-          "hgt = Segment((2,0,0), (2,0,3))",
-          "SetColor(hgt, \"#dc2626\")",
-          "SetLineThickness(hgt, 2)",
-          "SetCaption(hgt, \"h = 3\")",
-          "SetLabelMode(hgt, 3)"
-        ]
-      },
-      "formulas": [
-        "Цилиндрдің көлемі: $V = \\pi r^2 h$",
-        "Мұндағы $r$ — табан радиусы, $h$ — биіктік (жасаушы)",
-        "Берілгені: $r = 2$ см, $h = 3$ см",
-        "$V = \\pi \\cdot 2^2 \\cdot 3 = 12\\pi$"
-      ],
-      "options": [
-        "$6\\pi$ см³",
-        "$24\\pi$ см³",
-        "$12\\pi$ см³",
-        "$18\\pi$ см³"
-      ],
-      "answer": "C"
-    },
-    {
-      "id": 2,
-      "type": "3d",
-      "text": "Цилиндрдің осьтік қимасы — қабырғасы $a$ см болатын квадрат. Цилиндрдің көлемін табыңдар.",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "cyl = Cylinder((0,0,0), (0,0,2), 1)",
-          "SetColor(cyl, \"#2563eb\")",
-          "SetFilling(cyl, 0.18)",
-          "SetLineThickness(cyl, 1)",
-          "sq = Polygon((0,-1,0), (0,1,0), (0,1,2), (0,-1,2))",
-          "SetColor(sq, \"#eab308\")",
-          "SetFilling(sq, 0.45)",
-          "SetLineThickness(sq, 1)",
-          "side = Segment((0,1,0), (0,1,2))",
-          "SetColor(side, \"#dc2626\")",
-          "SetCaption(side, \"a\")",
-          "SetLabelMode(side, 3)",
-          "SetLineThickness(side, 2)",
-          "base = Segment((0,-1,0), (0,1,0))",
-          "SetColor(base, \"#dc2626\")",
-          "SetCaption(base, \"a\")",
-          "SetLabelMode(base, 3)",
-          "SetLineThickness(base, 2)"
-        ]
-      },
-      "formulas": [
-        "Осьтік қимасы квадрат болғандықтан, цилиндрдің биіктігі $h = a$ және табанының диаметрі $D = a$ болады",
-        "Цилиндрдің радиусы: $r = \\dfrac{D}{2} = \\dfrac{a}{2}$",
-        "Көлем: $V = \\pi r^2 h = \\pi \\cdot \\left(\\dfrac{a}{2}\\right)^2 \\cdot a = \\dfrac{\\pi a^3}{4}$"
-      ],
-      "options": [
-        "$\\pi a^3$",
-        "$\\dfrac{\\pi a^3}{4}$",
-        "$\\dfrac{\\pi a^3}{2}$",
-        "$\\dfrac{\\pi a^3}{8}$"
-      ],
-      "answer": "B"
-    },
-    {
-      "id": 3,
-      "type": "3d",
-      "text": "Бір кесенің екіншісіне қарағанда $2$ есе биіктеу, ал екінші кесенің біріншісіне қарағанда $1{,}5$ есе кеңірек. Қандай кесенің сыйымдылығы жоғары?",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "cyl1 = Cylinder((-2.5, 0, 0), (-2.5, 0, 2), 1)",
-          "SetColor(cyl1, \"#2563eb\")",
-          "SetFilling(cyl1, 0.35)",
-          "SetLineThickness(cyl1, 1)",
-          "h1 = Segment((-3.5, 0, 0), (-3.5, 0, 2))",
-          "SetCaption(h1, \"2h\")",
-          "SetLabelMode(h1, 3)",
-          "SetLineThickness(h1, 2)",
-          "SetColor(h1, \"#dc2626\")",
-          "r1 = Segment((-2.5, 0, 2), (-1.5, 0, 2))",
-          "SetCaption(r1, \"r\")",
-          "SetLabelMode(r1, 3)",
-          "SetLineThickness(r1, 2)",
-          "SetColor(r1, \"#dc2626\")",
-          "cyl2 = Cylinder((2.5, 0, 0), (2.5, 0, 1), 1.5)",
-          "SetColor(cyl2, \"#16a34a\")",
-          "SetFilling(cyl2, 0.35)",
-          "SetLineThickness(cyl2, 1)",
-          "h2 = Segment((4.2, 0, 0), (4.2, 0, 1))",
-          "SetCaption(h2, \"h\")",
-          "SetLabelMode(h2, 3)",
-          "SetLineThickness(h2, 2)",
-          "SetColor(h2, \"#dc2626\")",
-          "r2 = Segment((2.5, 0, 1), (4, 0, 1))",
-          "SetCaption(r2, \"1{,}5r\")",
-          "SetLabelMode(r2, 3)",
-          "SetLineThickness(r2, 2)",
-          "SetColor(r2, \"#dc2626\")"
-        ]
-      },
-      "formulas": [
-        "Бірінші кесенің өлшемдері: радиусы $r$, биіктігі $2h$",
-        "Оның көлемі: $V_1 = \\pi r^2 (2h) = 2\\pi r^2 h$",
-        "Екінші кесенің өлшемдері: радиусы $1{,}5r$, биіктігі $h$",
-        "Оның көлемі: $V_2 = \\pi (1{,}5r)^2 h = 2{,}25\\pi r^2 h$",
-        "$2{,}25 > 2$ болғандықтан, екінші кесенің сыйымдылығы жоғары ($V_2 > V_1$)"
-      ],
-      "options": [
-        "Екінші кесенің",
-        "Бірінші кесенің",
-        "Сыйымдылықтары бірдей",
-        "Анықтау мүмкін емес"
-      ],
-      "answer": "A"
-    },
-    {
-      "id": 4,
-      "type": "3d",
-      "text": "Квадраттың қабырғасы $a$-ға тең. Квадратты қабырғасы жатқан түзуден айналдырғанда пайда болған фигураның көлемін табыңдар.",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "cyl = Cylinder((0,0,0), (0,0,2), 2)",
-          "SetColor(cyl, \"#2563eb\")",
-          "SetFilling(cyl, 0.2)",
-          "SetLineThickness(cyl, 1)",
-          "sq = Polygon((0,0,0), (2,0,0), (2,0,2), (0,0,2))",
-          "SetColor(sq, \"#eab308\")",
-          "SetFilling(sq, 0.45)",
-          "SetLineThickness(sq, 1)",
-          "side1 = Segment((0,0,0), (2,0,0))",
-          "SetColor(side1, \"#dc2626\")",
-          "SetCaption(side1, \"a\")",
-          "SetLabelMode(side1, 3)",
-          "SetLineThickness(side1, 2)",
-          "side2 = Segment((2,0,0), (2,0,2))",
-          "SetColor(side2, \"#dc2626\")",
-          "SetCaption(side2, \"a\")",
-          "SetLabelMode(side2, 3)",
-          "SetLineThickness(side2, 2)",
-          "ax = Segment((0,0,-0.5), (0,0,2.5))",
-          "SetColor(ax, \"#1e293b\")",
-          "SetLineThickness(ax, 1)"
-        ]
-      },
-      "formulas": [
-        "Квадратты қабырғасы жатқан түзуден айналдырғанда цилиндр пайда болады",
-        "Бұл цилиндрдің биіктігі квадраттың қабырғасына тең: $h = a$",
-        "Табан радиусы да квадраттың қабырғасына тең: $r = a$",
-        "Пайда болған фигураның көлемі: $V = \\pi r^2 h = \\pi a^2 \\cdot a = \\pi a^3$"
-      ],
-      "options": [
-        "$\\pi a^3$",
-        "$2\\pi a^3$",
-        "$\\dfrac{\\pi a^3}{2}$",
-        "$\\dfrac{\\pi a^3}{4}$"
-      ],
-      "answer": "A"
-    },
-    {
-      "id": 5,
-      "type": "3d",
-      "text": "Цилиндрдің осьтік қимасының диагоналі $1$ см-ге тең және ол табан жазықтығына $30^\\circ$ бұрыш жасап көлбейді. Цилиндрдің көлемін табыңдар.",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "cyl = Cylinder((0,0,0), (0,0,2), 1.732)",
-          "SetColor(cyl, \"#2563eb\")",
-          "SetFilling(cyl, 0.18)",
-          "SetLineThickness(cyl, 1)",
-          "sq = Polygon((0,-1.732,0), (0,1.732,0), (0,1.732,2), (0,-1.732,2))",
-          "SetColor(sq, \"#eab308\")",
-          "SetFilling(sq, 0.45)",
-          "SetLineThickness(sq, 1)",
-          "diag = Segment((0,-1.732,0), (0,1.732,2))",
-          "SetColor(diag, \"#dc2626\")",
-          "SetLineThickness(diag, 2)",
-          "SetCaption(diag, \"1\")",
-          "SetLabelMode(diag, 3)",
-          "ang = Angle((0,1.732,0), (0,-1.732,0), (0,1.732,2))",
-          "SetCaption(ang, \"30^\\circ\")",
-          "SetLabelMode(ang, 3)",
-          "SetColor(ang, \"#dc2626\")"
-        ]
-      },
-      "formulas": [
-        "Тікбұрышты үшбұрышта $30^\\circ$ бұрышқа қарсы жатқан катет гипотенузаның жартысына тең",
-        "Цилиндрдің биіктігі: $h = d \\cdot \\sin(30^\\circ) = 1 \\cdot \\dfrac{1}{2} = \\dfrac{1}{2}$",
-        "Табанының диаметрі: $2r = d \\cdot \\cos(30^\\circ) = 1 \\cdot \\dfrac{\\sqrt{3}}{2}$",
-        "Радиус: $r = \\dfrac{\\sqrt{3}}{4}$",
-        "Көлем: $V = \\pi r^2 h = \\pi \\left(\\dfrac{\\sqrt{3}}{4}\\right)^2 \\cdot \\dfrac{1}{2} = \\pi \\cdot \\dfrac{3}{16} \\cdot \\dfrac{1}{2} = \\dfrac{3\\pi}{32}$"
-      ],
-      "options": [
-        "$\\dfrac{\\pi}{8}$",
-        "$\\dfrac{3\\pi}{16}$",
-        "$\\dfrac{\\pi}{16}$",
-        "$\\dfrac{3\\pi}{32}$"
-      ],
-      "answer": "D"
-    },
-    {
-      "id": 6,
-      "type": "3d",
-      "text": "Бірлік кубқа іштей сызылған цилиндрдің көлемін табыңдар.",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "cube = Prism(Polygon((-1,-1,0), (1,-1,0), (1,1,0), (-1,1,0)), 2)",
-          "SetColor(cube, \"#94a3b8\")",
-          "SetFilling(cube, 0.12)",
-          "SetLineThickness(cube, 1)",
-          "cyl = Cylinder((0,0,0), (0,0,2), 1)",
-          "SetColor(cyl, \"#dc2626\")",
-          "SetFilling(cyl, 0.5)",
-          "SetLineThickness(cyl, 1)",
-          "edge = Segment((-1,-1,0), (1,-1,0))",
-          "SetColor(edge, \"#dc2626\")",
-          "SetCaption(edge, \"1\")",
-          "SetLabelMode(edge, 3)",
-          "SetLineThickness(edge, 2)"
-        ]
-      },
-      "formulas": [
-        "Бірлік куб: қыры $a = 1$",
-        "Кубқа іштей сызылған цилиндр — табаны кубтың табан квадратына іштей сызылған шеңбер",
-        "Цилиндрдің радиусы: $r = \\dfrac{a}{2} = \\dfrac{1}{2}$",
-        "Цилиндрдің биіктігі: $h = a = 1$",
-        "Көлем: $V = \\pi r^2 h = \\pi \\cdot \\dfrac{1}{4} \\cdot 1 = \\dfrac{\\pi}{4}$"
-      ],
-      "options": [
-        "$\\dfrac{\\pi}{2}$",
-        "$\\pi$",
-        "$\\dfrac{\\pi}{4}$",
-        "$\\dfrac{\\pi}{3}$"
-      ],
-      "answer": "C"
-    },
-    {
-      "id": 7,
-      "type": "3d",
-      "text": "Тік призманың табаны — қабырғасы $1$ см-ге тең квадрат. Призманың бүйір қыры $2$ см-ге тең. Осы призмаға сырттай сызылған цилиндрдің көлемін табыңдар.",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "pr = Prism(Polygon((-1,-1,0), (1,-1,0), (1,1,0), (-1,1,0)), 4)",
-          "SetColor(pr, \"#eab308\")",
-          "SetFilling(pr, 0.45)",
-          "SetLineThickness(pr, 1)",
-          "cyl = Cylinder((0, 0, 0), (0, 0, 4), 1.414)",
-          "SetColor(cyl, \"#2563eb\")",
-          "SetFilling(cyl, 0.18)",
-          "SetLineThickness(cyl, 1)",
-          "baseEdge = Segment((-1,-1,0), (1,-1,0))",
-          "SetCaption(baseEdge, \"1\")",
-          "SetLabelMode(baseEdge, 3)",
-          "SetLineThickness(baseEdge, 2)",
-          "SetColor(baseEdge, \"#dc2626\")",
-          "hEdge = Segment((1,-1,0), (1,-1,4))",
-          "SetCaption(hEdge, \"2\")",
-          "SetLabelMode(hEdge, 3)",
-          "SetLineThickness(hEdge, 2)",
-          "SetColor(hEdge, \"#dc2626\")"
-        ]
-      },
-      "formulas": [
-        "Призма табаны — қабырғасы $a = 1$ квадрат",
-        "Цилиндр призмаға сырттай сызылғандықтан, табанындағы шеңбер квадратқа сырттай сызылған",
-        "Сырттай сызылған шеңбер радиусы квадраттың диагоналінің жартысына тең: $R = \\dfrac{a\\sqrt{2}}{2} = \\dfrac{\\sqrt{2}}{2}$",
-        "Цилиндрдің биіктігі призманың бүйір қырына тең: $h = 2$",
-        "Цилиндрдің көлемі: $V = \\pi R^2 h = \\pi \\left(\\dfrac{\\sqrt{2}}{2}\\right)^2 \\cdot 2 = \\pi \\cdot \\dfrac{2}{4} \\cdot 2 = \\pi$"
-      ],
-      "options": [
-        "$2\\pi$",
-        "$\\dfrac{\\pi}{2}$",
-        "$\\dfrac{\\pi}{4}$",
-        "$\\pi$"
-      ],
-      "answer": "D"
-    },
-    {
-      "id": 8,
-      "type": "3d",
-      "text": "Цилиндрдің көлемі $16\\pi$ см$^3$, ал биіктігі $4$ см. Цилиндрдің табанының радиусын табыңдар.",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "cyl = Cylinder((0,0,0), (0,0,4), 2)",
-          "SetColor(cyl, \"#2563eb\")",
-          "SetFilling(cyl, 0.35)",
-          "SetLineThickness(cyl, 1)",
-          "hgt = Segment((2,0,0), (2,0,4))",
-          "SetColor(hgt, \"#dc2626\")",
-          "SetLineThickness(hgt, 2)",
-          "SetCaption(hgt, \"h = 4\")",
-          "SetLabelMode(hgt, 3)",
-          "rad = Segment((0,0,4), (2,0,4))",
-          "SetColor(rad, \"#dc2626\")",
-          "SetLineThickness(rad, 2)",
-          "SetCaption(rad, \"r = ?\")",
-          "SetLabelMode(rad, 3)"
-        ]
-      },
-      "formulas": [
-        "Цилиндрдің көлемі: $V = \\pi r^2 h$",
-        "Бізге белгілісі: $16\\pi = \\pi r^2 \\cdot 4$",
-        "$r^2 = \\dfrac{16\\pi}{4\\pi} = 4$",
-        "Осыдан радиус $r = 2$ см екенін табамыз."
-      ],
-      "options": [
-        "$4$ см",
-        "$8$ см",
-        "$2$ см",
-        "$16$ см"
-      ],
-      "answer": "C"
-    },
-    {
-      "id": 9,
-      "type": "3d",
-      "text": "Тең бүйірлі цилиндрдің (осьтік қимасы квадрат) көлемі $54\\pi$ см$^3$. Оның биіктігін табыңдар.",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "cyl = Cylinder((0,0,0), (0,0,6), 3)",
-          "SetColor(cyl, \"#2563eb\")",
-          "SetFilling(cyl, 0.18)",
-          "SetLineThickness(cyl, 1)",
-          "sq = Polygon((0,-3,0), (0,3,0), (0,3,6), (0,-3,6))",
-          "SetColor(sq, \"#eab308\")",
-          "SetFilling(sq, 0.45)",
-          "SetLineThickness(sq, 1)",
-          "hgt = Segment((0,3,0), (0,3,6))",
-          "SetColor(hgt, \"#dc2626\")",
-          "SetLineThickness(hgt, 2)",
-          "SetCaption(hgt, \"h = 2r\")",
-          "SetLabelMode(hgt, 3)"
-        ]
-      },
-      "formulas": [
-        "Тең бүйірлі цилиндрдің осьтік қимасы квадрат болғандықтан, $h = 2r$ немесе $r = \\dfrac{h}{2}$.",
-        "Көлем формуласы: $V = \\pi r^2 h = \\pi \\left(\\dfrac{h}{2}\\right)^2 \\cdot h = \\dfrac{\\pi h^3}{4}$",
-        "$\\,\\dfrac{\\pi h^3}{4} = 54\\pi$",
-        "$h^3 = 216$",
-        "$h = 6$ см"
-      ],
-      "options": [
-        "$3$ см",
-        "$6$ см",
-        "$9$ см",
-        "$12$ см"
-      ],
-      "answer": "B"
-    },
-    {
-      "id": 10,
-      "type": "3d",
-      "text": "Екі цилиндрдің биіктіктері бірдей. Бірінші цилиндрдің табан радиусы екіншісінен $3$ есе үлкен. Олардың көлемдерінің қатынасы қандай?",
-      "geogebra": {
-        "commands": [
-          "SetPerspective(\"T\")",
-          "SetViewDirection((1.2, -1.5, 0.8))",
-          "ShowAxes(false)",
-          "ShowGrid(false)",
-          "cyl1 = Cylinder((-4,0,0), (-4,0,3), 3)",
-          "SetColor(cyl1, \"#2563eb\")",
-          "SetFilling(cyl1, 0.35)",
-          "SetLineThickness(cyl1, 1)",
-          "r1 = Segment((-4,0,3), (-1,0,3))",
-          "SetCaption(r1, \"3r\")",
-          "SetLabelMode(r1, 3)",
-          "SetLineThickness(r1, 2)",
-          "SetColor(r1, \"#dc2626\")",
-          "cyl2 = Cylinder((2,0,0), (2,0,3), 1)",
-          "SetColor(cyl2, \"#16a34a\")",
-          "SetFilling(cyl2, 0.35)",
-          "SetLineThickness(cyl2, 1)",
-          "r2 = Segment((2,0,3), (3,0,3))",
-          "SetCaption(r2, \"r\")",
-          "SetLabelMode(r2, 3)",
-          "SetLineThickness(r2, 2)",
-          "SetColor(r2, \"#dc2626\")"
-        ]
-      },
-      "formulas": [
-        "Цилиндр көлемі: $V = \\pi r^2 h$",
-        "Бірінші цилиндрдің көлемі: $V_1 = \\pi (3r)^2 h = 9\\pi r^2 h$",
-        "Екінші цилиндрдің көлемі: $V_2 = \\pi r^2 h$",
-        "Олардың қатынасы: $\\dfrac{V_1}{V_2} = \\dfrac{9\\pi r^2 h}{\\pi r^2 h} = 9$",
-        "Яғни, бірінші цилиндрдің көлемі $9$ есе үлкен ($9:1$)."
-      ],
-      "options": [
-        "$3:1$",
-        "$6:1$",
-        "$27:1$",
-        "$9:1$"
-      ],
-      "answer": "D"
-    }
-  ]
+  "title": "Цилиндр көлемі",
+  "problems": [
+    {
+      "id": 1,
+      "type": "3d",
+      "text": "Цилиндрдің жасаушысы $3$ см-ге, ал табанының радиусы $2$ см-ге тең. Цилиндрдің көлемін табыңдар.",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl = Cylinder((0,0,0), (0,0,3), 2)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.35)",
+          "SetLineThickness(cyl, 1)",
+          "rad = Segment((0,0,0), (2,0,0))",
+          "SetColor(rad, \"#dc2626\")",
+          "SetLineThickness(rad, 2)",
+          "SetCaption(rad, \"r = 2\")",
+          "SetLabelMode(rad, 3)",
+          "hgt = Segment((2,0,0), (2,0,3))",
+          "SetColor(hgt, \"#dc2626\")",
+          "SetLineThickness(hgt, 2)",
+          "SetCaption(hgt, \"h = 3\")",
+          "SetLabelMode(hgt, 3)"
+        ]
+      },
+      "formulas": [
+        "Цилиндрдің көлемі: $V = \\pi r^2 h$",
+        "Мұндағы $r$ — табан радиусы, $h$ — биіктік (жасаушы)",
+        "Берілгені: $r = 2$ см, $h = 3$ см",
+        "$V = \\pi \\cdot 2^2 \\cdot 3 = 12\\pi$"
+      ],
+      "options": [
+        "$6\\pi$ см³",
+        "$24\\pi$ см³",
+        "$12\\pi$ см³",
+        "$18\\pi$ см³"
+      ],
+      "answer": "C"
+    },
+    {
+      "id": 2,
+      "type": "3d",
+      "text": "Цилиндрдің осьтік қимасы — қабырғасы $a$ см болатын квадрат. Цилиндрдің көлемін табыңдар.",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl = Cylinder((0,0,0), (0,0,2), 1)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.18)",
+          "SetLineThickness(cyl, 1)",
+          "sq = Polygon((0,-1,0), (0,1,0), (0,1,2), (0,-1,2))",
+          "SetColor(sq, \"#eab308\")",
+          "SetFilling(sq, 0.45)",
+          "SetLineThickness(sq, 1)",
+          "side = Segment((0,1,0), (0,1,2))",
+          "SetColor(side, \"#dc2626\")",
+          "SetCaption(side, \"a\")",
+          "SetLabelMode(side, 3)",
+          "SetLineThickness(side, 2)",
+          "base = Segment((0,-1,0), (0,1,0))",
+          "SetColor(base, \"#dc2626\")",
+          "SetCaption(base, \"a\")",
+          "SetLabelMode(base, 3)",
+          "SetLineThickness(base, 2)"
+        ]
+      },
+      "formulas": [
+        "Осьтік қимасы квадрат болғандықтан, цилиндрдің биіктігі $h = a$ және табанының диаметрі $D = a$ болады",
+        "Цилиндрдің радиусы: $r = \\dfrac{D}{2} = \\dfrac{a}{2}$",
+        "Көлем: $V = \\pi r^2 h = \\pi \\cdot \\left(\\dfrac{a}{2}\\right)^2 \\cdot a = \\dfrac{\\pi a^3}{4}$"
+      ],
+      "options": [
+        "$\\pi a^3$",
+        "$\\dfrac{\\pi a^3}{4}$",
+        "$\\dfrac{\\pi a^3}{2}$",
+        "$\\dfrac{\\pi a^3}{8}$"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 3,
+      "type": "3d",
+      "text": "Бір кесенің екіншісіне қарағанда $2$ есе биіктеу, ал екінші кесенің біріншісіне қарағанда $1{,}5$ есе кеңірек. Қандай кесенің сыйымдылығы жоғары?",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl1 = Cylinder((-2.5, 0, 0), (-2.5, 0, 2), 1)",
+          "SetColor(cyl1, \"#2563eb\")",
+          "SetFilling(cyl1, 0.35)",
+          "SetLineThickness(cyl1, 1)",
+          "h1 = Segment((-3.5, 0, 0), (-3.5, 0, 2))",
+          "SetCaption(h1, \"2h\")",
+          "SetLabelMode(h1, 3)",
+          "SetLineThickness(h1, 2)",
+          "SetColor(h1, \"#dc2626\")",
+          "r1 = Segment((-2.5, 0, 2), (-1.5, 0, 2))",
+          "SetCaption(r1, \"r\")",
+          "SetLabelMode(r1, 3)",
+          "SetLineThickness(r1, 2)",
+          "SetColor(r1, \"#dc2626\")",
+          "cyl2 = Cylinder((2.5, 0, 0), (2.5, 0, 1), 1.5)",
+          "SetColor(cyl2, \"#16a34a\")",
+          "SetFilling(cyl2, 0.35)",
+          "SetLineThickness(cyl2, 1)",
+          "h2 = Segment((4.2, 0, 0), (4.2, 0, 1))",
+          "SetCaption(h2, \"h\")",
+          "SetLabelMode(h2, 3)",
+          "SetLineThickness(h2, 2)",
+          "SetColor(h2, \"#dc2626\")",
+          "r2 = Segment((2.5, 0, 1), (4, 0, 1))",
+          "SetCaption(r2, \"1.5r\")",
+          "SetLabelMode(r2, 3)",
+          "SetLineThickness(r2, 2)",
+          "SetColor(r2, \"#dc2626\")"
+        ]
+      },
+      "formulas": [
+        "Бірінші кесенің өлшемдері: радиусы $r$, биіктігі $2h$",
+        "Оның көлемі: $V_1 = \\pi r^2 (2h) = 2\\pi r^2 h$",
+        "Екінші кесенің өлшемдері: радиусы $1{,}5r$, биіктігі $h$",
+        "Оның көлемі: $V_2 = \\pi (1{,}5r)^2 h = 2{,}25\\pi r^2 h$",
+        "$2{,}25 > 2$ болғандықтан, екінші кесенің сыйымдылығы жоғары ($V_2 > V_1$)"
+      ],
+      "options": [
+        "Екінші кесенің",
+        "Бірінші кесенің",
+        "Сыйымдылықтары бірдей",
+        "Анықтау мүмкін емес"
+      ],
+      "answer": "A"
+    },
+    {
+      "id": 4,
+      "type": "3d",
+      "text": "Квадраттың қабырғасы $a$-ға тең. Квадратты қабырғасы жатқан түзуден айналдырғанда пайда болған фигураның көлемін табыңдар.",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl = Cylinder((0,0,0), (0,0,2), 2)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.2)",
+          "SetLineThickness(cyl, 1)",
+          "sq = Polygon((0,0,0), (2,0,0), (2,0,2), (0,0,2))",
+          "SetColor(sq, \"#eab308\")",
+          "SetFilling(sq, 0.45)",
+          "SetLineThickness(sq, 1)",
+          "side1 = Segment((0,0,0), (2,0,0))",
+          "SetColor(side1, \"#dc2626\")",
+          "SetCaption(side1, \"a\")",
+          "SetLabelMode(side1, 3)",
+          "SetLineThickness(side1, 2)",
+          "side2 = Segment((2,0,0), (2,0,2))",
+          "SetColor(side2, \"#dc2626\")",
+          "SetCaption(side2, \"a\")",
+          "SetLabelMode(side2, 3)",
+          "SetLineThickness(side2, 2)",
+          "ax = Segment((0,0,-0.5), (0,0,2.5))",
+          "SetColor(ax, \"#1e293b\")",
+          "SetLineThickness(ax, 1)"
+        ]
+      },
+      "formulas": [
+        "Квадратты қабырғасы жатқан түзуден айналдырғанда цилиндр пайда болады",
+        "Бұл цилиндрдің биіктігі квадраттың қабырғасына тең: $h = a$",
+        "Табан радиусы да квадраттың қабырғасына тең: $r = a$",
+        "Пайда болған фигураның көлемі: $V = \\pi r^2 h = \\pi a^2 \\cdot a = \\pi a^3$"
+      ],
+      "options": [
+        "$\\pi a^3$",
+        "$2\\pi a^3$",
+        "$\\dfrac{\\pi a^3}{2}$",
+        "$\\dfrac{\\pi a^3}{4}$"
+      ],
+      "answer": "A"
+    },
+    {
+      "id": 5,
+      "type": "3d",
+      "text": "Цилиндрдің осьтік қимасының диагоналі $1$ см-ге тең және ол табан жазықтығына $30^\\circ$ бұрыш жасап көлбейді. Цилиндрдің көлемін табыңдар.",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cyl = Cylinder((0,0,0), (0,0,2), 1.732)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.18)",
+          "SetLineThickness(cyl, 1)",
+          "sq = Polygon((0,-1.732,0), (0,1.732,0), (0,1.732,2), (0,-1.732,2))",
+          "SetColor(sq, \"#eab308\")",
+          "SetFilling(sq, 0.45)",
+          "SetLineThickness(sq, 1)",
+          "diag = Segment((0,-1.732,0), (0,1.732,2))",
+          "SetColor(diag, \"#dc2626\")",
+          "SetLineThickness(diag, 2)",
+          "SetCaption(diag, \"1\")",
+          "SetLabelMode(diag, 3)",
+          "ang = Angle((0,1.732,0), (0,-1.732,0), (0,1.732,2))",
+          "SetCaption(ang, \"30^\\circ\")",
+          "SetLabelMode(ang, 3)",
+          "SetColor(ang, \"#dc2626\")"
+        ]
+      },
+      "formulas": [
+        "Тікбұрышты үшбұрышта $30^\\circ$ бұрышқа қарсы жатқан катет гипотенузаның жартысына тең",
+        "Цилиндрдің биіктігі: $h = d \\cdot \\sin(30^\\circ) = 1 \\cdot \\dfrac{1}{2} = \\dfrac{1}{2}$",
+        "Табанының диаметрі: $2r = d \\cdot \\cos(30^\\circ) = 1 \\cdot \\dfrac{\\sqrt{3}}{2}$",
+        "Радиус: $r = \\dfrac{\\sqrt{3}}{4}$",
+        "Көлем: $V = \\pi r^2 h = \\pi \\left(\\dfrac{\\sqrt{3}}{4}\\right)^2 \\cdot \\dfrac{1}{2} = \\pi \\cdot \\dfrac{3}{16} \\cdot \\dfrac{1}{2} = \\dfrac{3\\pi}{32}$"
+      ],
+      "options": [
+        "$\\dfrac{\\pi}{8}$",
+        "$\\dfrac{3\\pi}{16}$",
+        "$\\dfrac{\\pi}{16}$",
+        "$\\dfrac{3\\pi}{32}$"
+      ],
+      "answer": "D"
+    },
+    {
+      "id": 6,
+      "type": "3d",
+      "text": "Бірлік кубқа іштей сызылған цилиндрдің көлемін табыңдар.",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "cube = Prism(Polygon((-1,-1,0), (1,-1,0), (1,1,0), (-1,1,0)), 2)",
+          "SetColor(cube, \"#94a3b8\")",
+          "SetFilling(cube, 0.12)",
+          "SetLineThickness(cube, 1)",
+          "cyl = Cylinder((0,0,0), (0,0,2), 1)",
+          "SetColor(cyl, \"#dc2626\")",
+          "SetFilling(cyl, 0.5)",
+          "SetLineThickness(cyl, 1)",
+          "edge = Segment((-1,-1,0), (1,-1,0))",
+          "SetColor(edge, \"#dc2626\")",
+          "SetCaption(edge, \"1\")",
+          "SetLabelMode(edge, 3)",
+          "SetLineThickness(edge, 2)"
+        ]
+      },
+      "formulas": [
+        "Бірлік куб: қыры $a = 1$",
+        "Кубқа іштей сызылған цилиндр — табаны кубтың табан квадратына іштей сызылған шеңбер",
+        "Цилиндрдің радиусы: $r = \\dfrac{a}{2} = \\dfrac{1}{2}$",
+        "Цилиндрдің биіктігі: $h = a = 1$",
+        "Көлем: $V = \\pi r^2 h = \\pi \\cdot \\dfrac{1}{4} \\cdot 1 = \\dfrac{\\pi}{4}$"
+      ],
+      "options": [
+        "$\\dfrac{\\pi}{2}$",
+        "$\\pi$",
+        "$\\dfrac{\\pi}{4}$",
+        "$\\dfrac{\\pi}{3}$"
+      ],
+      "answer": "C"
+    },
+    {
+      "id": 7,
+      "type": "3d",
+      "text": "Тік призманың табаны — қабырғасы $1$ см-ге тең квадрат. Призманың бүйір қыры $2$ см-ге тең. Осы призмаға сырттай сызылған цилиндрдің көлемін табыңдар.",
+      "geogebra": {
+        "commands": [
+          "SetPerspective(\"T\")",
+          "SetViewDirection((1.2, -1.5, 0.8))",
+          "ShowAxes(false)",
+          "ShowGrid(false)",
+          "pr = Prism(Polygon((-1,-1,0), (1,-1,0), (1,1,0), (-1,1,0)), 4)",
+          "SetColor(pr, \"#eab308\")",
+          "SetFilling(pr, 0.45)",
+          "SetLineThickness(pr, 1)",
+          "cyl = Cylinder((0, 0, 0), (0, 0, 4), 1.414)",
+          "SetColor(cyl, \"#2563eb\")",
+          "SetFilling(cyl, 0.18)",
+          "SetLineThickness(cyl, 1)",
+          "baseEdge = Segment((-1,-1,0), (1,-1,0))",
+          "SetCaption(baseEdge, \"1\")",
+          "SetLabelMode(baseEdge, 3)",
+          "SetLineThickness(baseEdge, 2)",
+          "SetColor(baseEdge, \"#dc2626\")",
+          "hEdge = Segment((1,-1,0), (1,-1,4))",
+          "SetCaption(hEdge, \"2\")",
+          "SetLabelMode(hEdge, 3)",
+          "SetLineThickness(hEdge, 2)",
+          "SetColor(hEdge, \"#dc2626\")"
+        ]
+      },
+      "formulas": [
+        "Призма табаны — қабырғасы $a = 1$ квадрат",
+        "Цилиндр призмаға сырттай сызылғандықтан, табанындағы шеңбер квадратқа сырттай сызылған",
+        "Сырттай сызылған шеңбер радиусы квадраттың диагоналінің жартысына тең: $R = \\dfrac{a\\sqrt{2}}{2} = \\dfrac{\\sqrt{2}}{2}$",
+        "Цилиндрдің биіктігі призманың бүйір қырына тең: $h = 2$",
+        "Цилиндрдің көлемі: $V = \\pi R^2 h = \\pi \\left(\\dfrac{\\sqrt{2}}{2}\\right)^2 \\cdot 2 = \\pi \\cdot \\dfrac{2}{4} \\cdot 2 = \\pi$"
+      ],
+      "options": [
+        "$2\\pi$",
+        "$\\dfrac{\\pi}{2}$",
+        "$\\dfrac{\\pi}{4}$",
+        "$\\pi$"
+      ],
+      "answer": "D"
+    }
+  ]
 }
+
+
+
+change this json file according to instructions on this gem bot
