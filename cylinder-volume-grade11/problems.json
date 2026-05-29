@@ -18,13 +18,13 @@
           "rad = Segment((0,0,0), (2,0,0))",
           "SetColor(rad, \"#dc2626\")",
           "SetLineThickness(rad, 2)",
-          "tRad = Text(\"r = 2\", (1, 0, -0.4))",
-          "SetColor(tRad, \"#dc2626\")",
+          "txtRad = Text(\"r = 2\", (1, -0.3, 0.2))",
+          "SetColor(txtRad, \"#dc2626\")",
           "hgt = Segment((2,0,0), (2,0,3))",
           "SetColor(hgt, \"#dc2626\")",
           "SetLineThickness(hgt, 2)",
-          "tHgt = Text(\"h = 3\", (2.6, 0, 1.5))",
-          "SetColor(tHgt, \"#dc2626\")"
+          "txtHgt = Text(\"h = 3\", (2.2, 0, 1.5))",
+          "SetColor(txtHgt, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -33,7 +33,12 @@
         "Берілгені: $r = 2$ см, $h = 3$ см",
         "$V = \\pi \\cdot 2^2 \\cdot 3 = 12\\pi$"
       ],
-      "options": ["$6\\pi$ см³", "$24\\pi$ см³", "$12\\pi$ см³", "$18\\pi$ см³"],
+      "options": [
+        "$6\\pi$ см³",
+        "$24\\pi$ см³",
+        "$12\\pi$ см³",
+        "$18\\pi$ см³"
+      ],
       "answer": "C"
     },
     {
@@ -57,13 +62,13 @@
           "side = Segment((0,1,0), (0,1,2))",
           "SetColor(side, \"#dc2626\")",
           "SetLineThickness(side, 2)",
-          "tSide = Text(\"a\", (0, 1.4, 1))",
-          "SetColor(tSide, \"#dc2626\")",
+          "txtSide = Text(\"a\", (0, 1.2, 1))",
+          "SetColor(txtSide, \"#dc2626\")",
           "base = Segment((0,-1,0), (0,1,0))",
           "SetColor(base, \"#dc2626\")",
           "SetLineThickness(base, 2)",
-          "tBase = Text(\"a\", (0, 0, -0.4))",
-          "SetColor(tBase, \"#dc2626\")"
+          "txtBase = Text(\"a\", (0, 0, 0.2))",
+          "SetColor(txtBase, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -71,7 +76,12 @@
         "Цилиндрдің радиусы: $r = \\dfrac{D}{2} = \\dfrac{a}{2}$",
         "Көлем: $V = \\pi r^2 h = \\pi \\cdot \\left(\\dfrac{a}{2}\\right)^2 \\cdot a = \\dfrac{\\pi a^3}{4}$"
       ],
-      "options": ["$\\pi a^3$", "$\\dfrac{\\pi a^3}{4}$", "$\\dfrac{\\pi a^3}{2}$", "$\\dfrac{\\pi a^3}{8}$"],
+      "options": [
+        "$\\pi a^3$",
+        "$\\dfrac{\\pi a^3}{4}$",
+        "$\\dfrac{\\pi a^3}{2}$",
+        "$\\dfrac{\\pi a^3}{8}$"
+      ],
       "answer": "B"
     },
     {
@@ -88,30 +98,30 @@
           "SetColor(cyl1, \"#2563eb\")",
           "SetFilling(cyl1, 0.35)",
           "SetLineThickness(cyl1, 1)",
-          "h1 = Segment((-3.6, 0, 0), (-3.6, 0, 2))",
-          "SetColor(h1, \"#dc2626\")",
+          "h1 = Segment((-3.5, 0, 0), (-3.5, 0, 2))",
           "SetLineThickness(h1, 2)",
-          "tH1 = Text(\"2h\", (-4.2, 0, 1))",
-          "SetColor(tH1, \"#dc2626\")",
-          "r1 = Segment((-2.5, 0, 0), (-1.5, 0, 0))",
-          "SetColor(r1, \"#dc2626\")",
+          "SetColor(h1, \"#dc2626\")",
+          "txtH1 = Text(\"2h\", (-3.8, 0, 1))",
+          "SetColor(txtH1, \"#dc2626\")",
+          "r1 = Segment((-2.5, 0, 2), (-1.5, 0, 2))",
           "SetLineThickness(r1, 2)",
-          "tR1 = Text(\"r\", (-2, 0, -0.4))",
-          "SetColor(tR1, \"#dc2626\")",
+          "SetColor(r1, \"#dc2626\")",
+          "txtR1 = Text(\"r\", (-2, 0, 2.2))",
+          "SetColor(txtR1, \"#dc2626\")",
           "cyl2 = Cylinder((2.5, 0, 0), (2.5, 0, 1), 1.5)",
           "SetColor(cyl2, \"#16a34a\")",
           "SetFilling(cyl2, 0.35)",
           "SetLineThickness(cyl2, 1)",
-          "h2 = Segment((4.3, 0, 0), (4.3, 0, 1))",
-          "SetColor(h2, \"#dc2626\")",
+          "h2 = Segment((4.2, 0, 0), (4.2, 0, 1))",
           "SetLineThickness(h2, 2)",
-          "tH2 = Text(\"h\", (4.9, 0, 0.5))",
-          "SetColor(tH2, \"#dc2626\")",
-          "r2 = Segment((2.5, 0, 0), (4, 0, 0))",
-          "SetColor(r2, \"#dc2626\")",
+          "SetColor(h2, \"#dc2626\")",
+          "txtH2 = Text(\"h\", (4.5, 0, 0.5))",
+          "SetColor(txtH2, \"#dc2626\")",
+          "r2 = Segment((2.5, 0, 1), (4, 0, 1))",
           "SetLineThickness(r2, 2)",
-          "tR2 = Text(\"1,5r\", (3.2, 0, -0.4))",
-          "SetColor(tR2, \"#dc2626\")"
+          "SetColor(r2, \"#dc2626\")",
+          "txtR2 = Text(\"1{,}5r\", (3.25, 0, 1.2))",
+          "SetColor(txtR2, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -121,7 +131,12 @@
         "Оның көлемі: $V_2 = \\pi (1{,}5r)^2 h = 2{,}25\\pi r^2 h$",
         "$2{,}25 > 2$ болғандықтан, екінші кесенің сыйымдылығы жоғары ($V_2 > V_1$)"
       ],
-      "options": ["Екінші кесенің", "Бірінші кесенің", "Сыйымдылықтары бірдей", "Анықтау мүмкін емес"],
+      "options": [
+        "Екінші кесенің",
+        "Бірінші кесенің",
+        "Сыйымдылықтары бірдей",
+        "Анықтау мүмкін емес"
+      ],
       "answer": "A"
     },
     {
@@ -145,13 +160,13 @@
           "side1 = Segment((0,0,0), (2,0,0))",
           "SetColor(side1, \"#dc2626\")",
           "SetLineThickness(side1, 2)",
-          "tSide1 = Text(\"a\", (1, 0, -0.4))",
-          "SetColor(tSide1, \"#dc2626\")",
+          "txtSide1 = Text(\"a\", (1, 0, 0.2))",
+          "SetColor(txtSide1, \"#dc2626\")",
           "side2 = Segment((2,0,0), (2,0,2))",
           "SetColor(side2, \"#dc2626\")",
           "SetLineThickness(side2, 2)",
-          "tSide2 = Text(\"a\", (2.5, 0, 1))",
-          "SetColor(tSide2, \"#dc2626\")",
+          "txtSide2 = Text(\"a\", (2.2, 0, 1))",
+          "SetColor(txtSide2, \"#dc2626\")",
           "ax = Segment((0,0,-0.5), (0,0,2.5))",
           "SetColor(ax, \"#1e293b\")",
           "SetLineThickness(ax, 1)"
@@ -163,7 +178,12 @@
         "Табан радиусы да квадраттың қабырғасына тең: $r = a$",
         "Пайда болған фигураның көлемі: $V = \\pi r^2 h = \\pi a^2 \\cdot a = \\pi a^3$"
       ],
-      "options": ["$\\pi a^3$", "$2\\pi a^3$", "$\\dfrac{\\pi a^3}{2}$", "$\\dfrac{\\pi a^3}{4}$"],
+      "options": [
+        "$\\pi a^3$",
+        "$2\\pi a^3$",
+        "$\\dfrac{\\pi a^3}{2}$",
+        "$\\dfrac{\\pi a^3}{4}$"
+      ],
       "answer": "A"
     },
     {
@@ -187,10 +207,12 @@
           "diag = Segment((0,-1.732,0), (0,1.732,2))",
           "SetColor(diag, \"#dc2626\")",
           "SetLineThickness(diag, 2)",
-          "tDiag = Text(\"d = 1\", (0, 0.3, 1.3))",
-          "SetColor(tDiag, \"#dc2626\")",
-          "tAng = Text(\"30°\", (0, -0.9, 0.25))",
-          "SetColor(tAng, \"#dc2626\")"
+          "txtDiag = Text(\"1\", (0, 0, 1.2))",
+          "SetColor(txtDiag, \"#dc2626\")",
+          "ang = Angle((0,1.732,0), (0,-1.732,0), (0,1.732,2))",
+          "SetColor(ang, \"#dc2626\")",
+          "txtAng = Text(\"30^\\circ\", (0, -1.2, 0.4))",
+          "SetColor(txtAng, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -200,7 +222,12 @@
         "Радиус: $r = \\dfrac{\\sqrt{3}}{4}$",
         "Көлем: $V = \\pi r^2 h = \\pi \\left(\\dfrac{\\sqrt{3}}{4}\\right)^2 \\cdot \\dfrac{1}{2} = \\pi \\cdot \\dfrac{3}{16} \\cdot \\dfrac{1}{2} = \\dfrac{3\\pi}{32}$"
       ],
-      "options": ["$\\dfrac{\\pi}{8}$", "$\\dfrac{3\\pi}{16}$", "$\\dfrac{\\pi}{16}$", "$\\dfrac{3\\pi}{32}$"],
+      "options": [
+        "$\\dfrac{\\pi}{8}$",
+        "$\\dfrac{3\\pi}{16}$",
+        "$\\dfrac{\\pi}{16}$",
+        "$\\dfrac{3\\pi}{32}$"
+      ],
       "answer": "D"
     },
     {
@@ -224,8 +251,8 @@
           "edge = Segment((-1,-1,0), (1,-1,0))",
           "SetColor(edge, \"#dc2626\")",
           "SetLineThickness(edge, 2)",
-          "tEdge = Text(\"a = 1\", (0, -1.3, -0.3))",
-          "SetColor(tEdge, \"#dc2626\")"
+          "txtEdge = Text(\"1\", (0, -1.2, 0.2))",
+          "SetColor(txtEdge, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -235,7 +262,12 @@
         "Цилиндрдің биіктігі: $h = a = 1$",
         "Көлем: $V = \\pi r^2 h = \\pi \\cdot \\dfrac{1}{4} \\cdot 1 = \\dfrac{\\pi}{4}$"
       ],
-      "options": ["$\\dfrac{\\pi}{2}$", "$\\pi$", "$\\dfrac{\\pi}{4}$", "$\\dfrac{\\pi}{3}$"],
+      "options": [
+        "$\\dfrac{\\pi}{2}$",
+        "$\\pi$",
+        "$\\dfrac{\\pi}{4}$",
+        "$\\dfrac{\\pi}{3}$"
+      ],
       "answer": "C"
     },
     {
@@ -257,15 +289,15 @@
           "SetFilling(cyl, 0.18)",
           "SetLineThickness(cyl, 1)",
           "baseEdge = Segment((-1,-1,0), (1,-1,0))",
-          "SetColor(baseEdge, \"#dc2626\")",
           "SetLineThickness(baseEdge, 2)",
-          "tBase = Text(\"a = 1\", (0, -1.3, -0.3))",
-          "SetColor(tBase, \"#dc2626\")",
+          "SetColor(baseEdge, \"#dc2626\")",
+          "txtBaseEdge = Text(\"1\", (0, -1.2, 0.2))",
+          "SetColor(txtBaseEdge, \"#dc2626\")",
           "hEdge = Segment((1,-1,0), (1,-1,4))",
-          "SetColor(hEdge, \"#dc2626\")",
           "SetLineThickness(hEdge, 2)",
-          "tHgt = Text(\"h = 2\", (1.6, -1, 2))",
-          "SetColor(tHgt, \"#dc2626\")"
+          "SetColor(hEdge, \"#dc2626\")",
+          "txtHEdge = Text(\"2\", (1.2, -1.2, 2))",
+          "SetColor(txtHEdge, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -275,7 +307,12 @@
         "Цилиндрдің биіктігі призманың бүйір қырына тең: $h = 2$",
         "Цилиндрдің көлемі: $V = \\pi R^2 h = \\pi \\left(\\dfrac{\\sqrt{2}}{2}\\right)^2 \\cdot 2 = \\pi \\cdot \\dfrac{2}{4} \\cdot 2 = \\pi$"
       ],
-      "options": ["$2\\pi$", "$\\dfrac{\\pi}{2}$", "$\\dfrac{\\pi}{4}$", "$\\pi$"],
+      "options": [
+        "$2\\pi$",
+        "$\\dfrac{\\pi}{2}$",
+        "$\\dfrac{\\pi}{4}$",
+        "$\\pi$"
+      ],
       "answer": "D"
     },
     {
@@ -295,22 +332,27 @@
           "hgt = Segment((2,0,0), (2,0,4))",
           "SetColor(hgt, \"#dc2626\")",
           "SetLineThickness(hgt, 2)",
-          "tHgt = Text(\"h = 4\", (2.6, 0, 2))",
-          "SetColor(tHgt, \"#dc2626\")",
-          "rad = Segment((0,0,0), (2,0,0))",
+          "txtHgt = Text(\"h = 4\", (2.2, 0, 2))",
+          "SetColor(txtHgt, \"#dc2626\")",
+          "rad = Segment((0,0,4), (2,0,4))",
           "SetColor(rad, \"#dc2626\")",
           "SetLineThickness(rad, 2)",
-          "tRad = Text(\"r = ?\", (1, 0, -0.4))",
-          "SetColor(tRad, \"#dc2626\")"
+          "txtRad = Text(\"r = ?\", (1, 0, 4.2))",
+          "SetColor(txtRad, \"#dc2626\")"
         ]
       },
       "formulas": [
         "Цилиндрдің көлемі: $V = \\pi r^2 h$",
         "Бізге белгілісі: $16\\pi = \\pi r^2 \\cdot 4$",
-        "$r^2 = \\dfrac{16\\pi}{4\\pi} = 4$",
+        "$(r^2) = \\dfrac{16\\pi}{4\\pi} = 4$",
         "Осыдан радиус $r = 2$ см екенін табамыз."
       ],
-      "options": ["$4$ см", "$8$ см", "$2$ см", "$16$ см"],
+      "options": [
+        "$4$ см",
+        "$8$ см",
+        "$2$ см",
+        "$16$ см"
+      ],
       "answer": "C"
     },
     {
@@ -334,13 +376,8 @@
           "hgt = Segment((0,3,0), (0,3,6))",
           "SetColor(hgt, \"#dc2626\")",
           "SetLineThickness(hgt, 2)",
-          "tHgt = Text(\"h = 2r\", (0, 3.6, 3))",
-          "SetColor(tHgt, \"#dc2626\")",
-          "rad = Segment((0,0,0), (0,3,0))",
-          "SetColor(rad, \"#dc2626\")",
-          "SetLineThickness(rad, 2)",
-          "tRad = Text(\"r\", (0, 1.5, -0.5))",
-          "SetColor(tRad, \"#dc2626\")"
+          "txtHgt = Text(\"h = 2r\", (0, 3.2, 3))",
+          "SetColor(txtHgt, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -350,7 +387,12 @@
         "$h^3 = 216$",
         "$h = 6$ см"
       ],
-      "options": ["$3$ см", "$6$ см", "$9$ см", "$12$ см"],
+      "options": [
+        "$3$ см",
+        "$6$ см",
+        "$9$ см",
+        "$12$ см"
+      ],
       "answer": "B"
     },
     {
@@ -367,20 +409,20 @@
           "SetColor(cyl1, \"#2563eb\")",
           "SetFilling(cyl1, 0.35)",
           "SetLineThickness(cyl1, 1)",
-          "r1 = Segment((-4,0,0), (-1,0,0))",
-          "SetColor(r1, \"#dc2626\")",
+          "r1 = Segment((-4,0,3), (-1,0,3))",
           "SetLineThickness(r1, 2)",
-          "tR1 = Text(\"3r\", (-2.5, 0, -0.5))",
-          "SetColor(tR1, \"#dc2626\")",
+          "SetColor(r1, \"#dc2626\")",
+          "txtR1 = Text(\"3r\", (-2.5, 0, 3.2))",
+          "SetColor(txtR1, \"#dc2626\")",
           "cyl2 = Cylinder((2,0,0), (2,0,3), 1)",
           "SetColor(cyl2, \"#16a34a\")",
           "SetFilling(cyl2, 0.35)",
           "SetLineThickness(cyl2, 1)",
-          "r2 = Segment((2,0,0), (3,0,0))",
-          "SetColor(r2, \"#dc2626\")",
+          "r2 = Segment((2,0,3), (3,0,3))",
           "SetLineThickness(r2, 2)",
-          "tR2 = Text(\"r\", (2.5, 0, -0.5))",
-          "SetColor(tR2, \"#dc2626\")"
+          "SetColor(r2, \"#dc2626\")",
+          "txtR2 = Text(\"r\", (2.5, 0, 3.2))",
+          "SetColor(txtR2, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -390,7 +432,12 @@
         "Олардың қатынасы: $\\dfrac{V_1}{V_2} = \\dfrac{9\\pi r^2 h}{\\pi r^2 h} = 9$",
         "Яғни, бірінші цилиндрдің көлемі $9$ есе үлкен ($9:1$)."
       ],
-      "options": ["$3:1$", "$6:1$", "$27:1$", "$9:1$"],
+      "options": [
+        "$3:1$",
+        "$6:1$",
+        "$27:1$",
+        "$9:1$"
+      ],
       "answer": "D"
     }
   ]
