@@ -18,13 +18,13 @@
           "rad = Segment((0,0,0), (2,0,0))",
           "SetColor(rad, \"#dc2626\")",
           "SetLineThickness(rad, 2)",
-          "SetCaption(rad, \"r = 2\")",
-          "SetLabelMode(rad, 3)",
+          "tRad = Text(\"r = 2\", (1, 0, -0.4))",
+          "SetColor(tRad, \"#dc2626\")",
           "hgt = Segment((2,0,0), (2,0,3))",
           "SetColor(hgt, \"#dc2626\")",
           "SetLineThickness(hgt, 2)",
-          "SetCaption(hgt, \"h = 3\")",
-          "SetLabelMode(hgt, 3)"
+          "tHgt = Text(\"h = 3\", (2.6, 0, 1.5))",
+          "SetColor(tHgt, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -57,13 +57,13 @@
           "side = Segment((0,1,0), (0,1,2))",
           "SetColor(side, \"#dc2626\")",
           "SetLineThickness(side, 2)",
-          "SetCaption(side, \"a\")",
-          "SetLabelMode(side, 3)",
+          "tSide = Text(\"a\", (0, 1.4, 1))",
+          "SetColor(tSide, \"#dc2626\")",
           "base = Segment((0,-1,0), (0,1,0))",
           "SetColor(base, \"#dc2626\")",
           "SetLineThickness(base, 2)",
-          "SetCaption(base, \"a\")",
-          "SetLabelMode(base, 3)"
+          "tBase = Text(\"a\", (0, 0, -0.4))",
+          "SetColor(tBase, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -91,13 +91,13 @@
           "h1 = Segment((-3.6, 0, 0), (-3.6, 0, 2))",
           "SetColor(h1, \"#dc2626\")",
           "SetLineThickness(h1, 2)",
-          "SetCaption(h1, \"2h\")",
-          "SetLabelMode(h1, 3)",
+          "tH1 = Text(\"2h\", (-4.2, 0, 1))",
+          "SetColor(tH1, \"#dc2626\")",
           "r1 = Segment((-2.5, 0, 0), (-1.5, 0, 0))",
           "SetColor(r1, \"#dc2626\")",
           "SetLineThickness(r1, 2)",
-          "SetCaption(r1, \"r\")",
-          "SetLabelMode(r1, 3)",
+          "tR1 = Text(\"r\", (-2, 0, -0.4))",
+          "SetColor(tR1, \"#dc2626\")",
           "cyl2 = Cylinder((2.5, 0, 0), (2.5, 0, 1), 1.5)",
           "SetColor(cyl2, \"#16a34a\")",
           "SetFilling(cyl2, 0.35)",
@@ -105,13 +105,13 @@
           "h2 = Segment((4.3, 0, 0), (4.3, 0, 1))",
           "SetColor(h2, \"#dc2626\")",
           "SetLineThickness(h2, 2)",
-          "SetCaption(h2, \"h\")",
-          "SetLabelMode(h2, 3)",
+          "tH2 = Text(\"h\", (4.9, 0, 0.5))",
+          "SetColor(tH2, \"#dc2626\")",
           "r2 = Segment((2.5, 0, 0), (4, 0, 0))",
           "SetColor(r2, \"#dc2626\")",
           "SetLineThickness(r2, 2)",
-          "SetCaption(r2, \"1,5r\")",
-          "SetLabelMode(r2, 3)"
+          "tR2 = Text(\"1,5r\", (3.2, 0, -0.4))",
+          "SetColor(tR2, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -145,13 +145,13 @@
           "side1 = Segment((0,0,0), (2,0,0))",
           "SetColor(side1, \"#dc2626\")",
           "SetLineThickness(side1, 2)",
-          "SetCaption(side1, \"a\")",
-          "SetLabelMode(side1, 3)",
+          "tSide1 = Text(\"a\", (1, 0, -0.4))",
+          "SetColor(tSide1, \"#dc2626\")",
           "side2 = Segment((2,0,0), (2,0,2))",
           "SetColor(side2, \"#dc2626\")",
           "SetLineThickness(side2, 2)",
-          "SetCaption(side2, \"a\")",
-          "SetLabelMode(side2, 3)",
+          "tSide2 = Text(\"a\", (2.5, 0, 1))",
+          "SetColor(tSide2, \"#dc2626\")",
           "ax = Segment((0,0,-0.5), (0,0,2.5))",
           "SetColor(ax, \"#1e293b\")",
           "SetLineThickness(ax, 1)"
@@ -187,13 +187,10 @@
           "diag = Segment((0,-1.732,0), (0,1.732,2))",
           "SetColor(diag, \"#dc2626\")",
           "SetLineThickness(diag, 2)",
-          "SetCaption(diag, \"d = 1\")",
-          "SetLabelMode(diag, 3)",
-          "ang = Angle((0,1.732,0), (0,-1.732,0), (0,1.732,2))",
-          "SetColor(ang, \"#dc2626\")",
-          "SetLineThickness(ang, 1)",
-          "SetCaption(ang, \"30°\")",
-          "SetLabelMode(ang, 3)"
+          "tDiag = Text(\"d = 1\", (0, 0.3, 1.3))",
+          "SetColor(tDiag, \"#dc2626\")",
+          "tAng = Text(\"30°\", (0, -0.9, 0.25))",
+          "SetColor(tAng, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -227,8 +224,8 @@
           "edge = Segment((-1,-1,0), (1,-1,0))",
           "SetColor(edge, \"#dc2626\")",
           "SetLineThickness(edge, 2)",
-          "SetCaption(edge, \"a = 1\")",
-          "SetLabelMode(edge, 3)"
+          "tEdge = Text(\"a = 1\", (0, -1.3, -0.3))",
+          "SetColor(tEdge, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -262,13 +259,13 @@
           "baseEdge = Segment((-1,-1,0), (1,-1,0))",
           "SetColor(baseEdge, \"#dc2626\")",
           "SetLineThickness(baseEdge, 2)",
-          "SetCaption(baseEdge, \"a = 1\")",
-          "SetLabelMode(baseEdge, 3)",
+          "tBase = Text(\"a = 1\", (0, -1.3, -0.3))",
+          "SetColor(tBase, \"#dc2626\")",
           "hEdge = Segment((1,-1,0), (1,-1,4))",
           "SetColor(hEdge, \"#dc2626\")",
           "SetLineThickness(hEdge, 2)",
-          "SetCaption(hEdge, \"h = 2\")",
-          "SetLabelMode(hEdge, 3)"
+          "tHgt = Text(\"h = 2\", (1.6, -1, 2))",
+          "SetColor(tHgt, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -298,13 +295,13 @@
           "hgt = Segment((2,0,0), (2,0,4))",
           "SetColor(hgt, \"#dc2626\")",
           "SetLineThickness(hgt, 2)",
-          "SetCaption(hgt, \"h = 4\")",
-          "SetLabelMode(hgt, 3)",
+          "tHgt = Text(\"h = 4\", (2.6, 0, 2))",
+          "SetColor(tHgt, \"#dc2626\")",
           "rad = Segment((0,0,0), (2,0,0))",
           "SetColor(rad, \"#dc2626\")",
           "SetLineThickness(rad, 2)",
-          "SetCaption(rad, \"r = ?\")",
-          "SetLabelMode(rad, 3)"
+          "tRad = Text(\"r = ?\", (1, 0, -0.4))",
+          "SetColor(tRad, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -337,13 +334,13 @@
           "hgt = Segment((0,3,0), (0,3,6))",
           "SetColor(hgt, \"#dc2626\")",
           "SetLineThickness(hgt, 2)",
-          "SetCaption(hgt, \"h = 2r\")",
-          "SetLabelMode(hgt, 3)",
+          "tHgt = Text(\"h = 2r\", (0, 3.6, 3))",
+          "SetColor(tHgt, \"#dc2626\")",
           "rad = Segment((0,0,0), (0,3,0))",
           "SetColor(rad, \"#dc2626\")",
           "SetLineThickness(rad, 2)",
-          "SetCaption(rad, \"r\")",
-          "SetLabelMode(rad, 3)"
+          "tRad = Text(\"r\", (0, 1.5, -0.5))",
+          "SetColor(tRad, \"#dc2626\")"
         ]
       },
       "formulas": [
@@ -373,8 +370,8 @@
           "r1 = Segment((-4,0,0), (-1,0,0))",
           "SetColor(r1, \"#dc2626\")",
           "SetLineThickness(r1, 2)",
-          "SetCaption(r1, \"3r\")",
-          "SetLabelMode(r1, 3)",
+          "tR1 = Text(\"3r\", (-2.5, 0, -0.5))",
+          "SetColor(tR1, \"#dc2626\")",
           "cyl2 = Cylinder((2,0,0), (2,0,3), 1)",
           "SetColor(cyl2, \"#16a34a\")",
           "SetFilling(cyl2, 0.35)",
@@ -382,8 +379,8 @@
           "r2 = Segment((2,0,0), (3,0,0))",
           "SetColor(r2, \"#dc2626\")",
           "SetLineThickness(r2, 2)",
-          "SetCaption(r2, \"r\")",
-          "SetLabelMode(r2, 3)"
+          "tR2 = Text(\"r\", (2.5, 0, -0.5))",
+          "SetColor(tR2, \"#dc2626\")"
         ]
       },
       "formulas": [
